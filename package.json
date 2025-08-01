@@ -10,6 +10,7 @@
     "optimize-images": "node scripts/optimize-images.js",
     "build": "node scripts/download-strapi-images.js && astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
     "build:no-pagefind": "node scripts/download-strapi-images.js && astro build && node scripts/post-build.js && node scripts/optimize-html.js",
+    "build:cf": "CF_PAGES=true node scripts/download-strapi-images.js && astro build && node scripts/post-build.js",
     "build:local": "dotenv -e .env.local -- node scripts/download-strapi-images.js && astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
     "build:fast": "astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
     "build:optimized": "node scripts/download-strapi-images.js && node scripts/optimize-images.js && astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
