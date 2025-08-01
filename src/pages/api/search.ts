@@ -10,6 +10,7 @@ export const GET: APIRoute = async ({ url }) => {
     const limitParam = url.searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam) : 10;
 
+    console.log(`🌐 搜索API调用 - 环境: ${import.meta.env.MODE}, 时间: ${new Date().toISOString()}`);
     console.log(`🔍 搜索API被调用: "${query}", 限制: ${limit}`);
 
     if (!query || query.trim().length === 0) {

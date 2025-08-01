@@ -1,0 +1,156 @@
+---
+/**
+ * 环境变量检查页面
+ */
+
+// 检查关键环境变量
+const envCheck = {
+  NODE_ENV: import.meta.env.NODE_ENV,
+  PROD: import.meta.env.PROD,
+  DEV: import.meta.env.DEV,
+  MODE: import.meta.env.MODE,
+  STRAPI_URL: import.meta.env.STRAPI_URL ? '✅ 已设置' : '❌ 未设置',
+  STRAPI_API_TOKEN: import.meta.env.STRAPI_API_TOKEN ? '✅ 已设置' : '❌ 未设置',
+  PUBLIC_STRAPI_URL: import.meta.env.PUBLIC_STRAPI_URL ? '✅ 已设置' : '❌ 未设置',
+};
+
+// 测试API连接
+let apiTest = {
+  status: '测试中...',
+  error: null,
+  data: null
+};
+
+try {
+  const response = await fetch('/api/search/?q=test');
+  if (response.ok) {
+    const data = await response.json();
+    apiTest = {
+      status: '✅ API连接正常',
+      error: null,
+      data: data
+    };
+  } else {
+    apiTest = {
+      status: '❌ API响应错误',
+      error: `HTTP ${response.status}: ${response.statusText}`,
+      data: null
+    };
+  }
+} catch (error) {
+  apiTest = {
+    status: '❌ API连接失败',
+    error: error.message,
+    data: null
+  };
+}
+---
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>环境检查</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .section { border: 1px solid #ddd; margin: 20px 0; padding: 15px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 环境检查</h1>
+
+    <div class="section">
+        <h2>📊 环境变量</h2>
+        <table>
+            <tr><th>变量名</th><th>状态</th></tr>
+            {Object.entries(envCheck).map(([key, value]) => (
+                <tr>
+                    <td>{key}</td>
+                    <td class={value.includes('✅') ? 'success' : value.includes('❌') ? 'error' : ''}>{value}</td>
+                </tr>
+            ))}
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🔍 API测试</h2>
+        <p><strong>状态:</strong> <span class={apiTest.status.includes('✅') ? 'success' : 'error'}>{apiTest.status}</span></p>
+        
+        {apiTest.error && (
+            <div>
+                <p><strong>错误:</strong> <span class="error">{apiTest.error}</span></p>
+            </div>
+        )}
+        
+        {apiTest.data && (
+            <div>
+                <p><strong>API响应:</strong></p>
+                <pre>{JSON.stringify(apiTest.data, null, 2)}</pre>
+            </div>
+        )}
+    </div>
+
+    <div class="section">
+        <h2>🌐 运行时信息</h2>
+        <table>
+            <tr><td>用户代理</td><td id="userAgent">-</td></tr>
+            <tr><td>当前URL</td><td id="currentUrl">-</td></tr>
+            <tr><td>时间戳</td><td>{new Date().toISOString()}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🧪 实时搜索测试</h2>
+        <div>
+            <input type="text" id="testInput" placeholder="输入搜索关键词..." value="11" style="padding: 8px; width: 200px;">
+            <button onclick="testSearch()" style="padding: 8px 16px;">测试搜索</button>
+        </div>
+        <div id="testResult" style="margin-top: 10px;"></div>
+    </div>
+
+    <script>
+        // 填充运行时信息
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('currentUrl').textContent = window.location.href;
+
+        // 搜索测试函数
+        async function testSearch() {
+            const input = document.getElementById('testInput');
+            const result = document.getElementById('testResult');
+            
+            const query = input.value.trim();
+            if (!query) {
+                result.innerHTML = '<span class="error">请输入搜索关键词</span>';
+                return;
+            }
+            
+            result.innerHTML = '<span>搜索中...</span>';
+            
+            try {
+                const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    result.innerHTML = `
+                        <div class="success">✅ 找到 ${data.data.length} 个结果</div>
+                        <pre>${JSON.stringify(data.data.slice(0, 2), null, 2)}</pre>
+                    `;
+                } else {
+                    result.innerHTML = `<div class="error">❌ 搜索失败: ${data.message || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ 请求失败: ${error.message}</div>`;
+            }
+        }
+
+        // 页面加载后自动测试
+        setTimeout(testSearch, 1000);
+    </script>
+</body>
+</html>
