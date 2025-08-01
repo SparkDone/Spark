@@ -3,12 +3,13 @@
  * 处理Strapi图片URL的转换，支持本地化和CDN
  */
 
-// 图片映射数据（启用本地映射，用于静态构建）
+// 图片映射数据（使用API代理，解决CORS问题）
 const imageMapping: Record<string, string> = {
-  "/uploads/cyberpunk_abstract_3840x2160_21046_b4caae8be5.jpg": "/images/strapi/banner-1-1732876800000.jpg",
-  "/uploads/shanghai_city_5083x3389_16563_686875de57.jpg": "/images/strapi/banner-2-1732876800001.jpg",
-  "/uploads/519556628d594f0db15a565f1d4598d3_4b5fec49c7.jpeg": "/images/strapi/article-333-cover-1732876800002.jpeg",
-  "/uploads/logo1_2c27baca01.png": "/images/strapi/article-44333fvvv-cover-1732876800003.png"
+  "/uploads/cyberpunk_abstract_3840x2160_21046_b4caae8be5.jpg": "/api/strapi-uploads/cyberpunk_abstract_3840x2160_21046_b4caae8be5.jpg",
+  "/uploads/shanghai_city_5083x3389_16563_686875de57.jpg": "/api/strapi-uploads/shanghai_city_5083x3389_16563_686875de57.jpg",
+  "/uploads/519556628d594f0db15a565f1d4598d3_4b5fec49c7.jpeg": "/api/strapi-uploads/519556628d594f0db15a565f1d4598d3_4b5fec49c7.jpeg",
+  "/uploads/519556628d594f0db15a565f1d4598d3_6830c9816e.jpeg": "/api/strapi-uploads/519556628d594f0db15a565f1d4598d3_6830c9816e.jpeg",
+  "/uploads/logo1_2c27baca01.png": "/api/strapi-uploads/logo1_2c27baca01.png"
 };
 
 /**
@@ -61,9 +62,9 @@ export function adaptImageUrl(strapiImageUrl: string, fallbackUrl?: string): str
       return imageMapping[strapiImageUrl];
     }
 
-    // 如果没有本地映射，使用远程URL
-    const strapiPublicUrl = getStrapiPublicUrl();
-    return `${strapiPublicUrl}${strapiImageUrl}`;
+    // 如果没有本地映射，使用API代理
+    const filename = strapiImageUrl.replace('/uploads/', '');
+    return `/api/strapi-uploads/${filename}`;
   }
 
   // 其他情况，直接返回
