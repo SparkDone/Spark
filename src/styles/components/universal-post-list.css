@@ -1,0 +1,693 @@
+/**
+ * 统一文章列表样式
+ * 支持列表、网格、瀑布流三种布局
+ */
+
+/* 文本截断样式 */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 响应式文本截断 */
+@media (max-width: 639px) {
+  .line-clamp-3 {
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (min-width: 1536px) {
+  .line-clamp-3 {
+    -webkit-line-clamp: 4;
+  }
+}
+
+/* 基础容器样式 */
+.universal-post-list {
+  width: 100%;
+  position: relative;
+}
+
+/* 文章数量少时的居中显示 */
+.universal-post-list[data-center="true"] {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 60vh;
+  padding-top: 2rem;
+}
+
+.universal-post-list[data-center="true"][data-layout="grid"] {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  grid-template-columns: none !important; /* 覆盖网格布局 */
+}
+
+/* 瀑布流布局现在默认就是居中的，不需要特殊处理 */
+.universal-post-list[data-center="true"][data-layout="masonry"] {
+  /* 继承默认的瀑布流样式 */
+}
+
+/* 居中显示的响应式调整 */
+@media (max-width: 640px) {
+  .universal-post-list[data-center="true"] {
+    min-height: 50vh;
+    padding-top: 1rem;
+  }
+
+  .universal-post-list[data-center="true"][data-layout="grid"] {
+    max-width: 100%;
+    gap: 1rem;
+    flex-direction: column;
+  }
+
+  /* 瀑布流在移动端已经有自己的响应式样式 */
+  .universal-post-list[data-center="true"][data-layout="masonry"] {
+    /* 继承默认的瀑布流移动端样式 */
+    align-items: center;
+  }
+
+  .universal-post-list[data-center="true"] .post-item {
+    max-width: 400px;
+    width: 100%;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .universal-post-list[data-center="true"][data-layout="grid"],
+  .universal-post-list[data-center="true"][data-layout="masonry"] {
+    max-width: 600px;
+  }
+}
+
+/* 居中显示时的提示信息样式 */
+.universal-post-list[data-center="true"] .center-hint {
+  position: absolute;
+  top: -2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 1;
+}
+
+.universal-post-list[data-center="true"] .center-hint p {
+  margin: 0;
+  font-size: 0.875rem;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.universal-post-list[data-center="true"]:hover .center-hint p {
+  opacity: 0.9;
+}
+
+/* 文章项基础样式 */
+.post-item {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+/* 防止布局初始化时的闪动 */
+.universal-post-list {
+  /* 移除所有切换动画，直接切换 */
+  transition: none;
+}
+
+.universal-post-list .post-item {
+  /* 确保尺寸计算一致 */
+  box-sizing: border-box;
+  /* 移除所有切换相关的动画 */
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* 防止服务器端渲染和客户端渲染不一致导致的闪动 */
+.universal-post-list:not([data-layout]) {
+  /* 在布局属性设置前隐藏内容 */
+  opacity: 0;
+}
+
+.universal-post-list[data-layout] {
+  /* 布局属性设置后显示内容 */
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+
+/* 列表布局已删除 */
+
+/* 列表布局相关样式已全部删除 */
+
+/* ===== 网格布局样式 ===== */
+.universal-post-list[data-layout="grid"] {
+  display: grid;
+  width: 100%;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+/* 网格布局响应式断点 - 修改为4栏 */
+@media (max-width: 639px) {
+  .universal-post-list[data-layout="grid"] {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .universal-post-list[data-layout="grid"] {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .universal-post-list[data-layout="grid"] {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+.universal-post-list[data-layout="grid"] .post-item {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--card-bg);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  transition: all 0.15s ease;
+  min-height: fit-content;
+  /* 确保尺寸计算一致 */
+  box-sizing: border-box;
+  contain: layout style;
+}
+
+/* 网格文章卡片高度 - 与原来的样式保持一致 */
+@media (max-width: 639px) {
+  .universal-post-list[data-layout="grid"] .post-item {
+    min-height: 250px;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .universal-post-list[data-layout="grid"] .post-item {
+    min-height: 280px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .universal-post-list[data-layout="grid"] .post-item {
+    min-height: 320px;
+  }
+}
+
+.universal-post-list[data-layout="grid"] .post-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.universal-post-list[data-layout="grid"] .post-image {
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+
+.universal-post-list[data-layout="grid"] .post-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.universal-post-list[data-layout="grid"] .image-link:hover .post-cover-image {
+  transform: scale(1.05);
+}
+
+.universal-post-list[data-layout="grid"] .post-content {
+  padding: 0.75rem 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.universal-post-list[data-layout="grid"] .post-title {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .universal-post-list[data-layout="grid"] .post-title {
+    font-size: 1.1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .universal-post-list[data-layout="grid"] .post-title {
+    font-size: 1.125rem;
+  }
+}
+
+.universal-post-list[data-layout="grid"] .post-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  flex: 1;
+  color: var(--text-75, rgba(0, 0, 0, 0.75));
+  transition: color 0.2s ease;
+}
+
+.universal-post-list[data-layout="grid"] .post-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 639px) {
+  .universal-post-list[data-layout="grid"] .post-description {
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (min-width: 1536px) {
+  .universal-post-list[data-layout="grid"] .post-description {
+    -webkit-line-clamp: 4;
+  }
+}
+
+.universal-post-list[data-layout="grid"] .post-metadata {
+  font-size: 0.75rem;
+  margin-top: auto;
+}
+
+/* 网格布局的元数据样式 - 分类靠右显示 */
+.universal-post-list[data-layout="grid"] .post-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-50);
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+/* 网格模式下日期靠左 */
+.universal-post-list[data-layout="grid"] .post-meta .post-date {
+  flex-shrink: 0;
+}
+
+/* 网格模式下分类区域靠右 */
+.universal-post-list[data-layout="grid"] .post-meta .category-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.universal-post-list[data-layout="grid"] .title-chevron {
+  display: none;
+}
+
+.universal-post-list[data-layout="grid"] .post-enter-btn {
+  display: none;
+}
+
+.universal-post-list[data-layout="grid"] .post-separator {
+  display: none;
+}
+
+.universal-post-list[data-layout="grid"] .post-item[data-has-cover="false"] {
+  position: relative;
+}
+
+.universal-post-list[data-layout="grid"] .post-item[data-has-cover="false"]::before {
+  content: '';
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2rem;
+  height: 2rem;
+  background: var(--primary);
+  opacity: 0.1;
+  border-radius: 50%;
+}
+
+/* ===== 瀑布流布局样式 ===== */
+/* 使用单列垂直布局 */
+.universal-post-list[data-layout="masonry"] {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%; /* 与网格视图保持一致的宽度 */
+  margin: 0 auto;
+  column-count: auto !important; /* 覆盖任何可能的列布局 */
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .universal-post-list[data-layout="masonry"] {
+    gap: 1rem;
+    width: 100%;
+    padding: 0;
+  }
+}
+
+.universal-post-list[data-layout="masonry"] .post-item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%; /* 占满容器宽度 */
+  background: var(--card-bg);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  transition: all 0.15s ease;
+  /* 确保尺寸计算一致 */
+  box-sizing: border-box;
+  contain: layout style;
+}
+
+.universal-post-list[data-layout="masonry"] .post-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 列表模式专用元数据 */
+.universal-post-list[data-layout="masonry"] .masonry-only-meta {
+  display: inline;
+}
+
+/* 网格模式隐藏列表专用元素 */
+.universal-post-list[data-layout="grid"] .masonry-only-meta {
+  display: none;
+}
+
+/* 分类链接样式 - 与标签样式统一 */
+.universal-post-list .post-category-link {
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.universal-post-list .post-category-link:hover .post-category {
+  color: var(--primary);
+}
+
+/* 分类样式 - 与日期颜色统一 */
+.universal-post-list .post-category {
+  color: var(--text-50);
+  font-size: 0.75rem;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 标签链接样式 */
+.universal-post-list[data-layout="masonry"] .post-tag-link {
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.universal-post-list[data-layout="masonry"] .post-tag-link:hover .post-tag {
+  color: var(--primary);
+}
+
+/* 标签样式 - 与日期颜色统一 */
+.universal-post-list[data-layout="masonry"] .post-tag {
+  color: var(--text-50); /* 与日期颜色保持一致 */
+  font-size: 0.75rem;
+  font-weight: 500; /* 增加字重，提高清晰度 */
+  -webkit-font-smoothing: antialiased; /* 改善字体渲染 */
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 移动设备下隐藏标签 */
+@media (max-width: 768px) {
+  .universal-post-list[data-layout="masonry"] .post-tag-link,
+  .universal-post-list[data-layout="masonry"] .post-tag {
+    display: none;
+  }
+
+  /* 同时隐藏标签前的分隔符 */
+  .universal-post-list[data-layout="masonry"] .masonry-only-meta .meta-separator {
+    display: none;
+  }
+}
+
+
+
+.universal-post-list[data-layout="masonry"] .post-image {
+  width: 100%;
+  overflow: hidden;
+}
+
+.universal-post-list[data-layout="masonry"] .post-cover-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.universal-post-list[data-layout="masonry"] .image-link:hover .post-cover-image {
+  transform: scale(1.05);
+}
+
+.universal-post-list[data-layout="masonry"] .post-content {
+  padding: 1rem;
+}
+
+.universal-post-list[data-layout="masonry"] .post-title {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.universal-post-list[data-layout="masonry"] .post-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+/* 瀑布流布局的元数据样式 */
+.universal-post-list[data-layout="masonry"] .post-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-50);
+  margin-top: 0.5rem;
+}
+
+.universal-post-list[data-layout="masonry"] .title-chevron {
+  display: none;
+}
+
+.universal-post-list[data-layout="masonry"] .post-enter-btn {
+  display: none;
+}
+
+.universal-post-list[data-layout="masonry"] .post-separator {
+  display: none;
+}
+
+/* ===== 通用样式 ===== */
+.post-title-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.post-title {
+  font-weight: 500 !important;
+  margin: 0;
+  position: relative;
+  transition: color 0.2s ease;
+  color: var(--text-90, rgba(0, 0, 0, 0.9));
+}
+
+.post-title-link:hover .post-title {
+  color: var(--primary);
+}
+
+.post-title-link:active .post-title {
+  color: var(--primary);
+}
+
+.post-description {
+  color: var(--text-75, rgba(0, 0, 0, 0.75));
+  line-height: 1.6;
+  margin-bottom: 0.875rem;
+  transition: color 0.2s ease;
+}
+
+
+
+.post-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-50);
+  margin-top: 0.875rem;
+}
+
+.separator {
+  color: var(--text-50);
+}
+
+/* 元数据样式 */
+.post-meta .post-date {
+  color: var(--text-50);
+  font-size: 0.75rem;
+}
+
+.post-meta .post-category {
+  color: var(--text-50);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.post-meta .meta-separator {
+  color: var(--text-30);
+  margin: 0 0.25rem;
+}
+
+.image-link {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.3s ease;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.image-link:hover .image-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.image-link:active .image-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.image-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.chevron-icon {
+  font-size: 3rem;
+  color: white;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.3s ease;
+}
+
+.image-link:hover .chevron-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.enter-icon {
+  font-size: 2.5rem;
+  color: var(--primary);
+}
+
+/* 空状态样式 */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty-state-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: var(--card-text-color-tertiary);
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--card-text-color-main);
+  margin-bottom: 0.5rem;
+}
+
+.empty-description {
+  color: var(--card-text-color-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.dev-tips {
+  background: var(--card-bg);
+  border: 1px solid var(--line-divider);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left;
+  margin-top: 1rem;
+}
+
+.dev-tips p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.dev-tips ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  list-style-type: disc;
+}
+
+.dev-tips li {
+  margin-bottom: 0.3rem;
+  color: var(--card-text-color-secondary);
+  line-height: 1.4;
+}
+
+.dev-tips code {
+  background: var(--inline-code-bg);
+  color: var(--inline-code-color);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}

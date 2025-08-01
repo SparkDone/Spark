@@ -1,0 +1,181 @@
+/* CSS Variables - converted from Stylus */
+
+:root {
+  --radius-large: 1rem;
+  --content-delay: 150ms;
+
+  /* Page layout variables */
+  --page-width: 68.75rem; /* 1100px (增加10%: 1000px * 1.1 = 1100px) */
+
+  /* Rainbow gradients - 优化：使用更简洁的渐变定义 */
+  --rainbow-light: linear-gradient(to right,
+    oklch(0.65 0.15 0), oklch(0.65 0.15 60), oklch(0.65 0.15 120),
+    oklch(0.65 0.15 180), oklch(0.65 0.15 240), oklch(0.65 0.15 300), oklch(0.65 0.15 360));
+  --rainbow-dark: linear-gradient(to right,
+    oklch(0.70 0.10 0), oklch(0.70 0.10 60), oklch(0.70 0.10 120),
+    oklch(0.70 0.10 180), oklch(0.70 0.10 240), oklch(0.70 0.10 300), oklch(0.70 0.10 360));
+
+  /* Light mode variables */
+  --primary: oklch(0.70 0.14 var(--hue));
+  --primary-hover: oklch(0.65 0.16 var(--hue));
+  --primary-active: oklch(0.60 0.18 var(--hue));
+  --page-bg: oklch(0.95 0.01 var(--hue));
+  --card-bg: white;
+
+  --btn-content: oklch(0.55 0.12 var(--hue));
+
+  --btn-regular-bg: oklch(0.95 0.025 var(--hue));
+  --btn-regular-bg-hover: oklch(0.9 0.05 var(--hue));
+  --btn-regular-bg-active: oklch(0.85 0.08 var(--hue));
+
+  --btn-plain-bg-hover: oklch(0.95 0.025 var(--hue));
+  --btn-plain-bg-active: oklch(0.98 0.01 var(--hue));
+
+  --btn-card-bg-hover: oklch(0.98 0.005 var(--hue));
+  --btn-card-bg-active: oklch(0.9 0.03 var(--hue));
+
+  /* 次要按钮变量 */
+  --btn-secondary-bg: oklch(0.92 0.02 var(--hue));
+  --btn-secondary-bg-hover: oklch(0.88 0.04 var(--hue));
+  --btn-secondary-text: oklch(0.45 0.08 var(--hue));
+  --btn-secondary-text-hover: oklch(0.40 0.10 var(--hue));
+  --btn-secondary-border: oklch(0.85 0.03 var(--hue));
+  --btn-secondary-border-hover: oklch(0.80 0.05 var(--hue));
+
+  --enter-btn-bg: var(--btn-regular-bg);
+  --enter-btn-bg-hover: var(--btn-regular-bg-hover);
+  --enter-btn-bg-active: var(--btn-regular-bg-active);
+
+  --deep-text: oklch(0.25 0.02 var(--hue));
+
+  --title-active: oklch(0.6 0.1 var(--hue));
+
+  /* Text color variables - light mode */
+  --text-90: rgba(0, 0, 0, 0.9);
+  --text-75: rgba(0, 0, 0, 0.75);
+  --text-50: rgba(0, 0, 0, 0.5);
+  --text-30: rgba(0, 0, 0, 0.3);
+  --text-25: rgba(0, 0, 0, 0.25);
+
+  --line-divider: rgba(0, 0, 0, 0.08);
+  --line-color: rgba(0, 0, 0, 0.1);
+  --meta-divider: rgba(0, 0, 0, 0.2);
+
+  /* Light mode specific */
+  --selection-bg: oklch(0.90 0.05 var(--hue));
+  --license-block-bg: rgba(0, 0, 0, 0.03);
+  --link-underline: oklch(0.93 0.04 var(--hue));
+  --link-hover: oklch(0.95 0.025 var(--hue));
+  --link-active: oklch(0.90 0.05 var(--hue));
+  --float-panel-bg: white;
+
+  --scrollbar-bg-light: rgba(0, 0, 0, 0.4);
+  --scrollbar-bg-hover-light: rgba(0, 0, 0, 0.5);
+  --scrollbar-bg-active-light: rgba(0, 0, 0, 0.6);
+
+  --scrollbar-bg-dark: rgba(255, 255, 255, 0.4);
+  --scrollbar-bg-hover-dark: rgba(255, 255, 255, 0.5);
+  --scrollbar-bg-active-dark: rgba(255, 255, 255, 0.6);
+
+  --scrollbar-bg: var(--scrollbar-bg-light);
+  --scrollbar-bg-hover: var(--scrollbar-bg-hover-light);
+  --scrollbar-bg-active: var(--scrollbar-bg-active-light);
+
+  --color-selection-bar: var(--rainbow-light);
+
+  /* 工具提示颜色 - 亮色主题 */
+  --tooltip-bg: oklch(0.2 0.02 var(--hue));
+  --tooltip-text: oklch(0.95 0.01 var(--hue));
+
+  --display-light-icon: 1;
+  --display-dark-icon: 0;
+
+  --admonitions-color-tip: oklch(0.7 0.14 180);
+  --admonitions-color-note: oklch(0.7 0.14 250);
+  --admonitions-color-important: oklch(0.7 0.14 310);
+  --admonitions-color-warning: oklch(0.7 0.14 60);
+  --admonitions-color-caution: oklch(0.6 0.2 25);
+
+  /* Code block variables - light mode */
+  --inline-code-bg: var(--btn-regular-bg);
+  --inline-code-color: var(--btn-content);
+  --codeblock-selection: oklch(0.90 0.05 var(--hue));
+  --codeblock-bg: oklch(0.98 0.005 var(--hue));
+  --codeblock-topbar-bg: oklch(0.95 0.02 var(--hue));
+}
+
+/* Dark mode variables */
+:root.dark {
+  --primary: oklch(0.75 0.14 var(--hue));
+  --primary-hover: oklch(0.80 0.16 var(--hue));
+  --primary-active: oklch(0.85 0.18 var(--hue));
+  --page-bg: oklch(0.16 0.014 var(--hue));
+  --card-bg: oklch(0.23 0.015 var(--hue));
+
+  --btn-content: oklch(0.75 0.1 var(--hue));
+
+  --btn-regular-bg: oklch(0.33 0.035 var(--hue));
+  --btn-regular-bg-hover: oklch(0.38 0.04 var(--hue));
+  --btn-regular-bg-active: oklch(0.43 0.045 var(--hue));
+
+  --btn-plain-bg-hover: oklch(0.30 0.035 var(--hue));
+  --btn-plain-bg-active: oklch(0.27 0.025 var(--hue));
+
+  --btn-card-bg-hover: oklch(0.3 0.03 var(--hue));
+  --btn-card-bg-active: oklch(0.35 0.035 var(--hue));
+
+  /* 次要按钮变量 - 暗色模式 */
+  --btn-secondary-bg: oklch(0.35 0.025 var(--hue));
+  --btn-secondary-bg-hover: oklch(0.40 0.03 var(--hue));
+  --btn-secondary-text: oklch(0.75 0.08 var(--hue));
+  --btn-secondary-text-hover: oklch(0.80 0.10 var(--hue));
+  --btn-secondary-border: oklch(0.45 0.03 var(--hue));
+  --btn-secondary-border-hover: oklch(0.50 0.05 var(--hue));
+
+  --line-divider: rgba(255, 255, 255, 0.08);
+  --line-color: rgba(255, 255, 255, 0.1);
+  --meta-divider: rgba(255, 255, 255, 0.2);
+
+  /* Text color variables - dark mode */
+  --text-90: rgba(255, 255, 255, 0.9);
+  --text-75: rgba(255, 255, 255, 0.75);
+  --text-50: rgba(255, 255, 255, 0.5);
+  --text-30: rgba(255, 255, 255, 0.3);
+  --text-25: rgba(255, 255, 255, 0.25);
+
+  /* Dark mode specific overrides */
+  --selection-bg: oklch(0.40 0.08 var(--hue));
+  --license-block-bg: var(--codeblock-bg);
+  --link-underline: oklch(0.40 0.08 var(--hue));
+  --link-hover: oklch(0.40 0.08 var(--hue));
+  --link-active: oklch(0.35 0.07 var(--hue));
+  --float-panel-bg: oklch(0.19 0.015 var(--hue));
+
+  --scrollbar-bg: var(--scrollbar-bg-dark);
+  --scrollbar-bg-hover: var(--scrollbar-bg-hover-dark);
+  --scrollbar-bg-active: var(--scrollbar-bg-active-dark);
+
+  --color-selection-bar: var(--rainbow-dark);
+
+  --display-light-icon: 0;
+  --display-dark-icon: 1;
+
+  --admonitions-color-tip: oklch(0.75 0.14 180);
+  --admonitions-color-note: oklch(0.75 0.14 250);
+  --admonitions-color-important: oklch(0.75 0.14 310);
+  --admonitions-color-warning: oklch(0.75 0.14 60);
+  --admonitions-color-caution: oklch(0.65 0.2 25);
+
+  /* 工具提示颜色 */
+  --tooltip-bg: oklch(0.2 0.02 var(--hue));
+  --tooltip-text: oklch(0.95 0.01 var(--hue));
+
+  /* Code block variables - dark mode */
+  --inline-code-bg: var(--btn-regular-bg);
+  --inline-code-color: var(--btn-content);
+  --codeblock-selection: oklch(0.40 0.08 var(--hue));
+  --codeblock-bg: oklch(0.17 0.015 var(--hue));
+  --codeblock-topbar-bg: oklch(0.12 0.015 var(--hue));
+}
+
+

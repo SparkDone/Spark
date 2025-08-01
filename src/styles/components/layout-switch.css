@@ -1,0 +1,52 @@
+/**
+ * 布局切换组件样式
+ */
+
+.layout-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem;
+  background: var(--card-bg);
+  border: 1px solid var(--line-divider);
+  border-radius: var(--radius-large);
+}
+
+.layout-switch-button {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-small);
+  color: var(--content-text-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.layout-switch-button:hover {
+  background: var(--btn-regular-bg);
+  color: var(--primary);
+}
+
+.layout-switch-button.active {
+  background: var(--primary);
+  color: white;
+}
+
+.layout-switch-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .layout-switch {
+    gap: 0.25rem;
+  }
+  
+  .layout-switch-button {
+    padding: 0.375rem;
+  }
+}

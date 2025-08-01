@@ -1,0 +1,381 @@
+---
+import "../../styles/components/mobile-navigation.css";
+/**
+ * 移动端导航组件
+ * 提供响应式导航菜单，支持手势操作和无障碍访问
+ */
+
+interface Props {
+  currentPath?: string;
+  class?: string;
+}
+
+const { currentPath = '', class: className = '' } = Astro.props;
+
+const navItems = [
+  { name: '首页', href: '/', icon: 'material-symbols:home' },
+  { name: '文章', href: '/posts', icon: 'material-symbols:article' },
+  { name: '分类', href: '/categories', icon: 'material-symbols:category' },
+  { name: '标签', href: '/tags', icon: 'material-symbols:tag' },
+  { name: '关于', href: '/about', icon: 'material-symbols:person' },
+];
+---
+
+<!-- 移动端导航触发按钮 -->
+<button
+  id="mobile-nav-toggle"
+  class="mobile-nav-toggle fixed top-4 right-4 z-50 lg:hidden
+         w-12 h-12 bg-white dark:bg-gray-800 rounded-full shadow-lg
+         border border-gray-200 dark:border-gray-700
+         flex items-center justify-center
+         transition-all duration-300 ease-in-out
+         hover:scale-110 hover:shadow-xl
+         focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+  aria-label="打开导航菜单"
+  aria-expanded="false"
+  aria-controls="mobile-nav-menu"
+>
+  <div class="hamburger-icon">
+    <span class="line line-1"></span>
+    <span class="line line-2"></span>
+    <span class="line line-3"></span>
+  </div>
+</button>
+
+<!-- 移动端导航遮罩 -->
+<div
+  id="mobile-nav-overlay"
+  class="mobile-nav-overlay fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden
+         opacity-0 pointer-events-none transition-all duration-300 ease-in-out"
+  aria-hidden="true"
+></div>
+
+<!-- 移动端导航菜单 -->
+<nav
+  id="mobile-nav-menu"
+  class={`mobile-nav-menu fixed top-0 right-0 h-full w-80 max-w-[85vw] z-50 lg:hidden
+          bg-white dark:bg-gray-900 shadow-2xl
+          transform translate-x-full transition-transform duration-300 ease-in-out
+          flex flex-col ${className}`}
+  aria-label="移动端导航菜单"
+  role="navigation"
+>
+  <!-- 导航头部 -->
+  <div class="nav-header p-6 border-b border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-sm">B</span>
+        </div>
+        <div>
+          <h2 class="font-bold text-gray-900 dark:text-white">我的博客</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400">技术分享与思考</p>
+        </div>
+      </div>
+      
+      <button
+        id="mobile-nav-close"
+        class="w-8 h-8 flex items-center justify-center rounded-lg
+               text-gray-500 hover:text-gray-700 hover:bg-gray-100
+               dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800
+               transition-colors duration-200"
+        aria-label="关闭导航菜单"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 搜索框 -->
+  <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="relative">
+      <input
+        type="text"
+        placeholder="搜索文章..."
+        class="w-full h-10 pl-10 pr-4 bg-gray-100 dark:bg-gray-800 
+               border border-gray-200 dark:border-gray-700 rounded-lg
+               text-gray-900 dark:text-white placeholder-gray-500
+               focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+               transition-colors duration-200"
+        id="mobile-search-input"
+      />
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导航链接 -->
+  <div class="nav-links flex-1 py-4">
+    {navItems.map((item, index) => (
+      <a
+        href={item.href}
+        class={`nav-link flex items-center gap-4 px-6 py-4 text-gray-700 dark:text-gray-300
+                hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400
+                transition-all duration-200 border-l-4 border-transparent
+                ${currentPath === item.href ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-500' : ''}
+                focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800`}
+        style={`animation-delay: ${index * 50}ms`}
+        data-nav-item
+      >
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <!-- 这里应该根据icon动态生成SVG，简化处理 -->
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+        </svg>
+        <span class="font-medium">{item.name}</span>
+        
+        {currentPath === item.href && (
+          <div class="ml-auto w-2 h-2 bg-blue-500 rounded-full"></div>
+        )}
+      </a>
+    ))}
+  </div>
+
+  <!-- 底部操作 -->
+  <div class="nav-footer p-4 border-t border-gray-200 dark:border-gray-700">
+    <!-- 主题切换 -->
+    <button
+      id="mobile-theme-toggle"
+      class="w-full flex items-center gap-3 px-4 py-3 rounded-lg
+             text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800
+             transition-colors duration-200"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+      </svg>
+      <span>切换主题</span>
+    </button>
+
+    <!-- 社交链接 -->
+    <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <span class="text-xs text-gray-500 dark:text-gray-400 flex-1">关注我们</span>
+      <div class="flex gap-2">
+        <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+          </svg>
+        </a>
+        <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.012.017 0z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+
+<script>
+  class MobileNavigation {
+    private toggle: HTMLElement;
+    private menu: HTMLElement;
+    private overlay: HTMLElement;
+    private closeBtn: HTMLElement;
+    private isOpen = false;
+    private startX = 0;
+    private currentX = 0;
+    private isDragging = false;
+
+    constructor() {
+      this.toggle = document.getElementById('mobile-nav-toggle')!;
+      this.menu = document.getElementById('mobile-nav-menu')!;
+      this.overlay = document.getElementById('mobile-nav-overlay')!;
+      this.closeBtn = document.getElementById('mobile-nav-close')!;
+      
+      this.init();
+    }
+
+    private init() {
+      this.bindEvents();
+      this.setupGestures();
+      this.setupKeyboardNavigation();
+    }
+
+    private bindEvents() {
+      // 切换按钮
+      this.toggle.addEventListener('click', () => this.toggleMenu());
+      
+      // 关闭按钮
+      this.closeBtn.addEventListener('click', () => this.closeMenu());
+      
+      // 遮罩点击关闭
+      this.overlay.addEventListener('click', () => this.closeMenu());
+      
+      // 导航链接点击关闭
+      this.menu.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          setTimeout(() => this.closeMenu(), 150);
+        });
+      });
+
+      // 主题切换
+      const themeToggle = document.getElementById('mobile-theme-toggle');
+      themeToggle?.addEventListener('click', () => {
+        this.toggleTheme();
+      });
+
+      // 搜索框
+      const searchInput = document.getElementById('mobile-search-input') as HTMLInputElement;
+      searchInput?.addEventListener('input', (e) => {
+        this.handleSearch((e.target as HTMLInputElement).value);
+      });
+    }
+
+    private setupGestures() {
+      // 滑动手势支持
+      this.menu.addEventListener('touchstart', (e) => {
+        this.startX = e.touches[0].clientX;
+        this.isDragging = true;
+      }, { passive: true });
+
+      this.menu.addEventListener('touchmove', (e) => {
+        if (!this.isDragging) return;
+        
+        this.currentX = e.touches[0].clientX;
+        const deltaX = this.currentX - this.startX;
+        
+        // 只允许向右滑动关闭
+        if (deltaX > 0) {
+          const progress = Math.min(deltaX / 200, 1);
+          this.menu.style.transform = `translateX(${deltaX}px)`;
+          this.overlay.style.opacity = `${1 - progress * 0.5}`;
+        }
+      }, { passive: true });
+
+      this.menu.addEventListener('touchend', () => {
+        if (!this.isDragging) return;
+        
+        const deltaX = this.currentX - this.startX;
+        
+        if (deltaX > 100) {
+          this.closeMenu();
+        } else {
+          // 回弹
+          this.menu.style.transform = '';
+          this.overlay.style.opacity = '';
+        }
+        
+        this.isDragging = false;
+      }, { passive: true });
+    }
+
+    private setupKeyboardNavigation() {
+      // 键盘导航支持
+      document.addEventListener('keydown', (e) => {
+        if (!this.isOpen) return;
+        
+        switch (e.key) {
+          case 'Escape':
+            this.closeMenu();
+            break;
+            
+          case 'Tab':
+            this.handleTabNavigation(e);
+            break;
+        }
+      });
+    }
+
+    private handleTabNavigation(e: KeyboardEvent) {
+      const focusableElements = this.menu.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+      
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    }
+
+    private toggleMenu() {
+      if (this.isOpen) {
+        this.closeMenu();
+      } else {
+        this.openMenu();
+      }
+    }
+
+    private openMenu() {
+      this.isOpen = true;
+      this.toggle.classList.add('active');
+      this.menu.classList.add('open');
+      this.overlay.classList.add('open');
+      
+      // 更新ARIA属性
+      this.toggle.setAttribute('aria-expanded', 'true');
+      this.overlay.setAttribute('aria-hidden', 'false');
+      
+      // 防止背景滚动
+      document.body.style.overflow = 'hidden';
+      
+      // 焦点管理
+      setTimeout(() => {
+        this.closeBtn.focus();
+      }, 300);
+    }
+
+    private closeMenu() {
+      this.isOpen = false;
+      this.toggle.classList.remove('active');
+      this.menu.classList.remove('open');
+      this.overlay.classList.remove('open');
+      
+      // 重置样式
+      this.menu.style.transform = '';
+      this.overlay.style.opacity = '';
+      
+      // 更新ARIA属性
+      this.toggle.setAttribute('aria-expanded', 'false');
+      this.overlay.setAttribute('aria-hidden', 'true');
+      
+      // 恢复背景滚动
+      document.body.style.overflow = '';
+      
+      // 焦点返回到触发按钮
+      this.toggle.focus();
+    }
+
+    private toggleTheme() {
+      const html = document.documentElement;
+      // 获取当前主题，如果没有设置则默认为暗黑模式
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      const isDark = currentTheme === 'dark';
+
+      if (isDark) {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    private handleSearch(query: string) {
+      if (query.length < 2) return;
+      
+      // 这里可以集成搜索功能
+      console.log('搜索:', query);
+    }
+  }
+
+  // 初始化移动端导航
+  document.addEventListener('DOMContentLoaded', () => {
+    new MobileNavigation();
+  });
+</script>

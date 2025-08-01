@@ -8,27 +8,22 @@ import type {
 import { LinkPreset } from "./types/config";
 
 export const siteConfig: SiteConfig = {
-	title: "Fuwari",
-	subtitle: "Demo Site",
-	lang: "en", // 'en', 'zh_CN', 'zh_TW', 'ja', 'ko', 'es', 'th'
+	// 🔧 网站基本信息 - 这些设置会被Strapi的Index Settings覆盖（如果配置了的话）
+	title: "SparkDone", // 默认网站标题，可在Strapi后台的Index Settings中修改
+	subtitle: "Powered by Astro & Strapi", // 默认副标题，可在Strapi后台修改
+	lang: "zh_CN", // 网站语言，固定为中文
 	themeColor: {
-		hue: 250, // Default hue for the theme color, from 0 to 360. e.g. red: 0, teal: 200, cyan: 250, pink: 345
-		fixed: false, // Hide the theme color picker for visitors
+		hue: 260, // 主题色调：0-360，例如红色:0, 青色:200, 蓝紫色:250, 粉色:345
+		fixed: false, // 是否隐藏主题色选择器，false=用户可以自定义主题色
 	},
-	banner: {
-		enable: false,
-		src: "assets/images/demo-banner.png", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
-		credit: {
-			enable: false, // Display the credit text of the banner image
-			text: "", // Credit text to be displayed
-			url: "", // (Optional) URL link to the original artwork or artist's page
-		},
-	},
-	toc: {
-		enable: true, // Display the table of contents on the right side of the post
-		depth: 2, // Maximum heading depth to show in the table, from 1 to 3
-	},
+
+	// banner: {
+	//	enable: false,
+	//	src: "assets/images/demo-banner.png",
+	//	position: "center",
+	//	credit: { enable: false, text: "Hello,baby.", url: "" },
+	// },
+
 	favicon: [
 		// Leave this array empty to use the default favicon
 		// {
@@ -45,17 +40,22 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Archive,
 		LinkPreset.About,
 		{
+			name: "搜索",
+			url: "/search/",
+			external: false,
+		},
+		{
 			name: "GitHub",
-			url: "https://github.com/saicaca/fuwari", // Internal links should not include the base path, as it is automatically added
+			url: "https://github.com", // Internal links should not include the base path, as it is automatically added
 			external: true, // Show an external link icon and will open in a new tab
 		},
 	],
 };
 
 export const profileConfig: ProfileConfig = {
-	avatar: "assets/images/demo-avatar.png", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-	name: "Lorem Ipsum",
-	bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	avatar: "/demo-avatar.png", // 使用public目录的头像
+	name: "SparkDone", // 请替换为您的姓名
+	bio: "Welcome to my blog powered by Astro and Strapi.", // 请替换为您的个人简介
 	links: [
 		{
 			name: "Twitter",
@@ -72,7 +72,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
-			url: "https://github.com/saicaca/fuwari",
+			url: "https://github.com",
 		},
 	],
 };

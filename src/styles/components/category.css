@@ -1,0 +1,162 @@
+/**
+ * [category] 组件样式
+ * 从 1.md 提取
+ * astro-cid: 2pzlju63
+ */
+
+/* 旧的分类页瀑布流样式已移除，现在使用 universal-post-list 组件 */
+
+/* 分类页列表布局样式 */
+.category-list-layout {
+  width: 100%;
+}
+
+.category-list-layout .post-card {
+  margin-bottom: 1.5rem;
+}
+
+/* 分类页PostCard样式增强 */
+.category-list-layout .card-base {
+  background: var(--card-bg);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.category-list-layout .card-base:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 分类页PostCard内容间距 */
+.category-list-layout .card-base > div:first-child {
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .category-list-layout .card-base > div:first-child {
+    padding: 1rem;
+  }
+
+  .category-list-layout .post-card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* 分类页PostCard文本样式 */
+.category-list-layout .card-base h3,
+.category-list-layout .card-base .font-bold {
+  color: var(--text-90);
+  line-height: 1.4;
+}
+
+.category-list-layout .card-base .text-75 {
+  color: var(--text-75);
+  line-height: 1.6;
+}
+
+/* 分类页PostCard链接样式 */
+.category-list-layout .card-base a:hover h3,
+.category-list-layout .card-base a:hover .font-bold {
+  color: var(--primary);
+  transition: color 0.3s ease;
+}
+
+/* 分类页PostCard元数据样式 */
+.category-list-layout .card-base .post-meta {
+  opacity: 0.8;
+}
+
+/* 分类页PostCard图片样式 */
+.category-list-layout .card-base img {
+  transition: transform 0.3s ease;
+}
+
+.category-list-layout .card-base:hover img {
+  transform: scale(1.02);
+}
+
+/* 确保分类页PostCard在所有设备上都有正确的间距 */
+@media (max-width: 639px) {
+  .category-list-layout .post-card {
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .category-list-layout .post-card {
+    margin-bottom: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .category-list-layout .post-card {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* 分类页网格布局样式 */
+#infinite-grid-container {
+  width: 100%;
+}
+
+#infinite-grid-container .grid-post-list {
+  display: grid;
+  width: 100%;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+/* 分类页网格布局响应式 */
+@media (max-width: 639px) {
+  #infinite-grid-container .grid-post-list {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  #infinite-grid-container .grid-post-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  #infinite-grid-container .grid-post-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  #infinite-grid-container .grid-post-list {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* 分类页网格项目样式 */
+#infinite-grid-container .grid-post-list article {
+  height: fit-content;
+  min-height: 300px;
+}
+
+/* 确保GridPostCard在分类页网格中正确显示 */
+#infinite-grid-container .card-base {
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+#infinite-grid-container .card-base:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* 旧的重复样式已移除 - 这些样式现在在buttons.css中定义 */
+/* 旧的瀑布流样式已移除 - 这些样式现在在上面的瀑布流布局部分定义 */

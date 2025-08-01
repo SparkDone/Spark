@@ -1,0 +1,87 @@
+/**
+ * ResponsiveImage 组件样式
+ * 从 1.md 提取
+ * astro-cid: 5d6rpylk
+ */
+
+/**
+  * 组件样式
+  * astro-cid: 5d6rpylk
+  */
+  .responsive-image[data-astro-cid-5d6rpylk]  {
+  width:100%;
+  height:auto;
+  opacity:0;
+  transform:scale(1.05)
+  }
+  .responsive-image[data-astro-cid-5d6rpylk].loaded  {
+  opacity:1;
+  transform:scale(1)
+  }
+  .responsive-image[data-astro-cid-5d6rpylk].error  {
+  opacity:0.7;
+  filter:grayscale(100%)
+  }
+  .loading-indicator[data-astro-cid-5d6rpylk]  {
+  opacity:1;
+  transition:opacity 0.3s ease
+  }
+  .responsive-image[data-astro-cid-5d6rpylk].loaded+.loading-indicator[data-astro-cid-5d6rpylk],
+  .responsive-image[data-astro-cid-5d6rpylk].error+.loading-indicator[data-astro-cid-5d6rpylk]  {
+  opacity:0;
+  pointer-events:none
+  }
+  .skeleton-placeholder[data-astro-cid-5d6rpylk]  {
+  background:linear-gradient(90deg,
+transparent,
+rgba(255,
+255,
+255,
+0.4),
+transparent);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite
+  }
+  @keyframes shimmer  {
+  0%  {
+  background-position:-200% 0
+  }
+  100%  {
+  background-position:200% 0
+  }
+  }
+  .blur-placeholder[data-astro-cid-5d6rpylk]  {
+  filter:blur(10px);
+  transform:scale(1.1);
+  transition:all 0.3s ease
+  }
+  @media (max-width: 640px)  {
+  .responsive-image[data-astro-cid-5d6rpylk]  {
+  height:auto;
+  max-height:60vh
+  }
+  }
+  @media (prefers-color-scheme: dark)  {
+  .skeleton-placeholder[data-astro-cid-5d6rpylk]  {
+  background:linear-gradient(90deg,
+transparent,
+rgba(255,
+255,
+255,
+0.1),
+transparent)
+  }
+  }
+  @media (prefers-reduced-motion: reduce)  {
+  .responsive-image[data-astro-cid-5d6rpylk],
+  .skeleton-placeholder[data-astro-cid-5d6rpylk],
+  .blur-placeholder[data-astro-cid-5d6rpylk]  {
+  transition:none;
+  animation:none
+  }
+  }
+  @media (prefers-contrast: high)  {
+  .responsive-image[data-astro-cid-5d6rpylk]  {
+  filter:contrast(1.2)
+  }
+  }

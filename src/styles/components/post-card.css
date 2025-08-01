@@ -1,0 +1,68 @@
+/**
+ * GridPostCard 组件样式
+ * 通用样式，适用于所有页面
+ */
+
+/* 文本截断样式 */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 响应式文本截断 */
+@media (max-width: 639px) {
+  .line-clamp-3 {
+    -webkit-line-clamp: 2;
+  }
+}
+
+@media (min-width: 1536px) {
+  .line-clamp-3 {
+    -webkit-line-clamp: 4;
+  }
+}
+
+/* 网格文章卡片高度 */
+@media (max-width: 639px) {
+  .grid-post-list article {
+    min-height: 250px;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .grid-post-list article {
+    min-height: 280px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-post-list article {
+    min-height: 320px;
+  }
+}
+
+/* 确保GridPostCard在所有网格布局中正确显示 */
+.grid-post-list .card-base {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-post-list .card-base > div:last-child {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-post-list .card-base .mt-auto {
+  margin-top: auto;
+}

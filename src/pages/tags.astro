@@ -1,0 +1,184 @@
+---
+// 静态预渲染Tags页面
+export const prerender = true;
+
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { getTagList } from "../utils/hybrid-content-utils";
+import { getTagUrl } from "../utils/url-utils";
+import ButtonTag from "../components/control/ButtonTag.astro";
+
+// 获取所有标签
+const tags = await getTagList();
+
+// 按文章数量排序
+const sortedTags = tags.sort((a, b) => b.count - a.count);
+
+const title = "标签";
+const description = `浏览所有标签 (${tags.length}个)`;
+
+// Tags页面结构化数据
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "标签页面",
+  description: description,
+  url: Astro.url.href,
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: tags.length,
+    itemListElement: tags.map((tag, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Thing",
+        name: tag.name,
+        url: `${Astro.site?.href || "https://sparkdone.com"}${getTagUrl(tag.name)}`,
+        description: `${tag.count} 篇文章`
+      }
+    }))
+  }
+};
+---
+
+<MainGridLayout title={title} description={description}>
+    <!-- Tags页面结构化数据 -->
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+
+    <!-- 为 SwupA11yPlugin 添加主标题 -->
+    <h1 class="sr-only">标签</h1>
+
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-9 py-6 relative w-full">
+            <!-- 页面标题 -->
+            <div class="flex items-center mb-6">
+                <Icon name="material-symbols:tag-rounded" class="text-3xl text-[var(--primary)] mr-3" />
+                <h1 class="transition w-full block font-bold
+                    text-3xl md:text-[2.25rem]/[2.75rem]
+                    text-black/90 dark:text-white/90
+                ">
+                    标签
+                </h1>
+            </div>
+
+            <!-- 标签统计 -->
+            <div class="mb-6 text-neutral-600 dark:text-neutral-400">
+                <p class="text-sm">
+                    共有 <span class="font-semibold text-[var(--primary)]">{tags.length}</span> 个标签，
+                    <span class="font-semibold text-[var(--primary)]">{tags.reduce((sum, tag) => sum + tag.count, 0)}</span> 篇文章
+                </p>
+            </div>
+
+            <!-- 标签云 -->
+            <div class="space-y-6">
+                <!-- 热门标签 (文章数 >= 3) -->
+                {sortedTags.filter(tag => tag.count >= 3).length > 0 && (
+                    <div>
+                        <h2 class="text-lg font-semibold mb-3 text-neutral-800 dark:text-neutral-200 flex items-center">
+                            <Icon name="material-symbols:local-fire-department" class="text-xl text-orange-500 mr-2" />
+                            热门标签
+                        </h2>
+                        <div class="flex gap-3 flex-wrap">
+                            {sortedTags.filter(tag => tag.count >= 3).map(tag => (
+                                <ButtonTag 
+                                    href={getTagUrl(tag.name)} 
+                                    label={`查看所有 ${tag.name} 标签的文章 (${tag.count}篇)`}
+                                    class="text-base px-4 py-2"
+                                >
+                                    {tag.name.trim()}
+                                    <span class="ml-2 text-xs bg-[var(--primary)] text-white px-2 py-1 rounded-full">
+                                        {tag.count}
+                                    </span>
+                                </ButtonTag>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <!-- 常用标签 (文章数 2) -->
+                {sortedTags.filter(tag => tag.count === 2).length > 0 && (
+                    <div>
+                        <h2 class="text-lg font-semibold mb-3 text-neutral-800 dark:text-neutral-200 flex items-center">
+                            <Icon name="material-symbols:star" class="text-xl text-yellow-500 mr-2" />
+                            常用标签
+                        </h2>
+                        <div class="flex gap-2 flex-wrap">
+                            {sortedTags.filter(tag => tag.count === 2).map(tag => (
+                                <ButtonTag 
+                                    href={getTagUrl(tag.name)} 
+                                    label={`查看所有 ${tag.name} 标签的文章 (${tag.count}篇)`}
+                                >
+                                    {tag.name.trim()}
+                                    <span class="ml-1 text-xs text-neutral-500">
+                                        {tag.count}
+                                    </span>
+                                </ButtonTag>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <!-- 其他标签 (文章数 1) -->
+                {sortedTags.filter(tag => tag.count === 1).length > 0 && (
+                    <div>
+                        <h2 class="text-lg font-semibold mb-3 text-neutral-800 dark:text-neutral-200 flex items-center">
+                            <Icon name="material-symbols:label" class="text-xl text-blue-500 mr-2" />
+                            其他标签
+                        </h2>
+                        <div class="flex gap-2 flex-wrap">
+                            {sortedTags.filter(tag => tag.count === 1).map(tag => (
+                                <ButtonTag 
+                                    href={getTagUrl(tag.name)} 
+                                    label={`查看所有 ${tag.name} 标签的文章 (${tag.count}篇)`}
+                                    class="text-sm"
+                                >
+                                    {tag.name.trim()}
+                                </ButtonTag>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <!-- 如果没有标签 -->
+                {tags.length === 0 && (
+                    <div class="text-center py-12">
+                        <Icon name="material-symbols:tag-rounded" class="text-6xl text-neutral-300 dark:text-neutral-600 mx-auto mb-4" />
+                        <p class="text-neutral-500 dark:text-neutral-400">
+                            暂无标签
+                        </p>
+                    </div>
+                )}
+            </div>
+
+            <!-- 返回链接 -->
+            <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+                <a 
+                    href="/archive/" 
+                    class="inline-flex items-center text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors"
+                >
+                    <Icon name="material-symbols:arrow-back" class="text-lg mr-2" />
+                    返回归档页面
+                </a>
+            </div>
+        </div>
+    </div>
+</MainGridLayout>
+
+<style>
+/* 标签云动画效果 */
+.tag-cloud-item {
+    transition: all 0.3s ease;
+}
+
+.tag-cloud-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .tag-cloud-item {
+        font-size: 0.875rem;
+    }
+}
+</style>

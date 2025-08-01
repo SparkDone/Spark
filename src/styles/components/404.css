@@ -1,0 +1,97 @@
+/**
+ * 404 Page Styles
+ * 404页面样式 - 清理版本
+ */
+
+/* 文本截断工具类 */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 响应式文字大小 */
+@media (max-width: 640px) {
+  .text-6xl {
+    font-size: 3.5rem;
+  }
+
+  .text-7xl {
+    font-size: 4rem;
+  }
+}
+/* 背景效果 */
+.bg-gradient-to-br {
+  background-attachment: fixed;
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* 404页面卡片样式 - 与其他页面保持一致 */
+.page-404-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
+  border: 1px solid var(--line-divider);
+}
+
+/* 404页面卡片悬停效果 */
+.page-404-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* 404页面响应式间距 */
+@media (max-width: 768px) {
+  .page-404-card {
+    margin: 1rem;
+    padding: 2rem 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-404-card {
+    margin: 0.5rem;
+    padding: 1.5rem 1rem !important;
+  }
+}
+
+/* 减少动画（用户偏好） */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .hover\:scale-105:hover {
+    animation: none;
+    transform: none;
+  }
+}

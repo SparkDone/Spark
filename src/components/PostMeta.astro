@@ -11,6 +11,8 @@ interface Props {
 	updated?: Date;
 	tags: string[];
 	category: string | null;
+	author?: string;
+
 	hideTagsForMobile?: boolean;
 	hideUpdateDate?: boolean;
 }
@@ -19,13 +21,14 @@ const {
 	updated,
 	tags,
 	category,
+
 	hideTagsForMobile = false,
 	hideUpdateDate = false,
 } = Astro.props;
 const className = Astro.props.class;
 ---
 
-<div class:list={["flex flex-wrap text-neutral-500 dark:text-neutral-400 items-center gap-4 gap-x-4 gap-y-2", className]}>
+<div class:list={["flex flex-wrap items-center gap-4 gap-x-4 gap-y-2 post-meta-container", className]}>
     <!-- publish date -->
     <div class="flex items-center">
         <div class="meta-icon"
@@ -54,8 +57,10 @@ const className = Astro.props.class;
         </div>
         <div class="flex flex-row flex-nowrap items-center">
             <a href={getCategoryUrl(category)} aria-label={`View all posts in the ${category} category`}
-               class="link-lg transition text-50 text-sm font-medium
-                            hover:text-[var(--primary)] dark:hover:text-[var(--primary)] whitespace-nowrap">
+               class="category-meta-link-custom transition text-sm font-medium whitespace-nowrap"
+               style="color: rgba(0, 0, 0, 0.75) !important; font-weight: 500 !important; text-decoration: none !important;"
+               onmouseover="this.style.color='var(--primary)' + ' !important'"
+               onmouseout="this.style.color='rgba(0, 0, 0, 0.75)' + ' !important'">
                 {category || i18n(I18nKey.uncategorized)}
             </a>
         </div>
@@ -71,12 +76,90 @@ const className = Astro.props.class;
             {(tags && tags.length > 0) && tags.map((tag, i) => (
                 <div class:list={[{"hidden": i == 0}, "mx-1.5 text-[var(--meta-divider)] text-sm"]}>/</div>
                 <a href={getTagUrl(tag)} aria-label={`View all posts with the ${tag.trim()} tag`}
-                   class="link-lg transition text-50 text-sm font-medium
-                                hover:text-[var(--primary)] dark:hover:text-[var(--primary)] whitespace-nowrap">
+                   class="tag-meta-link transition text-sm font-medium whitespace-nowrap">
                     {tag.trim()}
                 </a>
             ))}
             {!(tags && tags.length > 0) && <div class="transition text-50 text-sm font-medium">{i18n(I18nKey.noTags)}</div>}
         </div>
     </div>
+
+
 </div>
+
+<style>
+  /* 强制覆盖分类链接样式 */
+  .category-meta-link-custom {
+    color: rgba(0, 0, 0, 0.75) !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease !important;
+  }
+
+  .category-meta-link-custom:hover {
+    color: var(--primary) !important;
+  }
+
+  /* 暗黑模式 */
+  :global(.dark) .category-meta-link-custom {
+    color: rgba(255, 255, 255, 0.75) !important;
+  }
+
+  :global(.dark) .category-meta-link-custom:hover {
+    color: var(--primary) !important;
+  }
+
+  /* 确保在所有情况下都生效 */
+  :global(html.dark) .category-meta-link-custom {
+    color: rgba(255, 255, 255, 0.75) !important;
+  }
+
+  :global(html:not(.dark)) .category-meta-link-custom {
+    color: rgba(0, 0, 0, 0.75) !important;
+  }
+</style>
+
+<script>
+  // 强制设置分类链接颜色
+  document.addEventListener('DOMContentLoaded', function() {
+    function updateCategoryColors() {
+      const categoryLinks = document.querySelectorAll('.category-meta-link-custom');
+      const isDark = document.documentElement.classList.contains('dark') ||
+                     document.body.classList.contains('dark') ||
+                     document.querySelector('html').classList.contains('dark');
+
+      categoryLinks.forEach(link => {
+        const baseColor = isDark ? 'rgba(255, 255, 255, 0.75)' : 'rgba(0, 0, 0, 0.75)';
+        link.style.setProperty('color', baseColor, 'important');
+        link.style.setProperty('font-weight', '500', 'important');
+        link.style.setProperty('text-decoration', 'none', 'important');
+
+        // 更新鼠标事件
+        link.onmouseover = function() {
+          this.style.setProperty('color', 'var(--primary)', 'important');
+        };
+        link.onmouseout = function() {
+          const currentIsDark = document.documentElement.classList.contains('dark') ||
+                               document.body.classList.contains('dark') ||
+                               document.querySelector('html').classList.contains('dark');
+          const currentBaseColor = currentIsDark ? 'rgba(255, 255, 255, 0.75)' : 'rgba(0, 0, 0, 0.75)';
+          this.style.setProperty('color', currentBaseColor, 'important');
+        };
+      });
+    }
+
+    // 初始设置
+    updateCategoryColors();
+
+    // 监听主题变化
+    const observer = new MutationObserver(updateCategoryColors);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  });
+</script>

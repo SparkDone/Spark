@@ -1,0 +1,118 @@
+---
+import "../../styles/components/loading-spinner.css";
+/**
+ * 统一的加载状态组件
+ * 提供多种样式和大小的加载指示器
+ */
+
+interface Props {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'spinner' | 'dots' | 'pulse' | 'skeleton';
+  color?: 'primary' | 'secondary' | 'accent' | 'neutral';
+  text?: string;
+  fullscreen?: boolean;
+  class?: string;
+}
+
+const { 
+  size = 'md',
+  variant = 'spinner',
+  color = 'primary',
+  text,
+  fullscreen = false,
+  class: className = ''
+} = Astro.props;
+
+const sizeClasses = {
+  sm: 'w-4 h-4',
+  md: 'w-6 h-6',
+  lg: 'w-8 h-8',
+  xl: 'w-12 h-12'
+};
+
+const colorClasses = {
+  primary: 'text-blue-600 dark:text-blue-400',
+  secondary: 'text-gray-600 dark:text-gray-400',
+  accent: 'text-purple-600 dark:text-purple-400',
+  neutral: 'text-gray-500 dark:text-gray-300'
+};
+
+const containerClass = fullscreen 
+  ? 'fixed inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center'
+  : 'flex items-center justify-center';
+---
+
+<div class={`loading-container ${containerClass} ${className}`}>
+  <div class="flex flex-col items-center gap-3">
+    
+    {variant === 'spinner' && (
+      <div class={`animate-spin ${sizeClasses[size]} ${colorClasses[color]}`}>
+        <svg class="w-full h-full" fill="none" viewBox="0 0 24 24">
+          <circle 
+            class="opacity-25" 
+            cx="12" 
+            cy="12" 
+            r="10" 
+            stroke="currentColor" 
+            stroke-width="4"
+          ></circle>
+          <path 
+            class="opacity-75" 
+            fill="currentColor" 
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+      </div>
+    )}
+
+    {variant === 'dots' && (
+      <div class="flex space-x-1">
+        <div class={`${sizeClasses[size]} ${colorClasses[color]} rounded-full animate-bounce`} style="animation-delay: 0ms"></div>
+        <div class={`${sizeClasses[size]} ${colorClasses[color]} rounded-full animate-bounce`} style="animation-delay: 150ms"></div>
+        <div class={`${sizeClasses[size]} ${colorClasses[color]} rounded-full animate-bounce`} style="animation-delay: 300ms"></div>
+      </div>
+    )}
+
+    {variant === 'pulse' && (
+      <div class={`${sizeClasses[size]} ${colorClasses[color]} rounded-full animate-pulse bg-current`}></div>
+    )}
+
+    {variant === 'skeleton' && (
+      <div class="space-y-3 w-full max-w-sm">
+        <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse"></div>
+        <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-5/6"></div>
+        <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-4/6"></div>
+      </div>
+    )}
+
+    {text && (
+      <p class={`text-sm font-medium ${colorClasses[color]} animate-pulse`}>
+        {text}
+      </p>
+    )}
+  </div>
+</div>
+
+
+
+<script>
+  // 自动隐藏加载器的逻辑
+  document.addEventListener('DOMContentLoaded', () => {
+    const loadingContainers = document.querySelectorAll('.loading-container');
+    
+    loadingContainers.forEach(container => {
+      // 如果是全屏加载器，在页面加载完成后自动隐藏
+      if (container.classList.contains('fixed')) {
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            container.style.opacity = '0';
+            container.style.transition = 'opacity 0.3s ease-out';
+            setTimeout(() => {
+              container.remove();
+            }, 300);
+          }, 500); // 最少显示500ms
+        });
+      }
+    });
+  });
+</script>

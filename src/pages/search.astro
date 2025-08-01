@@ -1,0 +1,356 @@
+---
+// 静态预渲染搜索页面
+export const prerender = true;
+
+import Layout from '../layouts/Layout.astro';
+import MainGridLayout from '../layouts/MainGridLayout.astro';
+import { Icon } from 'astro-icon/components';
+
+// 安全地获取URL参数
+let query = '';
+try {
+  if (Astro.url && Astro.url.searchParams) {
+    query = Astro.url.searchParams.get('q') || '';
+  }
+} catch (error) {
+  console.warn('获取URL参数失败:', error);
+  query = '';
+}
+
+const title = query ? `搜索结果: ${query}` : '搜索';
+---
+
+<Layout title={title}>
+  <MainGridLayout>
+    <!-- 为 SwupA11yPlugin 添加主标题 -->
+    <h1 class="sr-only">{title}</h1>
+
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+      <div class="card-base z-10 px-9 py-6 relative w-full">
+        <!-- 搜索结果容器 -->
+        <div id="search-results" class="space-y-4">
+
+          <!-- 加载状态 -->
+          <div id="loading-state" class="hidden text-center py-12">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)] mx-auto mb-4"></div>
+            <p class="text-black/60 dark:text-white/60">正在搜索...</p>
+          </div>
+          
+          <!-- 无结果状态 -->
+          <div id="no-results" class="hidden text-center py-12">
+            <Icon name="material-symbols:search-off" class="text-6xl text-black/20 dark:text-white/20 mb-4 mx-auto" />
+            <p class="text-black/60 dark:text-white/60 mb-2">未找到相关结果</p>
+            <p class="text-sm text-black/40 dark:text-white/40">尝试使用不同的关键词</p>
+          </div>
+          
+          <!-- 结果列表 -->
+          <div id="results-list" class="space-y-4">
+            <!-- 动态填充搜索结果 -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </MainGridLayout>
+</Layout>
+
+<script>
+  // 搜索功能
+  let searchTimeout;
+  let isSearching = false; // 防止重复搜索
+  let lastSearchQuery = ''; // 记录上次搜索的关键词
+  let lastSearchTime = 0; // 记录上次搜索的时间
+
+  // DOM元素引用 - 使用函数获取以确保在Swup转换后正确获取
+  function getDOMElements() {
+    return {
+      searchResults: document.getElementById('search-results'),
+      loadingState: document.getElementById('loading-state'),
+      noResults: document.getElementById('no-results'),
+      resultsList: document.getElementById('results-list')
+    };
+  }
+
+
+  
+  // 执行搜索
+  async function performSearch(query) {
+    const currentTime = Date.now();
+
+    // 防重复搜索检查
+    if (isSearching) {
+      console.log('⏸️ 搜索正在进行中，跳过重复请求');
+      return;
+    }
+
+    // 如果是相同的查询且时间间隔小于1秒，跳过
+    if (query === lastSearchQuery && (currentTime - lastSearchTime) < 1000) {
+      console.log('⏸️ 相同查询且时间间隔过短，跳过重复搜索');
+      return;
+    }
+
+    console.log('🔍 开始搜索:', query);
+    isSearching = true;
+    lastSearchQuery = query;
+    lastSearchTime = currentTime;
+
+    if (!query.trim()) {
+      showInitialState();
+      isSearching = false;
+      return;
+    }
+
+    if (query.trim().length < 2) {
+      console.log('⚠️ 搜索关键词太短，需要至少2个字符');
+      isSearching = false;
+      return;
+    }
+
+    // 检查是否已有结果，如果有则不显示加载状态
+    const { resultsList } = getDOMElements();
+    const hasExistingResults = resultsList && resultsList.children.length > 0;
+
+    if (!hasExistingResults) {
+      showLoadingState();
+    }
+
+    try {
+      const apiUrl = `/api/search/?q=${encodeURIComponent(query)}&limit=50`;
+      console.log('📡 发送搜索请求:', apiUrl);
+
+      const response = await fetch(apiUrl);
+      console.log('📊 搜索响应状态:', response.status);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('📋 搜索响应数据:', data);
+
+      if (data.success && data.data && data.data.length > 0) {
+        console.log('✅ 找到搜索结果:', data.data.length, '个');
+        showResults(data.data, query);
+      } else {
+        console.log('❌ 未找到搜索结果');
+        showNoResults();
+      }
+    } catch (error) {
+      console.error('❌ 搜索错误:', error);
+      showNoResults();
+    } finally {
+      // 搜索完成，重置状态
+      isSearching = false;
+    }
+  }
+  
+  // 显示状态函数 - 动态获取DOM元素，减少闪烁
+  function showInitialState() {
+    const { loadingState, noResults, resultsList } = getDOMElements();
+    console.log('📝 显示初始状态');
+    if (loadingState) loadingState.classList.add('hidden');
+    if (noResults) noResults.classList.add('hidden');
+    if (resultsList) resultsList.classList.add('hidden');
+  }
+
+  function showLoadingState() {
+    const { loadingState, noResults, resultsList } = getDOMElements();
+    console.log('⏳ 显示加载状态');
+    // 添加短暂延迟，避免快速搜索时的闪烁
+    setTimeout(() => {
+      if (isSearching) { // 只有在仍在搜索时才显示加载状态
+        if (loadingState) loadingState.classList.remove('hidden');
+        if (noResults) noResults.classList.add('hidden');
+        if (resultsList) resultsList.classList.add('hidden');
+      }
+    }, 100);
+  }
+
+  function showNoResults() {
+    const { loadingState, noResults, resultsList } = getDOMElements();
+    console.log('❌ 显示无结果状态');
+    if (loadingState) loadingState.classList.add('hidden');
+    if (noResults) noResults.classList.remove('hidden');
+    if (resultsList) resultsList.classList.add('hidden');
+  }
+  
+  function showResults(results, query) {
+    console.log('🎨 渲染搜索结果:', results.length, '个');
+
+    const { loadingState, noResults, resultsList } = getDOMElements();
+
+    // 检查DOM元素是否存在
+    if (!resultsList) {
+      console.error('❌ 无法找到结果列表元素');
+      return;
+    }
+
+    loadingState?.classList.add('hidden');
+    noResults?.classList.add('hidden');
+    resultsList.classList.remove('hidden');
+
+    try {
+      // 渲染结果
+      const resultsHtml = results.map((item, index) => {
+        // 安全地获取各个字段
+        const title = item.title || `结果 ${index + 1}`;
+        const url = item.url || '#';
+        const excerpt = item.excerpt || '暂无描述';
+        const category = item.category || '未分类';
+        const publishedDate = item.published ?
+          new Date(item.published).toLocaleDateString() : '';
+
+        return `
+          <article class="bg-white/50 dark:bg-black/20 rounded-lg p-6 border border-black/5 dark:border-white/5 hover:border-[var(--primary)]/20 transition-all hover:shadow-lg">
+            <h3 class="text-lg font-semibold mb-2">
+              <a href="${url}" class="text-black/90 dark:text-white/90 hover:text-[var(--primary)] transition-colors">
+                ${title}
+              </a>
+            </h3>
+            <div class="text-sm text-black/60 dark:text-white/60 mb-3 leading-relaxed">
+              ${excerpt}
+            </div>
+            <div class="flex items-center justify-between text-xs text-black/40 dark:text-white/40">
+              <span>${category}</span>
+              <span>${publishedDate}</span>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      // 添加结果统计
+      const statsHtml = `
+        <div class="text-center py-4 mb-6">
+          <p class="text-sm text-black/60 dark:text-white/60">
+            找到 <span class="font-semibold text-[var(--primary)]">${results.length}</span> 个相关结果
+          </p>
+        </div>
+      `;
+
+      resultsList.innerHTML = statsHtml + resultsHtml;
+      console.log('✅ 搜索结果渲染完成');
+
+
+
+      console.log('✅ 搜索结果渲染完成');
+
+    } catch (error) {
+      console.error('❌ 渲染搜索结果时出错:', error);
+      showNoResults();
+    }
+  }
+  
+  // 检查DOM是否准备好
+  function isDOMReady() {
+    const { searchResults, loadingState, noResults, resultsList } = getDOMElements();
+    const isReady = !!(searchResults && loadingState && noResults && resultsList);
+    console.log('🔍 DOM准备状态:', {
+      searchResults: !!searchResults,
+      loadingState: !!loadingState,
+      noResults: !!noResults,
+      resultsList: !!resultsList,
+      isReady
+    });
+    return isReady;
+  }
+
+  // 从URL参数执行搜索的通用函数
+  function searchFromUrl() {
+    try {
+      const urlQuery = new URLSearchParams(window.location.search).get('q');
+      console.log('🔍 检查URL参数:', {
+        url: window.location.href,
+        search: window.location.search,
+        query: urlQuery,
+        pathname: window.location.pathname
+      });
+
+      // 检查DOM是否准备好
+      if (!isDOMReady()) {
+        console.log('⏳ DOM未准备好，延迟执行搜索');
+        setTimeout(() => {
+          if (isDOMReady()) {
+            searchFromUrl();
+          } else {
+            console.error('❌ DOM元素仍未准备好');
+          }
+        }, 100);
+        return;
+      }
+
+      if (urlQuery) {
+        console.log('🔍 从URL参数执行搜索:', urlQuery);
+        performSearch(urlQuery);
+      } else {
+        console.log('📝 URL中没有搜索参数，显示初始状态');
+        showInitialState();
+      }
+    } catch (error) {
+      console.warn('获取URL参数失败:', error);
+      showInitialState();
+    }
+  }
+
+
+
+  // 页面加载完成后的初始化
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 搜索页面DOMContentLoaded');
+    searchFromUrl();
+  });
+
+  // 简化的浏览器历史记录监听
+  window.addEventListener('popstate', (event) => {
+    if (window.location.pathname === '/search/') {
+      console.log('🔄 浏览器历史记录变化，重新执行搜索');
+      setTimeout(() => {
+        searchFromUrl();
+      }, 100);
+    }
+  });
+
+  // 监听Swup页面转换事件
+  function setupSwupListeners() {
+    if (window.swup && window.swup.hooks) {
+      console.log('🔄 设置Swup事件监听器');
+
+      // 简化的页面转换监听
+      window.swup.hooks.on('page:view', () => {
+        if (window.location.pathname === '/search/') {
+          console.log('🔄 Swup页面转换完成，执行搜索');
+          setTimeout(() => {
+            searchFromUrl();
+          }, 100);
+        }
+      });
+    }
+  }
+
+  // 如果Swup已经加载，立即设置监听器
+  if (window.swup) {
+    setupSwupListeners();
+  } else {
+    // 否则等待Swup加载完成
+    document.addEventListener('swup:enable', setupSwupListeners);
+  }
+
+  // 简化的安全措施：只在必要时检查
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && window.location.pathname === '/search/' && !isSearching) {
+      console.log('🔄 页面变为可见，检查是否需要重新搜索');
+      // 检查是否有搜索结果，如果没有则重新搜索
+      const { resultsList } = getDOMElements();
+      const hasResults = resultsList && resultsList.children.length > 0;
+      const urlQuery = new URLSearchParams(window.location.search).get('q');
+
+      if (urlQuery && !hasResults) {
+        console.log('🔄 检测到有搜索参数但无结果，重新执行搜索');
+        setTimeout(() => {
+          searchFromUrl();
+        }, 200);
+      }
+    }
+  });
+
+
+</script>

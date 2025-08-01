@@ -1,0 +1,120 @@
+---
+import { Icon } from "astro-icon/components";
+import { profileConfig } from "../../config";
+import { url } from "../../utils/url-utils";
+import ImageWrapper from "../misc/ImageWrapper.astro";
+import { getPrimaryAuthor, getIndexSettings } from "../../lib/strapi";
+import type { AuthorData } from "../../types/config";
+
+// 获取 Index Settings 来检查是否显示作者小分区
+let showAuthorSection = true; // 默认显示
+try {
+  const indexSettings = await getIndexSettings();
+  if (indexSettings.data) {
+    showAuthorSection = indexSettings.data.show_author_section !== false;
+  }
+} catch (error) {
+  console.error('获取 Index Settings 失败，使用默认设置:', error);
+}
+
+// 如果设置为不显示作者小分区，直接返回空
+if (!showAuthorSection) {
+  // 返回空的 HTML，不渲染任何内容
+}
+
+// 尝试获取 Strapi 中的主要作者信息，如果失败则使用配置文件
+let authorInfo: AuthorData | null = null;
+try {
+  authorInfo = await getPrimaryAuthor();
+} catch (error) {
+  console.error('获取作者信息失败，使用配置文件:', error);
+}
+
+// 如果没有获取到 Strapi 作者信息，使用配置文件
+const config = authorInfo ? {
+  avatar: authorInfo.avatar || profileConfig.avatar, // 优先使用Strapi头像
+  name: authorInfo.name || profileConfig.name,
+  bio: authorInfo.bio || profileConfig.bio,
+  links: []
+} : profileConfig;
+
+
+
+// 构建社交链接
+const socialLinks = [];
+
+if (authorInfo) {
+  // 使用 Strapi 作者的社交链接
+  if (authorInfo.email) {
+    socialLinks.push({
+      name: "Email",
+      icon: "material-symbols:mail-outline",
+      url: `mailto:${authorInfo.email}`
+    });
+  }
+  if (authorInfo.website) {
+    socialLinks.push({
+      name: "Website",
+      icon: "material-symbols:language",
+      url: authorInfo.website
+    });
+  }
+  if (authorInfo.github) {
+    socialLinks.push({
+      name: "GitHub",
+      icon: "fa6-brands:github",
+      url: `https://github.com/${authorInfo.github}`
+    });
+  }
+  if (authorInfo.twitter) {
+    socialLinks.push({
+      name: "Twitter",
+      icon: "fa6-brands:twitter",
+      url: `https://twitter.com/${authorInfo.twitter}`
+    });
+  }
+  if (authorInfo.linkedin) {
+    socialLinks.push({
+      name: "LinkedIn",
+      icon: "fa6-brands:linkedin",
+      url: `https://linkedin.com/in/${authorInfo.linkedin}`
+    });
+  }
+} else {
+  // 使用配置文件的链接
+  socialLinks.push(...profileConfig.links);
+}
+---
+
+{showAuthorSection && (
+<div class="p-3">
+    <a aria-label="Go to About Page" href={url('/about/')}
+       class="group block relative mx-auto mt-1 lg:mx-0 lg:mt-0 mb-3
+       max-w-[12rem] lg:max-w-none overflow-hidden rounded-xl active:scale-95">
+        <div class="absolute transition pointer-events-none group-hover:bg-black/30 group-active:bg-black/50
+        w-full h-full z-50 flex items-center justify-center">
+            <Icon name="fa6-regular:address-card"
+                  class="transition opacity-0 scale-90 group-hover:scale-100 group-hover:opacity-100 text-white text-5xl">
+            </Icon>
+        </div>
+        <ImageWrapper src={authorInfo?.avatar || config.avatar || ""} alt="Profile Image of the Author" class="mx-auto lg:w-full h-full lg:mt-0 "></ImageWrapper>
+    </a>
+    <div class="px-2">
+        <div class="font-bold text-xl text-center mb-1 dark:text-neutral-50 transition">{authorInfo?.name || config.name}</div>
+        <div class="h-1 w-5 bg-[var(--primary)] mx-auto rounded-full mb-2 transition"></div>
+        <div class="text-center text-neutral-400 mb-2.5 transition">{authorInfo?.bio || config.bio}</div>
+        <div class="flex gap-2 justify-center mb-1">
+            {socialLinks.length > 1 && socialLinks.map(item =>
+                    <a rel="me" aria-label={item.name} href={item.url} target="_blank" class="btn-regular rounded-lg h-10 w-10 active:scale-90">
+                        <Icon name={item.icon} class="text-[1.5rem]"></Icon>
+                    </a>
+            )}
+            {socialLinks.length == 1 && <a rel="me" aria-label={socialLinks[0].name} href={socialLinks[0].url} target="_blank"
+                                            class="btn-regular rounded-lg h-10 gap-2 px-3 font-bold active:scale-95">
+                <Icon name={socialLinks[0].icon} class="text-[1.5rem]"></Icon>
+                {socialLinks[0].name}
+            </a>}
+        </div>
+    </div>
+</div>
+)}

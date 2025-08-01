@@ -37,7 +37,7 @@ $: if (hue || hue === 0) {
             </div>
         </div>
     </div>
-    <div class="w-full h-6 px-1 bg-[oklch(0.80_0.10_0)] dark:bg-[oklch(0.70_0.10_0)] rounded select-none">
+    <div class="w-full h-6 px-1 rounded select-none rainbow-gradient">
         <input aria-label={i18n(I18nKey.themeColor)} type="range" min="0" max="360" bind:value={hue}
                class="slider" id="colorSlider" step="5" style="width: 100%">
     </div>
@@ -45,12 +45,21 @@ $: if (hue || hue === 0) {
 
 
 <style lang="stylus">
+    /* 彩虹渐变样式 */
+    .rainbow-gradient
+      /* 亮色模式 - 较深的颜色 */
+      background linear-gradient(to right, oklch(0.65 0.15 0), oklch(0.65 0.15 30), oklch(0.65 0.15 60), oklch(0.65 0.15 90), oklch(0.65 0.15 120), oklch(0.65 0.15 150), oklch(0.65 0.15 180), oklch(0.65 0.15 210), oklch(0.65 0.15 240), oklch(0.65 0.15 270), oklch(0.65 0.15 300), oklch(0.65 0.15 330), oklch(0.65 0.15 360))
+
+      /* 暗色模式 - 适中的颜色 */
+      :global(.dark) &
+        background linear-gradient(to right, oklch(0.70 0.10 0), oklch(0.70 0.10 30), oklch(0.70 0.10 60), oklch(0.70 0.10 90), oklch(0.70 0.10 120), oklch(0.70 0.10 150), oklch(0.70 0.10 180), oklch(0.70 0.10 210), oklch(0.70 0.10 240), oklch(0.70 0.10 270), oklch(0.70 0.10 300), oklch(0.70 0.10 330), oklch(0.70 0.10 360))
+
     #display-setting
       input[type="range"]
         -webkit-appearance none
         height 1.5rem
-        background-image var(--color-selection-bar)
-        transition background-image 0.15s ease-in-out
+        background var(--color-selection-bar)
+        transition background 0.15s ease-in-out
 
         /* Input Thumb */
         &::-webkit-slider-thumb

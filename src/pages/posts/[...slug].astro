@@ -5,14 +5,18 @@ import Markdown from "@components/misc/Markdown.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { getSortedPosts } from "@utils/content-utils";
+import { getSortedPosts } from "@utils/hybrid-content-utils";
 import { getDir, getPostUrlBySlug } from "@utils/url-utils";
+// import { getBannerForPage } from "../../utils/banner-utils"; // Banner已删除
 import { Icon } from "astro-icon/components";
 import { licenseConfig } from "src/config";
 import ImageWrapper from "../../components/misc/ImageWrapper.astro";
 import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
+
+// 混合模式：文章页面静态预渲染
+export const prerender = true;
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
@@ -22,31 +26,168 @@ export async function getStaticPaths() {
 	}));
 }
 
-const { entry } = Astro.props;
-const { Content, headings } = await entry.render();
+// 在服务器模式下，总是直接获取最新的文章数据，避免缓存问题
+const { slug } = Astro.params;
+console.log('🚀🚀🚀 [SLUG].ASTRO 文章页面开始执行，slug:', slug);
+console.log('🚀🚀🚀 当前时间:', new Date().toISOString());
 
-const { remarkPluginFrontmatter } = await entry.render();
+// 使用现有的 getSortedPosts 函数来获取文章
+const allPosts = await getSortedPosts();
+const entry = allPosts.find(post => post.slug === slug);
+
+console.log('🔍 从所有文章中找到的文章:', entry ? entry.data.title : '未找到');
+console.log('🔍 entry.body 内容长度:', entry?.body?.length || 0);
+console.log('🔍 entry.body 内容预览:', entry?.body?.substring(0, 200) || '无内容');
+
+if (!entry) {
+	// 如果找不到文章，返回 404
+	return Astro.redirect('/404/');
+}
+
+
+
+// 处理不同的数据源（Astro Content Collection vs Strapi）
+let Content, headings, remarkPluginFrontmatter;
+
+console.log('🔍 entry.render 存在吗?', !!entry.render);
+console.log('🔍 entry.body 内容:', entry.body?.substring(0, 100) + '...');
+
+if (entry.render) {
+	// 强制调用 render() 函数来获取内容和统计信息
+	console.log('📞 调用 entry.render() 函数...');
+	const renderResult = await entry.render();
+	Content = renderResult.Content;
+	headings = renderResult.headings;
+	remarkPluginFrontmatter = renderResult.remarkPluginFrontmatter;
+
+	console.log('✅ render() 调用完成，Content 类型:', typeof Content);
+	console.log('✅ remarkPluginFrontmatter:', remarkPluginFrontmatter);
+} else {
+	// Strapi 数据（服务器模式）
+	console.log('🔍 处理 Strapi 数据，文章内容:', entry.body?.substring(0, 100) + '...');
+
+	// 动态导入 reading-time 插件
+	const getReadingTime = (await import('reading-time')).default;
+
+	// 计算字数和阅读时间
+	const content = entry.body || '';
+	const readingTimeStats = getReadingTime(content);
+
+	console.log('📊 自动计算的阅读统计:', {
+		words: readingTimeStats.words,
+		minutes: Math.max(1, Math.round(readingTimeStats.minutes))
+	});
+
+	// 创建一个能正确渲染 Markdown 的 Content 组件
+	console.log('📝 原始内容长度:', content.length);
+	console.log('📝 原始内容预览:', content.substring(0, 200) + '...');
+
+	// 使用 Astro 的内置 Markdown 处理
+	Content = () => {
+		// 生成标题ID的函数
+		const generateId = (text: string) => {
+			return text
+				.toLowerCase()
+				.replace(/[^\w\s-]/g, '') // 移除特殊字符
+				.replace(/\s+/g, '-')     // 空格替换为连字符
+				.trim();
+		};
+
+		// 简单的 Markdown 转换：处理基本格式
+		let htmlContent = content
+			.replace(/\n\n/g, '</p><p>')  // 段落
+			.replace(/\n/g, '<br>')       // 换行
+			.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // 粗体
+			.replace(/\*(.*?)\*/g, '<em>$1</em>')              // 斜体
+			.replace(/`(.*?)`/g, '<code>$1</code>')            // 代码
+			.replace(/^# (.*$)/gm, (match, title) => `<h1 id="${generateId(title)}">${title}</h1>`)             // H1 with ID
+			.replace(/^## (.*$)/gm, (match, title) => `<h2 id="${generateId(title)}">${title}</h2>`)            // H2 with ID
+			.replace(/^### (.*$)/gm, (match, title) => `<h3 id="${generateId(title)}">${title}</h3>`);          // H3 with ID
+
+		// 包装在段落标签中
+		if (!htmlContent.startsWith('<')) {
+			htmlContent = '<p>' + htmlContent + '</p>';
+		}
+
+		console.log('🎨 转换后的 HTML 预览:', htmlContent.substring(0, 200) + '...');
+
+		return htmlContent;
+	};
+
+	// 从内容中提取标题信息
+	headings = [];
+	const headingRegex = /^(#{1,3})\s+(.+)$/gm;
+	let match;
+	while ((match = headingRegex.exec(content)) !== null) {
+		const depth = match[1].length;
+		const text = match[2].trim();
+		const slug = text
+			.toLowerCase()
+			.replace(/[^\w\s-]/g, '')
+			.replace(/\s+/g, '-')
+			.trim();
+
+		headings.push({
+			depth,
+			text,
+			slug
+		});
+	}
+	remarkPluginFrontmatter = {
+		words: readingTimeStats.words,
+		minutes: Math.max(1, Math.round(readingTimeStats.minutes)),
+		excerpt: entry.data.description || content.substring(0, 150) + '...'
+	};
+}
+
+
+// const banner = await getBannerForPage('post', entry.data.category);
+// console.log('📄 文章页面Banner:', banner);
+
+// SEO 数据处理
+const seoTitle = entry.data.metaTitle || entry.data.title;
+const seoDescription = entry.data.metaDescription || entry.data.description || entry.data.title;
+const seoKeywords = entry.data.keywords || entry.data.tags?.join(', ') || '';
+
+// Author 调试
+console.log('Author Debug in Article Page:', {
+  'entry.data.author': entry.data.author,
+  'typeof entry.data.author': typeof entry.data.author,
+  'entry.data keys': Object.keys(entry.data)
+});
+
+// 获取作者名称，处理不同的数据格式
+const getAuthorName = (author: any) => {
+	if (typeof author === 'string') {
+		return author;
+	} else if (author && typeof author === 'object' && author.name) {
+		return author.name;
+	}
+	return profileConfig.name;
+};
 
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "BlogPosting",
 	headline: entry.data.title,
-	description: entry.data.description || entry.data.title,
-	keywords: entry.data.tags,
+	description: seoDescription,
+	keywords: seoKeywords,
 	author: {
 		"@type": "Person",
-		name: profileConfig.name,
+		name: getAuthorName(entry.data.author),
 		url: Astro.site,
 	},
 	datePublished: formatDateToYYYYMMDD(entry.data.published),
-	inLanguage: entry.data.lang
-		? entry.data.lang.replace("_", "-")
-		: siteConfig.lang.replace("_", "-"),
+	inLanguage: siteConfig.lang.replace("_", "-"),
 	// TODO include cover image here
 };
 ---
-<MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
+<MainGridLayout title={seoTitle} description={seoDescription} setOGTypeArticle={true} headings={headings}>
+    {seoKeywords && <meta slot="head" name="keywords" content={seoKeywords} />}
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+
+
+
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
         <div id="post-container" class:list={["card-base z-10 px-6 md:px-9 pt-6 pb-4 relative w-full ",
             {}
@@ -71,17 +212,19 @@ const jsonLd = {
 
             <!-- title -->
             <div class="relative onload-animation">
-                <div
+                <h1
                     data-pagefind-body data-pagefind-weight="10" data-pagefind-meta="title"
                     class="transition w-full block font-bold mb-3
-                    text-3xl md:text-[2.25rem]/[2.75rem]
+                    text-[1.5rem]
                     text-black/90 dark:text-white/90
                     md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
                     before:absolute before:top-[0.75rem] before:left-[-1.125rem]
                 ">
                     {entry.data.title}
-                </div>
+                </h1>
             </div>
+
+
 
             <!-- metadata -->
             <div class="onload-animation">
@@ -91,6 +234,7 @@ const jsonLd = {
                         updated={entry.data.updated}
                         tags={entry.data.tags}
                         category={entry.data.category}
+
                 ></PostMetadata>
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
@@ -102,11 +246,14 @@ const jsonLd = {
             }
 
 
-            <Markdown class="mb-6 markdown-content onload-animation">
-                <Content />
-            </Markdown>
+            <!-- 文章内容 -->
+            <div class="mb-6 markdown-content onload-animation prose dark:prose-invert prose-lg max-w-none">
+                <div set:html={entry.body?.replace(/\n/g, '<br>') || '<p>内容为空</p>'} />
+            </div>
 
-            {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
+
+
+            {licenseConfig.enable && <License title={entry.data.title} slug={entry.slug} pubDate={entry.data.published} author={entry.data.author} class="mb-6 rounded-xl license-container onload-animation"></License>}
 
         </div>
     </div>

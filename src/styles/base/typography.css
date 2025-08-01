@@ -1,0 +1,397 @@
+/**
+ * Typography Styles
+ * 排版样式 - 统一的文字排版规范
+ */
+
+/* 字体变量定义 */
+:root {
+  --font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-family-mono: 'JetBrains Mono Variable', 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', 'Source Code Pro', monospace;
+  --font-size-base: 1rem;
+  --line-height-base: 1.6;
+}
+
+/* 基础字体设置 - 强制统一字体 */
+* {
+  font-family: var(--font-family) !important;
+}
+
+body {
+  font-family: var(--font-family) !important;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--text-90);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 标题样式 */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 500 !important;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--text-90);
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 500 !important;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+  margin-bottom: 0.875rem;
+}
+
+h5 {
+  font-size: 1.125rem;
+  margin-bottom: 0.75rem;
+}
+
+h6 {
+  font-size: 1rem;
+  margin-bottom: 0.625rem;
+}
+
+/* 响应式标题 */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  h3 {
+    font-size: 1.375rem;
+  }
+}
+
+/* 段落样式 */
+p {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+  color: var(--text-75);
+}
+
+/* 基础链接样式 - 默认不添加下划线 */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+/* 内容区域链接样式 - 仅在特定内容区域显示下划线 */
+.prose a,
+.markdown-body a,
+.article-content a,
+.post-body a,
+.content-text a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.prose a:hover,
+.markdown-body a:hover,
+.article-content a:hover,
+.post-body a:hover,
+.content-text a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* 排除不需要下划线的区域 */
+.post-card a,
+.post-list a,
+.grid-post-list a,
+.masonry-container a,
+.masonry-item a,
+.navbar a,
+.nav a,
+.menu a,
+.sidebar a,
+.header a,
+.footer a,
+.widget a,
+.card a,
+.list-item a {
+  text-decoration: none !important;
+}
+
+.post-card a:hover,
+.post-list a:hover,
+.grid-post-list a:hover,
+.masonry-container a:hover,
+.masonry-item a:hover,
+.navbar a:hover,
+.nav a:hover,
+.menu a:hover,
+.sidebar a:hover,
+.header a:hover,
+.footer a:hover,
+.widget a:hover,
+.card a:hover,
+.list-item a:hover {
+  text-decoration: none !important;
+}
+
+/* 移除全局的 focus 边框，让各组件自己控制 */
+a:focus {
+  outline: none;
+}
+
+/* 强调文本 */
+strong, b {
+  font-weight: 500 !important;
+  color: var(--text-90);
+}
+
+em, i {
+  font-style: italic;
+}
+
+/* 代码样式 */
+code {
+  font-family: var(--font-family-mono);
+  font-size: 0.875em;
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--code-border);
+}
+
+pre {
+  font-family: var(--font-family-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid var(--code-border);
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* 引用样式 */
+blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid var(--primary);
+  background: var(--quote-bg);
+  font-style: italic;
+  color: var(--text-75);
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* 列表样式 */
+ul, ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  color: var(--text-75);
+}
+
+li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+li:last-child {
+  margin-bottom: 0;
+}
+
+/* 嵌套列表 */
+ul ul, ol ol, ul ol, ol ul {
+  margin: 0.5rem 0;
+}
+
+/* 描述列表 */
+dl {
+  margin: 1rem 0;
+}
+
+dt {
+  font-weight: 500 !important;
+  color: var(--text-90);
+  margin-bottom: 0.25rem;
+}
+
+dd {
+  margin: 0 0 1rem 1.5rem;
+  color: var(--text-75);
+}
+
+/* 小字体文本 */
+small {
+  font-size: 0.875rem;
+  color: var(--text-60);
+}
+
+/* 标记文本 */
+mark {
+  background: var(--highlight-bg);
+  color: var(--highlight-text);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+}
+
+/* 删除线文本 */
+del {
+  text-decoration: line-through;
+  color: var(--text-60);
+}
+
+/* 下划线文本 */
+ins {
+  text-decoration: underline;
+  color: var(--text-90);
+}
+
+/* 上标和下标 */
+sup, sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* 文本对齐工具类 */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+/* 文本截断工具类 */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 字体权重工具类 */
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 500 !important;
+}
+
+.font-bold {
+  font-weight: 500 !important;
+}
+
+/* 字体大小工具类 */
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-base {
+  font-size: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+/* 行高工具类 */
+.leading-tight {
+  line-height: 1.25;
+}
+
+.leading-normal {
+  line-height: 1.5;
+}
+
+.leading-relaxed {
+  line-height: 1.625;
+}
+
+.leading-loose {
+  line-height: 2;
+}

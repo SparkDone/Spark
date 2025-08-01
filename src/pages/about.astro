@@ -1,25 +1,71 @@
 ---
+// 混合模式：关于页面静态预渲染（不使用Content Collections）
+export const prerender = true;
 
-import { getEntry, render } from "astro:content";
 import Markdown from "@components/misc/Markdown.astro";
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 
-const aboutPost = await getEntry("spec", "about");
+// 简化版本：直接使用静态内容，不依赖Content Collections
+const aboutContent = `
+# 关于本站 🚀
 
-if (!aboutPost) {
-	throw new Error("About page content not found");
-}
+欢迎来到我的博客！这是一个分享想法、经验和知识的地方。
 
-const { Content } = await render(aboutPost);
+**🔥 测试更新：这是在开发模式下添加的内容！**
+
+## 关于我 👨‍💻
+
+我是一个热爱技术的开发者和写作者，喜欢探索新技术并与社区分享见解。
+
+### 技能栈
+- 前端开发：React, Vue, Astro
+- 后端开发：Node.js, Python
+- 数据库：MySQL, MongoDB
+- 云服务：AWS, Cloudflare
+
+## 关于这个博客
+
+这个博客使用 [Astro](https://astro.build/) 构建，这是一个现代的静态网站生成器，提供快速、专注于内容的网站。博客特色包括：
+
+- 快速加载时间
+- 响应式设计
+- SEO优化
+- 现代开发实践
+
+## 联系方式
+
+如果您有任何问题或想要联系，请随时联系我！
+
+感谢您访问我的博客！
+`;
 ---
-<MainGridLayout title={i18n(I18nKey.about)} description={i18n(I18nKey.about)}>
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
-        <div class="card-base z-10 px-9 py-6 relative w-full ">
-            <Markdown class="mt-2">
-                <Content />
-            </Markdown>
+
+<MainGridLayout title={i18n(I18nKey.about)}>
+    <!-- 为 SwupA11yPlugin 添加主标题 -->
+    <h1 class="sr-only">{i18n(I18nKey.about)}</h1>
+
+    <div class="card-base z-10 px-9 py-6 relative w-full ">
+        <!-- Page title as h1 for accessibility -->
+        <h1 class="transition w-full block font-bold mb-6
+            text-3xl md:text-[2.25rem]/[2.75rem]
+            text-black/90 dark:text-white/90
+            onload-animation">
+            {i18n(I18nKey.about)}
+        </h1>
+
+        <div class="mt-2 prose prose-lg dark:prose-invert max-w-none">
+            <div set:html={aboutContent.split('\n').map(line => {
+                if (line.startsWith('# ')) return `<h1>${line.slice(2)}</h1>`;
+                if (line.startsWith('## ')) return `<h2>${line.slice(3)}</h2>`;
+                if (line.startsWith('- ')) return `<li>${line.slice(2)}</li>`;
+                if (line.includes('[') && line.includes('](')) {
+                    return `<p>${line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')}</p>`;
+                }
+                if (line.trim() === '') return '<br>';
+                return `<p>${line}</p>`;
+            }).join('')} />
         </div>
     </div>
 </MainGridLayout>

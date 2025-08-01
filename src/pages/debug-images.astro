@@ -1,0 +1,197 @@
+---
+// 图片调试页面
+import { getPublishedArticles } from '../lib/strapi';
+import { adaptImageUrl, imageConfig } from '../utils/image-adapter';
+
+let articles = [];
+let error = null;
+
+try {
+  const response = await getPublishedArticles();
+  articles = response.data || [];
+} catch (e) {
+  error = e.message;
+  console.error('获取文章失败:', e);
+}
+
+// 测试图片URL
+const testImageUrls = [
+  '/uploads/test.jpg',
+  'https://api.sparkdone.com/uploads/test.jpg',
+  '/images/strapi/test.jpg'
+];
+---
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片调试页面</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+    .image-test { margin: 10px 0; }
+    .image-test img { max-width: 200px; height: auto; border: 1px solid #ccc; }
+    .error { color: red; }
+    .success { color: green; }
+    pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>🖼️ 图片调试页面</h1>
+
+  <div class="debug-section">
+    <h2>📋 环境配置</h2>
+    <pre>{JSON.stringify({
+      STRAPI_URL: import.meta.env.STRAPI_URL,
+      STRAPI_PUBLIC_URL: import.meta.env.STRAPI_PUBLIC_URL,
+      imageConfig: imageConfig
+    }, null, 2)}</pre>
+  </div>
+
+  <div class="debug-section">
+    <h2>🔗 API连接状态</h2>
+    {error ? (
+      <p class="error">❌ API连接失败: {error}</p>
+    ) : (
+      <p class="success">✅ API连接成功，获取到 {articles.length} 篇文章</p>
+    )}
+
+    <h3>🔍 原始API响应测试</h3>
+    <p>请在浏览器中访问以下URL查看原始API响应：</p>
+    <a href={`${import.meta.env.STRAPI_PUBLIC_URL || import.meta.env.STRAPI_URL}/api/articles?populate[0]=image&populate[1]=category&populate[2]=tags&populate[3]=author.avatar&filters[draft][$eq]=false&sort=published:desc`} target="_blank" style="word-break: break-all;">
+      {import.meta.env.STRAPI_PUBLIC_URL || import.meta.env.STRAPI_URL}/api/articles?populate[0]=image&populate[1]=category&populate[2]=tags&populate[3]=author.avatar&filters[draft][$eq]=false&sort=published:desc
+    </a>
+    <p><small>注意：您需要在请求头中添加 Authorization: Bearer YOUR_TOKEN</small></p>
+  </div>
+
+  <div class="debug-section">
+    <h2>🧪 图片URL测试</h2>
+    <div class="image-test">
+      <h3>测试真实的Strapi上传图片</h3>
+      <p>请手动测试以下URL是否可以在浏览器中直接访问：</p>
+      <ul>
+        <li><a href={`${import.meta.env.STRAPI_PUBLIC_URL || import.meta.env.STRAPI_URL}/uploads/`} target="_blank">{import.meta.env.STRAPI_PUBLIC_URL || import.meta.env.STRAPI_URL}/uploads/</a></li>
+        <li><a href={`${import.meta.env.STRAPI_PUBLIC_URL || import.meta.env.STRAPI_URL}/api/upload/files`} target="_blank">{import.meta.env.STRAPI_PUBLIC_URL || import.meta.env.STRAPI_URL}/api/upload/files</a></li>
+      </ul>
+    </div>
+
+    {testImageUrls.map(url => (
+      <div class="image-test">
+        <p><strong>原始URL:</strong> {url}</p>
+        <p><strong>转换后:</strong> {adaptImageUrl(url)}</p>
+        <img src={adaptImageUrl(url)} alt="测试图片" onerror="this.style.border='2px solid red'; this.alt='❌ 加载失败';" onload="this.style.border='2px solid green';" />
+      </div>
+    ))}
+  </div>
+
+  <div class="debug-section">
+    <h2>📰 文章图片</h2>
+    {articles.slice(0, 3).map(article => (
+      <div class="image-test">
+        <h3>{article.title}</h3>
+        <p><strong>文章ID:</strong> {article.id}</p>
+
+        <!-- 调试：显示完整的文章数据结构 -->
+        <details>
+          <summary>🔍 查看完整文章数据</summary>
+          <pre>{JSON.stringify(article, null, 2)}</pre>
+        </details>
+
+        <!-- 检查各种可能的图片字段名 -->
+        <div style="margin: 10px 0;">
+          <p><strong>图片字段详细检查:</strong></p>
+          <ul>
+            <li>article.image: {article.image ? '✅ 存在' : '❌ 不存在'}</li>
+            {article.image && (
+              <li style="margin-left: 20px;">
+                类型: {Array.isArray(article.image) ? `数组，长度: ${article.image.length}` : typeof article.image}
+              </li>
+            )}
+            {article.image && Array.isArray(article.image) && article.image.length > 0 && (
+              <li style="margin-left: 20px;">
+                第一个元素: {JSON.stringify(article.image[0], null, 2)}
+              </li>
+            )}
+            {article.image && !Array.isArray(article.image) && (
+              <li style="margin-left: 20px;">
+                对象内容: {JSON.stringify(article.image, null, 2)}
+              </li>
+            )}
+            <li>article.cover: {article.cover ? '✅ 存在' : '❌ 不存在'}</li>
+            <li>article.featured_image: {article.featured_image ? '✅ 存在' : '❌ 不存在'}</li>
+            <li>article.thumbnail: {article.thumbnail ? '✅ 存在' : '❌ 不存在'}</li>
+          </ul>
+        </div>
+
+        {/* 处理数组类型的image字段 */}
+        {article.image && Array.isArray(article.image) && article.image.length > 0 ? (
+          <div>
+            <p><strong>图片类型:</strong> 数组，第一张图片</p>
+            <p><strong>原始图片URL:</strong> {article.image[0].url}</p>
+            <p><strong>转换后URL:</strong> {adaptImageUrl(article.image[0].url)}</p>
+            <img
+              src={adaptImageUrl(article.image[0].url)}
+              alt={article.title}
+              onerror="this.style.border='2px solid red'; this.alt='❌ 加载失败';"
+              onload="this.style.border='2px solid green';"
+            />
+          </div>
+        ) : /* 处理对象类型的image字段 */
+        article.image && !Array.isArray(article.image) && article.image.url ? (
+          <div>
+            <p><strong>图片类型:</strong> 单个对象</p>
+            <p><strong>原始图片URL:</strong> {article.image.url}</p>
+            <p><strong>转换后URL:</strong> {adaptImageUrl(article.image.url)}</p>
+            <img
+              src={adaptImageUrl(article.image.url)}
+              alt={article.title}
+              onerror="this.style.border='2px solid red'; this.alt='❌ 加载失败';"
+              onload="this.style.border='2px solid green';"
+            />
+          </div>
+        ) : article.cover ? (
+          <div>
+            <p><strong>封面图片URL:</strong> {article.cover.url}</p>
+            <p><strong>转换后URL:</strong> {adaptImageUrl(article.cover.url)}</p>
+            <img
+              src={adaptImageUrl(article.cover.url)}
+              alt={article.title}
+              onerror="this.style.border='2px solid red'; this.alt='❌ 加载失败';"
+              onload="this.style.border='2px solid green';"
+            />
+          </div>
+        ) : (
+          <p>❌ 该文章没有找到有效的图片字段</p>
+        )}
+      </div>
+    ))}
+  </div>
+
+  <div class="debug-section">
+    <h2>🔍 手动测试</h2>
+    <p>请在浏览器开发者工具的Network标签页中查看图片请求的状态。</p>
+    <p>常见问题：</p>
+    <ul>
+      <li><strong>404错误:</strong> 图片路径不正确</li>
+      <li><strong>403错误:</strong> 需要认证或权限不足</li>
+      <li><strong>CORS错误:</strong> 跨域访问被阻止</li>
+      <li><strong>连接超时:</strong> 服务器响应慢或不可达</li>
+    </ul>
+  </div>
+
+  <script>
+    // 客户端调试信息
+    console.log('🖼️ 图片调试信息');
+    console.log('当前页面URL:', window.location.href);
+    console.log('用户代理:', navigator.userAgent);
+    
+    // 监听图片加载错误
+    document.addEventListener('error', function(e) {
+      if (e.target.tagName === 'IMG') {
+        console.error('图片加载失败:', e.target.src);
+      }
+    }, true);
+  </script>
+</body>
+</html>

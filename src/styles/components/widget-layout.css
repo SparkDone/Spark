@@ -1,0 +1,13 @@
+/**
+ * WidgetLayout 组件样式
+ * 从 1.md 提取
+ * astro-cid: ucso7hve
+ */
+
+/**
+  * 组件样式
+  * astro-cid: ucso7hve
+  */
+  .collapsed[data-astro-cid-ucso7hve]  {
+  height:var(--collapsedHeight)
+  }

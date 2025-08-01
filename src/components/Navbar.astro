@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import { navBarConfig, siteConfig } from "../config";
+import { config } from "../config/api";
 import { LinkPresets } from "../constants/link-presets";
 import { LinkPreset, type NavBarLink } from "../types/config";
 import { url } from "../utils/url-utils";
@@ -8,54 +9,75 @@ import LightDarkSwitch from "./LightDarkSwitch.svelte";
 import Search from "./Search.svelte";
 import DisplaySettings from "./widget/DisplaySettings.svelte";
 import NavMenuPanel from "./widget/NavMenuPanel.astro";
+import { getAdaptedMainNavigation } from "../lib/custom-navigation";
+import StaticLogo from "./StaticLogo.astro";
 
 const className = Astro.props.class;
 
-let links: NavBarLink[] = navBarConfig.links.map(
-	(item: NavBarLink | LinkPreset): NavBarLink => {
-		if (typeof item === "number") {
-			return LinkPresets[item];
-		}
-		return item;
-	},
-);
+// 获取导航链接
+const getStaticLinks = () => navBarConfig.links.map((item: NavBarLink | LinkPreset): NavBarLink => {
+  if (typeof item === "number") {
+    return LinkPresets[item];
+  }
+  return item;
+});
+
+let links: NavBarLink[] = [];
+
+if (config.features.useStrapi) {
+  try {
+    links = await getAdaptedMainNavigation();
+  } catch (error) {
+    console.error('获取动态导航失败，使用静态导航:', error);
+    links = getStaticLinks();
+  }
+} else {
+  links = getStaticLinks();
+}
 ---
-<div id="navbar" class="z-50 onload-animation">
-    <div class="absolute h-8 left-0 right-0 -top-8 bg-[var(--card-bg)] transition"></div> <!-- used for onload animation -->
+<div id="navbar" class="z-50 onload-animation w-full fixed top-0 left-0 right-0">
+    <div class="absolute h-8 left-0 right-0 -top-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md transition"></div> <!-- used for onload animation -->
     <div class:list={[
         className,
-        "card-base !overflow-visible max-w-[var(--page-width)] h-[4.5rem] !rounded-t-none mx-auto flex items-center justify-between px-4"]}>
-        <a href={url('/')} class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95">
-            <div class="flex flex-row text-[var(--primary)] items-center text-md">
-                <Icon name="material-symbols:home-outline-rounded" class="text-[1.75rem] mb-1 mr-2" />
-                {siteConfig.title}
-            </div>
-        </a>
-        <div class="hidden md:flex">
-            {links.map((l) => {
-                return <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
-                          class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
-                >
-                    <div class="flex items-center">
-                        {l.name}
-                        {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
-                    </div>
-                </a>;
-            })}
+        "!overflow-visible w-full h-[4.5rem] !rounded-none flex items-center px-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/20 dark:border-gray-700/20"]}>
+
+        <!-- LOGO 固定在最左侧 -->
+        <div id="navbar-logo" class="btn-plain scale-animation rounded-lg h-[3.25rem] px-5 font-bold active:scale-95 flex-shrink-0">
+            <a href={url('/')} class="flex items-center">
+                <StaticLogo />
+            </a>
         </div>
-        <div class="flex">
-            <!--<SearchPanel client:load>-->
+
+        <!-- 中间导航链接区域 - 在剩余空间中居中 -->
+        <div class="flex-1 flex justify-center" id="nav-center-container">
+            <div class="hidden md:flex">
+                {links.map((l) => {
+                    return <a aria-label={l.name} href={l.external ? l.url : url(l.url)} target={l.external ? "_blank" : null}
+                              class="btn-plain scale-animation rounded-lg h-11 font-bold px-5 active:scale-95"
+                    >
+                        <div class="flex items-center">
+                            {l.name}
+                            {l.external && <Icon name="fa6-solid:arrow-up-right-from-square" class="text-[0.875rem] transition -translate-y-[1px] ml-1 text-black/[0.2] dark:text-white/[0.2]"></Icon>}
+                        </div>
+                    </a>;
+                })}
+            </div>
+        </div>
+
+        <!-- 右侧控制按钮固定在最右侧 -->
+        <div class="flex items-center gap-2 flex-shrink-0">
             <Search client:only="svelte"></Search>
             {!siteConfig.themeColor.fixed && (
-                    <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
-                        <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
-                    </button>
+                <button aria-label="Display Settings" class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="display-settings-switch">
+                    <Icon name="material-symbols:palette-outline" class="text-[1.25rem]"></Icon>
+                </button>
             )}
             <LightDarkSwitch client:only="svelte"></LightDarkSwitch>
             <button aria-label="Menu" name="Nav Menu" class="btn-plain scale-animation rounded-lg w-11 h-11 active:scale-90 md:!hidden" id="nav-menu-switch">
                 <Icon name="material-symbols:menu-rounded" class="text-[1.25rem]"></Icon>
             </button>
         </div>
+
         <NavMenuPanel links={links}></NavMenuPanel>
         <DisplaySettings client:only="svelte"></DisplaySettings>
     </div>
@@ -63,12 +85,53 @@ let links: NavBarLink[] = navBarConfig.links.map(
 
 <script>
 function switchTheme() {
-    if (localStorage.theme === 'dark') {
-        document.documentElement.classList.remove('dark');
-        localStorage.theme = 'light';
-    } else {
-        document.documentElement.classList.add('dark');
-        localStorage.theme = 'dark';
+    // 导入优化的主题切换函数
+    import('/src/utils/setting-utils.js').then(module => {
+        const { getStoredTheme, setTheme, LIGHT_MODE, DARK_MODE } = module;
+
+        // 获取当前主题
+        const currentTheme = getStoredTheme();
+
+        // 切换主题
+        const newTheme = currentTheme === DARK_MODE ? LIGHT_MODE : DARK_MODE;
+        setTheme(newTheme);
+
+        // 更新按钮图标（如果需要）
+        updateThemeButtonIcon(newTheme);
+    }).catch(error => {
+        console.warn('主题切换模块加载失败，使用备用方法:', error);
+
+        // 备用的简单切换方法
+        const currentTheme = localStorage.theme || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        // 添加过渡动画
+        document.documentElement.classList.add('theme-transitioning');
+
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        localStorage.theme = newTheme;
+
+        // 移除过渡类
+        setTimeout(() => {
+            document.documentElement.classList.remove('theme-transitioning');
+        }, 120); // 与CSS动画时间匹配
+    });
+}
+
+function updateThemeButtonIcon(theme) {
+    // 更新主题切换按钮的图标（如果有的话）
+    const themeButton = document.getElementById("scheme-switch");
+    if (themeButton) {
+        // 添加按钮点击动画
+        themeButton.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            themeButton.style.transform = 'scale(1)';
+        }, 100);
     }
 }
 
@@ -104,38 +167,4 @@ function loadButtonScript() {
 loadButtonScript();
 </script>
 
-{import.meta.env.PROD && <script is:inline define:vars={{scriptUrl: url('/pagefind/pagefind.js')}}>
-async function loadPagefind() {
-    try {
-        const response = await fetch(scriptUrl, { method: 'HEAD' });
-        if (!response.ok) {
-            throw new Error(`Pagefind script not found: ${response.status}`);
-        }
-
-        const pagefind = await import(scriptUrl);
-
-        await pagefind.options({
-            excerptLength: 20
-        });
-
-        window.pagefind = pagefind;
-
-        document.dispatchEvent(new CustomEvent('pagefindready'));
-        console.log('Pagefind loaded and initialized successfully, event dispatched.');
-    } catch (error) {
-        console.error('Failed to load Pagefind:', error);
-        window.pagefind = {
-            search: () => Promise.resolve({ results: [] }),
-            options: () => Promise.resolve(),
-        };
-        document.dispatchEvent(new CustomEvent('pagefindloaderror'));
-        console.log('Pagefind load error, event dispatched.');
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadPagefind);
-} else {
-    loadPagefind();
-}
-</script>}
+{import.meta.env.PROD && <script is:inline src="/js/pagefind-loader.js"></script>}

@@ -1,0 +1,68 @@
+/**
+ * DynamicLogo 组件样式
+ * 从 1.md 第 3586 行提取
+ * data-astro-cid-h4ussuxv
+ */
+
+.logo-container[data-astro-cid-h4ussuxv] {
+  max-height: 2rem;
+  display: flex;
+  align-items: center;
+  perspective: 1000px; /* 3D透视效果 */
+}
+
+.logo-container[data-astro-cid-h4ussuxv] img[data-astro-cid-h4ussuxv] {
+  max-height: 2rem;
+  width: auto;
+  -o-object-fit: contain;
+  object-fit: contain;
+}
+
+/* LOGO动画效果 */
+.logo-animated {
+  transform-style: preserve-3d;
+}
+
+.logo-image {
+  transform-origin: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 简单的呼吸动画 */
+@keyframes logoBreath {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* 轻微摇摆动画 */
+@keyframes logoSway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1deg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
+}
+
+/* 动画类 */
+.logo-breath {
+  animation: logoBreath 2s ease-in-out;
+}
+
+.logo-sway {
+  animation: logoSway 1.5s ease-in-out;
+}
+
+/* 悬停效果增强 */
+.logo-container:hover .logo-image {
+  transform: scale(1.05) rotateZ(2deg);
+}

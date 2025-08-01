@@ -1,27 +1,468 @@
+/* 所有 @import 必须在最前面 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+@import './base/reset.css';
+@import './base/typography.css';
+@import './layouts/main-grid.css';
+@import './components/layout.css';
+@import './components/navbar.css';
+@import './components/buttons.css';
+@import './components/logo.css';
+@import './components/search-box.css';
+@import './components/layout-switch.css';
+@import './components/layout-switcher.css';
+@import './components/mobile-navigation.css';
+@import './components/post-card.css';
+@import './components/post-list.css';
+@import './components/infinite-post-list.css';
+@import './components/switchable-post-list.css';
+@import './components/responsive-image.css';
+@import './components/back-to-top.css';
+@import './components/loading-spinner.css';
+@import './components/error-boundary.css';
+@import './components/widget-layout.css';
+@import './components/banner-carousel.css';
+@import './components/universal-post-list.css';
+@import './components/404.css';
+
+/* Tailwind CSS 指令 */
+@tailwind base;
 @tailwind components;
+@tailwind utilities;
 
 @layer components {
-    .card-base {
-        @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition;
+    /* 确保html和body占满全宽 */
+    html, body {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden;
     }
-    h1, h2, h3, h4, h5, h6, p, a, span, li, ul, ol, blockquote, code, pre, table, th, td, strong {
-        @apply transition;
+
+    /* 防止字体加载时的闪动 - 使用透明度而不是visibility */
+    html.fonts-loading {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    html.fonts-loaded {
+        opacity: 1;
+    }
+
+    /* 防止初始化时的内容跳动 */
+    body {
+        /* 移除transform，避免影响fixed定位 */
+        /* transform: translateZ(0); */
+        /* 防止字体渲染导致的布局变化 */
+        font-display: swap;
+        /* 使用其他方式启用硬件加速 */
+        will-change: scroll-position;
+    }
+
+    /* 防止图片加载导致的布局跳动 */
+    img {
+        /* 为图片预留空间 */
+        min-height: 1px;
+        /* 使用GPU加速 */
+        transform: translateZ(0);
+    }
+
+    /* 防止页面初始化时的闪动 */
+    .layout-switching {
+        transition: all 0.3s ease;
+    }
+
+    /* 防止布局切换时的闪动 */
+    [data-layout] {
+        transition: none;
+    }
+
+    [data-layout].layout-switching {
+        transition: all 0.3s ease;
+    }
+
+    /* 磨砂导航栏样式 */
+    #navbar {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    /* 磨砂左侧栏样式 */
+    .fixed.left-0.z-20 {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 1px 0 3px 0 rgba(0, 0, 0, 0.1), 1px 0 2px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    /* 左侧栏滚动条样式 - 默认隐藏，悬停显示 */
+    .sidebar-scroll {
+        overflow-y: auto !important;
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: transparent transparent; /* Firefox - 默认完全透明 */
+        transition: scrollbar-color 0.3s ease;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+        width: 8px;
+        background: transparent;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 4px;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+        background: transparent; /* 默认完全透明 */
+        border-radius: 4px;
+        transition: background 0.3s ease;
+        border: 1px solid transparent;
+        background-clip: content-box;
+    }
+
+    /* 鼠标悬停整个侧边栏时显示滚动条 */
+    .sidebar-scroll:hover {
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent; /* Firefox */
+    }
+
+    .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.5); /* 悬停时显示 */
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(156, 163, 175, 0.8) !important; /* 直接悬停滚动条时更明显 */
+    }
+
+    /* 暗黑模式下的滚动条 */
+    .dark .sidebar-scroll {
+        scrollbar-color: transparent transparent; /* 默认透明 */
+    }
+
+    .dark .sidebar-scroll::-webkit-scrollbar-thumb {
+        background: transparent; /* 默认透明 */
+    }
+
+    .dark .sidebar-scroll:hover {
+        scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+    }
+
+    .dark .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    .dark .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    /* 确保侧边栏容器正确设置 */
+    #sidebar-desktop {
+        height: calc(100vh - 4.5rem) !important;
+        max-height: calc(100vh - 4.5rem) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    #sidebar-mobile {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    /* 侧边栏内部容器 */
+    #sidebar {
+        height: auto;
+        overflow: visible;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 确保侧边栏内容区域正常布局 */
+    #sidebar-sticky {
+        overflow: visible;
+    }
+
+    /* 侧边栏内容自然高度，只有内容多时才滚动 */
+    #sidebar-desktop #sidebar {
+        min-height: auto;
+    }
+
+    /* 确保滚动条默认隐藏，悬停显示 */
+    #sidebar-desktop {
+        scrollbar-width: thin !important;
+        scrollbar-color: transparent transparent !important; /* 默认完全透明 */
+    }
+
+    #sidebar-desktop::-webkit-scrollbar {
+        width: 8px !important;
+        background: transparent !important;
+    }
+
+    #sidebar-desktop::-webkit-scrollbar-thumb {
+        background: transparent !important; /* 默认完全透明 */
+        border-radius: 4px !important;
+        transition: background 0.3s ease !important;
+    }
+
+    /* 悬停时显示滚动条 */
+    #sidebar-desktop:hover {
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent !important;
+    }
+
+    #sidebar-desktop:hover::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.5) !important;
+    }
+
+    #sidebar-desktop::-webkit-scrollbar-thumb:hover {
+        background: rgba(156, 163, 175, 0.8) !important;
+    }
+
+    /* 移动端侧边栏滚动样式 */
+    #sidebar-mobile {
+        scrollbar-width: thin !important;
+        scrollbar-color: transparent transparent !important;
+    }
+
+    #sidebar-mobile::-webkit-scrollbar {
+        width: 8px !important;
+        background: transparent !important;
+    }
+
+    #sidebar-mobile::-webkit-scrollbar-thumb {
+        background: transparent !important;
+        border-radius: 4px !important;
+        transition: background 0.3s ease !important;
+    }
+
+    #sidebar-mobile:hover {
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent !important;
+    }
+
+    #sidebar-mobile:hover::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.5) !important;
+    }
+
+    #sidebar-mobile::-webkit-scrollbar-thumb:hover {
+        background: rgba(156, 163, 175, 0.8) !important;
+    }
+
+    /* 移动端侧边栏内容自然高度 */
+    #sidebar-mobile #sidebar {
+        min-height: auto;
+    }
+
+    /* 暗色主题下的滚动条 */
+    .dark .sidebar-scroll:hover {
+        scrollbar-color: rgba(75, 85, 99, 0.5) transparent; /* Firefox */
+    }
+
+    .dark .sidebar-scroll:hover::-webkit-scrollbar-thumb {
+        background: rgba(75, 85, 99, 0.5); /* 深灰色 */
+    }
+
+    .dark .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(75, 85, 99, 0.8) !important; /* 悬停时更深 */
+    }
+
+    /* 确保左侧栏可以正常交互 */
+    #sidebar-desktop, #sidebar-mobile {
+        pointer-events: auto !important;
+        user-select: text !important;
+    }
+
+    #sidebar-desktop *, #sidebar-mobile * {
+        pointer-events: auto;
+        user-select: text;
+    }
+
+    /* 移动端侧边栏样式 */
+    #mobile-sidebar-toggle {
+        transition: all 0.2s ease;
+    }
+
+    #mobile-sidebar-toggle:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    #mobile-sidebar-toggle:active {
+        transform: scale(0.95);
+    }
+
+    /* 在移动视图下，将折叠按钮移动到导航栏内LOGO左侧 */
+    @media (max-width: 1199px) {
+        #mobile-sidebar-toggle {
+            position: fixed !important;
+            top: 0.75rem !important;
+            left: 1rem !important;
+            z-index: 60 !important;
+            width: 2.75rem !important;
+            height: 2.75rem !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        #mobile-sidebar-toggle:hover {
+            background: var(--btn-regular-bg-hover) !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        /* 当折叠按钮显示时，让导航栏的LOGO容器向右移动 */
+        #navbar-logo {
+            margin-left: 3rem !important;
+            transition: margin-left 0.2s ease !important;
+        }
+    }
+
+    /* 移动端侧边栏遮罩层 */
+    #sidebar-overlay {
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+
+    /* 移动端侧边栏主体 */
+    #sidebar-mobile {
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 确保侧边栏固定定位 */
+    #sidebar-desktop {
+        position: fixed !important;
+        left: 0 !important;
+        z-index: 40 !important;
+        width: 280px !important;
+        top: 4.5rem !important;
+        bottom: 0 !important;
+        height: calc(100vh - 4.5rem) !important;
+    }
+
+    /* 侧边栏专用隐藏类 - 保持fixed定位 */
+    .sidebar-hidden {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .sidebar-visible {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    /* 响应式主内容区域调整 */
+    /* 当窗口宽度足够时显示固定侧边栏 */
+    @media (min-width: 1200px) {
+        #sidebar-desktop {
+            display: block !important;
+        }
+
+        #mobile-sidebar-toggle {
+            display: none !important;
+        }
+
+        /* 导航条在除左侧栏外的剩余空间中居中 */
+        #nav-center-container {
+            margin-left: 280px;
+            width: calc(100vw - 280px);
+            justify-content: center;
+        }
+
+        /* 主内容区域 - 正确逻辑：整个页面100%宽度，用padding-left避开侧边栏 */
+        #main-grid {
+            /* 整个页面宽度 */
+            width: 100%;
+            margin-left: 0;
+            margin-right: 0;
+            /* 用padding-left为侧边栏留出空间 */
+            padding-left: 280px;
+            padding-right: 1rem;
+            padding-top: 2rem;
+            max-width: none;
+        }
+
+        /* 内容容器在padding区域内居中 */
+        #main-grid > main {
+            max-width: var(--page-width);
+            margin: 0 auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+
+    /* 当窗口宽度不够时隐藏固定侧边栏，显示切换按钮 */
+    @media (max-width: 1499px) {
+        #sidebar-desktop {
+            /* 不再强制隐藏，让JavaScript控制 */
+            /* visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important; */
+        }
+
+        #mobile-sidebar-toggle {
+            display: flex !important;
+        }
+
+        /* 小屏幕时导航和主内容都恢复正常居中 */
+        #nav-center-container {
+            margin-left: 0;
+            transform: none;
+            justify-content: center;
+        }
+
+        /* 小屏幕时移除侧边栏的padding */
+        #main-grid {
+            width: 100%;
+            margin-left: 0;
+            margin-right: 0;
+            /* 小屏幕时不需要为侧边栏留空间 */
+            padding-left: 1rem;
+            padding-right: 1rem;
+            padding-top: 2rem;
+        }
+
+        /* 小屏幕时内容容器也要调整 */
+        #main-grid > main {
+            max-width: var(--page-width);
+            margin: 0 auto;
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+
+
+    .card-base {
+        @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)];
+    }
+    /* 只对需要动画的元素应用transition - 加快速度 */
+    a, button {
+        @apply transition-colors duration-100;
     }
     .card-shadow {
         @apply drop-shadow-[0_2px_4px_rgba(0,0,0,0.005)]
     }
     .expand-animation {
-        @apply relative before:ease-out before:transition active:bg-none hover:before:bg-[var(--btn-plain-bg-hover)] active:before:bg-[var(--btn-plain-bg-active)] z-0
-        before:absolute before:rounded-[inherit] before:inset-0 before:scale-[0.85] hover:before:scale-100 before:-z-10
+        @apply relative before:ease-out active:bg-none hover:before:bg-[var(--btn-plain-bg-hover)] active:before:bg-[var(--btn-plain-bg-active)] z-0
+        before:absolute before:rounded-[inherit] before:inset-0 before:scale-[0.85] hover:before:scale-100 before:-z-10;
+        &:before {
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
     }
     .link {
-        @apply transition rounded-md p-1 -m-1 expand-animation;
+        @apply rounded-md p-1 -m-1 expand-animation;
+        transition: color 0.2s ease;
     }
     .link-lg {
-        @apply transition rounded-md p-1.5 -m-1.5 expand-animation;
+        @apply rounded-md p-1.5 -m-1.5 expand-animation;
+        transition: color 0.2s ease;
     }
     .float-panel {
-        @apply top-[5.25rem] rounded-[var(--radius-large)] overflow-hidden bg-[var(--float-panel-bg)] transition shadow-xl dark:shadow-none
+        @apply top-[5.25rem] rounded-[var(--radius-large)] overflow-hidden bg-[var(--float-panel-bg)] shadow-xl dark:shadow-none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
     }
     .float-panel-closed {
         @apply -translate-y-1 opacity-0 pointer-events-none
@@ -31,15 +472,17 @@
     }
 
     .btn-card {
-        @apply transition flex items-center justify-center bg-[var(--card-bg)] hover:bg-[var(--btn-card-bg-hover)]
-        active:bg-[var(--btn-card-bg-active)]
+        @apply flex items-center justify-center bg-[var(--card-bg)] hover:bg-[var(--btn-card-bg-hover)]
+        active:bg-[var(--btn-card-bg-active)];
+        transition: background-color 0.2s ease;
     }
     .btn-card.disabled {
         @apply pointer-events-none text-black/10 dark:text-white/10
     }
     .btn-plain {
-        @apply transition relative flex items-center justify-center bg-none
+        @apply relative flex items-center justify-center bg-none
         text-black/75 hover:text-[var(--primary)] dark:text-white/75 dark:hover:text-[var(--primary)];
+        transition: color 0.2s ease, background-color 0.2s ease;
         &:not(.scale-animation) {
             @apply hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
         }
@@ -51,23 +494,18 @@
         }
     }
     .btn-regular {
-        @apply transition flex items-center justify-center bg-[var(--btn-regular-bg)] hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)]
-        text-[var(--btn-content)] dark:text-white/75
+        @apply flex items-center justify-center bg-[var(--btn-regular-bg)] hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)]
+        text-[var(--btn-content)] dark:text-white/75;
+        transition: background-color 0.2s ease;
     }
 
     .link-underline {
-        @apply transition underline decoration-2 decoration-dashed decoration-[var(--link-underline)]
-        hover:decoration-[var(--link-hover)] active:decoration-[var(--link-active)] underline-offset-[0.25rem]
+        @apply underline decoration-2 decoration-dashed decoration-[var(--link-underline)]
+        hover:decoration-[var(--link-hover)] active:decoration-[var(--link-active)] underline-offset-[0.25rem];
+        transition: text-decoration-color 0.2s ease;
     }
 
-    .toc-hide,
-    .toc-not-ready {
-        @apply opacity-0 pointer-events-none
-    }
 
-    #toc-inner-wrapper {
-        mask-image: linear-gradient(to bottom, transparent 0%, black 2rem, black calc(100% - 2rem), transparent 100%);
-    }
 
     .hide-scrollbar {
         scrollbar-width: none;
@@ -94,12 +532,50 @@
     }
 
     .meta-icon {
-        @apply w-8 h-8 transition rounded-md flex items-center justify-center bg-[var(--btn-regular-bg)]
-        text-[var(--btn-content)] mr-2
+        @apply w-8 h-8 rounded-md flex items-center justify-center bg-[var(--btn-regular-bg)]
+        text-[var(--btn-content)] mr-2;
+        transition: background-color 0.2s ease;
+    }
+
+    /* PostMeta容器默认样式 */
+    .post-meta-container {
+        color: var(--text-50);
+    }
+
+    /* PostMeta组件中分类和标签的统一样式 - 使用最高优先级的选择器 */
+    div.post-meta-container a.category-meta-link,
+    div.post-meta-container a.tag-meta-link,
+    .post-meta-container a.category-meta-link,
+    .post-meta-container a.tag-meta-link,
+    a.category-meta-link,
+    a.tag-meta-link {
+        color: var(--text-75) !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        transition: color 0.2s ease !important;
+    }
+
+    div.post-meta-container a.category-meta-link:hover,
+    div.post-meta-container a.tag-meta-link:hover,
+    .post-meta-container a.category-meta-link:hover,
+    .post-meta-container a.tag-meta-link:hover,
+    a.category-meta-link:hover,
+    a.tag-meta-link:hover {
+        color: var(--primary) !important;
+    }
+
+    /* 确保PostMeta中的其他文本使用默认颜色 */
+    .post-meta-container .text-50 {
+        color: var(--text-50) !important;
     }
     .with-divider {
         @apply before:content-['/'] before:ml-1.5 before:mr-1.5 before:text-[var(--meta-divider)] before:text-sm
-        before:font-medium before:first-of-type:hidden before:transition
+        before:font-medium before:first-of-type:hidden;
+        &:before {
+            transition: color 0.2s ease;
+        }
     }
 
     .btn-regular-dark {
@@ -110,11 +586,157 @@
     .btn-regular-dark.success {
         @apply bg-[oklch(0.75_0.14_var(--hue))] dark:bg-[oklch(0.75_0.14_var(--hue))]
     }
+
+    /* LOGO 主题切换样式 */
+    .logo-light {
+        display: block !important;
+    }
+
+    .dark .logo-light {
+        display: none !important;
+    }
+
+    .logo-dark {
+        display: none !important;
+    }
+
+    .dark .logo-dark {
+        display: block !important;
+    }
+
+    .logo-single {
+        display: block !important;
+    }
+
+    /* Markdown styles */
+    .custom-md {
+        h1 {
+            @apply text-3xl;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            .anchor {
+                @apply -m-0.5 ml-[0.2ch] p-0.5 select-none opacity-0 no-underline !important;
+                transition: opacity 0.2s ease;
+
+                .anchor-icon {
+                    @apply mx-[0.45ch] !important;
+                }
+            }
+
+            &:hover {
+                .anchor {
+                    @apply opacity-100 !important;
+                }
+            }
+        }
+
+        a:not(.no-styling) {
+            @apply relative bg-none link font-medium text-[var(--primary)]
+            underline decoration-[var(--link-underline)] decoration-1 decoration-dashed underline-offset-4;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+
+            &:hover, &:active {
+                @apply decoration-transparent;
+                background: var(--btn-plain-bg-hover);
+                border-bottom: 1px dashed var(--link-hover);
+                text-decoration: none;
+            }
+        }
+
+        code {
+            @apply bg-[var(--inline-code-bg)] text-[var(--inline-code-color)] px-1 py-0.5 rounded-md overflow-hidden;
+
+            font-family: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            &:before {
+                content:none;
+            }
+            &:after {
+                content:none;
+            }
+
+            counter-reset: line;
+            span.line {
+                &:before {
+                    @apply text-white/25 mr-4 w-4 inline-block;
+                    content: counter(line);
+                    counter-increment: line;
+                    direction: rtl;
+                }
+                &:last-child:empty, &:last-child:has(> span:empty:only-child) {
+                    display: none;
+                }
+            }
+        }
+
+        .copy-btn {
+            all: initial;
+            @apply btn-regular-dark opacity-0 shadow-lg shadow-black/50 absolute active:scale-90 h-8 w-8 top-3 right-3 text-sm rounded-lg z-20 cursor-pointer;
+            transition: opacity 0.2s ease, transform 0.15s ease;
+        }
+        .frame:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .copy-btn-icon {
+            @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 fill-white pointer-events-none;
+            transition: transform 0.2s ease;
+        }
+        .copy-btn .copy-icon {
+            @apply opacity-100 fill-white dark:fill-white/75;
+        }
+        .copy-btn.success .copy-icon {
+            @apply opacity-0 fill-[var(--deep-text)]
+        }
+        .copy-btn .success-icon {
+            @apply opacity-0 fill-white;
+        }
+        .copy-btn.success .success-icon {
+            @apply opacity-100
+        }
+
+        .expressive-code {
+            @apply my-4;
+            ::selection {
+                @apply bg-[var(--codeblock-selection)];
+            }
+        }
+
+        ul, ol {
+            li::marker {
+                @apply text-[var(--primary)];
+            }
+        }
+
+        blockquote {
+            @apply not-italic border-transparent relative;
+            font-weight: inherit;
+
+            &:before {
+                @apply content-[''] absolute -left-1 block bg-[var(--btn-regular-bg)] h-full w-1 rounded-full;
+                transition: background-color 0.2s ease;
+            }
+
+            /* Remove the double quotes from default styles */
+            p:before, p:after {
+                @apply content-none;
+            }
+        }
+
+        .katex-display-container {
+            max-width: 100%;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+    }
 }
 
 .custom-md img, #post-cover img {
     @apply cursor-zoom-in
 }
+
+/* Banner样式已删除 */
 
 ::selection {
     background-color: var(--selection-bg)
@@ -122,20 +744,57 @@
 
 .dash-line {
     position: relative;
+    z-index: 1;
 }
 
 .dash-line::before {
     content: "";
     position: absolute;
-    width: 10%;
-    height: 100%;
+    width: 2px;
+    height: calc(100% - 8px);
     left: calc(50% - 1px);
+    top: 4px;
     border-left: 2px dashed var(--line-color);
     pointer-events: none;
-    transition: all 0.3s;
-    transform: translateY(-50%);
+    transition: border-color 0.2s ease;
+    z-index: 0;
 }
 
 .collapsed {
     height: var(--collapsedHeight);
+}
+
+/* Footer样式 - 确保显示在正确位置 */
+.footer-content {
+    margin-top: auto;
+    padding-top: 2rem;
+}
+
+/* 确保页面高度正确计算，避免不必要的滚动条 */
+html, body {
+    height: auto;
+    overflow-x: hidden;
+}
+
+/* 确保主内容区域使用flex布局 */
+#main-grid {
+    min-height: calc(100vh - 4.5rem);
+    display: flex;
+    flex-direction: column;
+    padding-top: 2rem;
+}
+
+#main-grid main {
+    flex: 1;
+    min-height: 0; /* 防止flex子元素溢出 */
+    width: 100%; /* 确保主内容占满容器宽度 */
+}
+
+
+
+/* 确保页面高度扩展元素完全隐藏 */
+#page-height-extend.hidden {
+    display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }

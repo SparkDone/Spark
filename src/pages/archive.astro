@@ -1,14 +1,20 @@
 ---
+// 混合模式：归档页面静态预渲染
+export const prerender = true;
+
 import ArchivePanel from "@components/ArchivePanel.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { getSortedPosts } from "../utils/content-utils";
+import { getSortedPosts } from "../utils/hybrid-content-utils";
 
 const sortedPosts = await getSortedPosts();
 ---
 
 <MainGridLayout title={i18n(I18nKey.archive)}>
+    <!-- 为 SwupA11yPlugin 添加主标题 -->
+    <h1 class="sr-only">{i18n(I18nKey.archive)}</h1>
+
     <ArchivePanel sortedPosts={sortedPosts} client:only="svelte"></ArchivePanel>
 </MainGridLayout>
 

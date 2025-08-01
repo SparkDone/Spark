@@ -10,13 +10,24 @@ interface Props {
 	slug: string;
 	pubDate: Date;
 	class: string;
+	author?: string | { name: string; [key: string]: any };
 }
 
-const { title, pubDate } = Astro.props;
+const { title, pubDate, author } = Astro.props;
 const className = Astro.props.class;
 const profileConf = profileConfig;
 const licenseConf = licenseConfig;
 const postUrl = decodeURIComponent(Astro.url.toString());
+
+// 获取作者名称，优先使用传入的作者信息，否则使用配置文件中的名称
+const authorName = (() => {
+	if (typeof author === 'string') {
+		return author;
+	} else if (author && typeof author === 'object' && author.name) {
+		return author.name;
+	}
+	return profileConf.name;
+})();
 ---
 <div class={`relative transition overflow-hidden bg-[var(--license-block-bg)] py-5 px-6 ${className}`}>
     <div class="transition font-bold text-black/75 dark:text-white/75">
@@ -28,7 +39,7 @@ const postUrl = decodeURIComponent(Astro.url.toString());
     <div class="flex gap-6 mt-2">
         <div>
             <div class="transition text-black/30 dark:text-white/30 text-sm">{i18n(I18nKey.author)}</div>
-            <div class="transition text-black/75 dark:text-white/75 line-clamp-2">{profileConf.name}</div>
+            <div class="transition text-black/75 dark:text-white/75 line-clamp-2">{authorName}</div>
         </div>
         <div>
             <div class="transition text-black/30 dark:text-white/30 text-sm">{i18n(I18nKey.publishedAt)}</div>

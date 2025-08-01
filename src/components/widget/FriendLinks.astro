@@ -1,0 +1,70 @@
+---
+import { Icon } from "astro-icon/components";
+import { getFriendLinks } from "../../lib/strapi";
+import WidgetLayout from "./WidgetLayout.astro";
+
+interface Props {
+  class?: string;
+  style?: string;
+}
+
+const { class: className, style } = Astro.props;
+
+// 获取友情链接数据
+let friendLinks: any[] = [];
+
+try {
+  // 使用配置中的Strapi URL
+  const strapiUrl = import.meta.env.STRAPI_URL || 'http://localhost:1337';
+  const url = `${strapiUrl}/api/friend-links?populate=*&sort=sort_order:asc,createdAt:desc&filters[publishedAt][$notNull]=true`;
+  const response = await fetch(url);
+  const data = await response.json();
+
+  if (data && data.data && Array.isArray(data.data)) {
+    friendLinks = data.data;
+  }
+} catch (error) {
+  console.error('获取友情链接失败:', error);
+}
+
+// 如果友情链接数量较多，启用折叠功能
+const isCollapsed = friendLinks.length >= 10;
+const COLLAPSED_HEIGHT = "12rem";
+---
+
+{friendLinks.length > 0 && (
+  <WidgetLayout name="友情链接" id="friend-links" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT} class={className} style={style}>
+    {friendLinks.map((link) => {
+      return (
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`访问 ${link.name}${link.description ? ': ' + link.description : ''}`}
+        >
+          <button
+            class="w-full h-10 rounded-lg bg-none hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition-all pl-2 hover:pl-3 text-neutral-700 hover:text-[var(--primary)] dark:text-neutral-300 dark:hover:text-[var(--primary)] mb-1"
+          >
+            <div class="flex items-center justify-between relative mr-2">
+              <div class="flex items-center overflow-hidden text-left whitespace-nowrap overflow-ellipsis text-sm">
+                {link.icon ? (
+                  <Icon
+                    name={link.icon}
+                    class="w-4 h-4 mr-2 flex-shrink-0 text-[var(--primary)]"
+                  />
+                ) : (
+                  <div class="w-4 h-4 rounded-full bg-[var(--primary)] flex items-center justify-center mr-2 flex-shrink-0">
+                    <span class="text-white text-xs font-bold">
+                      {link.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <span class="truncate">{link.name}</span>
+              </div>
+            </div>
+          </button>
+        </a>
+      );
+    })}
+  </WidgetLayout>
+)}

@@ -1,0 +1,43 @@
+/**
+ * LoadingSpinner 组件样式
+ * 从 1.md 提取
+ * astro-cid: gc7qpd7x
+ */
+
+/**
+  * 组件样式
+  * astro-cid: gc7qpd7x
+  */
+  .loading-container[data-astro-cid-gc7qpd7x]  {
+  min-height:60px
+  }
+  @keyframes bounce  {
+  0%,
+  80%,
+  100%  {
+  transform:scale(0)
+  }
+  40%  {
+  transform:scale(1)
+  }
+  }
+  .animate-bounce[data-astro-cid-gc7qpd7x]  {
+  animation:bounce 1.4s infinite ease-in-out both
+  }
+  @media (max-width: 640px)  {
+  .loading-container[data-astro-cid-gc7qpd7x]  {
+  min-height:40px
+  }
+  }
+  @media (prefers-color-scheme: dark)  {
+  .loading-container[data-astro-cid-gc7qpd7x]  {
+  color-scheme:dark
+  }
+  }
+  @media (prefers-reduced-motion: reduce)  {
+  .animate-spin[data-astro-cid-gc7qpd7x],
+  .animate-bounce[data-astro-cid-gc7qpd7x],
+  .animate-pulse[data-astro-cid-gc7qpd7x]  {
+  animation:none
+  }
+  }

@@ -1,16 +1,32 @@
 ---
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
-import { getCategoryList } from "../../utils/content-utils";
+import { getCategoryList } from "../../utils/hybrid-content-utils";
+import { getAllCategories } from "../../lib/strapi";
 import ButtonLink from "../control/ButtonLink.astro";
 import WidgetLayout from "./WidgetLayout.astro";
 
 const categories = await getCategoryList();
 
-const COLLAPSED_HEIGHT = "7.5rem";
-const COLLAPSE_THRESHOLD = 5;
+// 获取 Strapi 分类数据以获取图标信息
+let strapiCategories: any[] = [];
+try {
+  const response = await getAllCategories();
+  if (response && response.data && Array.isArray(response.data)) {
+    strapiCategories = response.data;
+  }
+} catch (error) {
+  console.error('获取 Strapi 分类失败:', error);
+}
 
-const isCollapsed = categories.length >= COLLAPSE_THRESHOLD;
+// 创建分类名称到图标的映射
+const categoryIconMap = new Map();
+strapiCategories.forEach(cat => {
+  categoryIconMap.set(cat.name, cat.icon);
+});
+
+// 禁用折叠功能，始终显示全部分类
+const isCollapsed = false;
 
 interface Props {
 	class?: string;
@@ -20,16 +36,20 @@ const className = Astro.props.class;
 const style = Astro.props.style;
 ---
 
-<WidgetLayout name={i18n(I18nKey.categories)} id="categories" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT}
+<WidgetLayout name={i18n(I18nKey.categories)} id="categories" isCollapsed={isCollapsed}
                 class={className} style={style}
 >
-    {categories.map((c) =>
-        <ButtonLink
-            url={c.url}
-            badge={String(c.count)}
-            label={`View all posts in the ${c.name.trim()} category`}
-        >
-            {c.name.trim()}
-        </ButtonLink>
-    )}
+    {categories.map((c) => {
+        const categoryIcon = categoryIconMap.get(c.name.trim());
+        return (
+            <ButtonLink
+                url={c.url}
+                badge={String(c.count)}
+                label={`View all posts in the ${c.name.trim()} category`}
+                icon={categoryIcon}
+            >
+                {c.name.trim()}
+            </ButtonLink>
+        );
+    })}
 </WidgetLayout>

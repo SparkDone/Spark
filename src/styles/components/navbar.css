@@ -1,0 +1,400 @@
+/**
+ * Navbar Component Styles
+ * 导航栏组件样式
+ */
+
+/* 确保导航栏固定定位 */
+#navbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 50 !important;
+  width: 100% !important;
+}
+
+/* 主导航栏 */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-body);
+  border-bottom: 1px solid var(--line-divider);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.navbar.transparent {
+  background: rgba(var(--bg-body-rgb), 0.8);
+}
+
+.navbar.hidden {
+  transform: translateY(-100%);
+}
+
+/* 导航栏容器 */
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--content-padding);
+  height: var(--navbar-height);
+}
+
+/* 导航栏品牌区域 */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: var(--text-90);
+  font-weight: 700 !important;
+  font-size: 1.25rem;
+  transition: color 0.2s ease;
+}
+
+.navbar-brand:hover {
+  color: var(--primary);
+}
+
+.navbar-brand img,
+.navbar-brand svg {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.375rem;
+}
+
+/* 导航菜单 */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-nav.mobile {
+  display: none;
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-body);
+  flex-direction: column;
+  padding: 2rem;
+  gap: 1rem;
+  z-index: 99;
+  border-top: 1px solid var(--line-divider);
+}
+
+.navbar-nav.mobile.open {
+  display: flex;
+}
+
+/* 导航项目 */
+.navbar-item {
+  position: relative;
+}
+
+.navbar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: var(--text-75);
+  font-weight: 500;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+.navbar-link:hover {
+  color: var(--primary);
+}
+
+.navbar-link.active {
+  color: var(--primary);
+}
+
+/* 简约的底部指示器 */
+.navbar-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 1px;
+}
+
+/* 点击时的简单反馈 */
+.navbar-link:active {
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+.navbar-link svg {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.7;
+}
+
+/* 下拉菜单 */
+.navbar-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: var(--bg-body);
+  border: 1px solid var(--line-divider);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-lg);
+  padding: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.navbar-item:hover .navbar-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.navbar-dropdown-item {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  color: var(--text-75);
+  transition: all 0.2s ease;
+}
+
+.navbar-dropdown-item:hover {
+  color: var(--text-90);
+  background: var(--btn-plain-bg-hover);
+}
+
+/* 导航栏操作区域 */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 搜索按钮 */
+.navbar-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line-divider);
+  border-radius: 0.5rem;
+  background: var(--bg-body);
+  color: var(--text-60);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  min-width: 200px;
+  justify-content: flex-start;
+}
+
+.navbar-search-btn:hover {
+  border-color: var(--primary);
+  color: var(--text-75);
+}
+
+.navbar-search-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.navbar-search-text {
+  flex: 1;
+  text-align: left;
+}
+
+.navbar-search-kbd {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.375rem;
+  background: var(--btn-plain-bg);
+  border-radius: 0.25rem;
+  color: var(--text-60);
+}
+
+/* 主题切换按钮 */
+.navbar-theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-75);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navbar-theme-btn:hover {
+  color: var(--text-90);
+  background: var(--btn-plain-bg-hover);
+}
+
+.navbar-theme-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* 移动端菜单按钮 */
+.navbar-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-75);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navbar-menu-btn:hover {
+  color: var(--text-90);
+  background: var(--btn-plain-bg-hover);
+}
+
+.navbar-menu-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* 面包屑导航 */
+.navbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-60);
+  margin-left: 1rem;
+}
+
+.navbar-breadcrumb-item {
+  color: var(--text-60);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.navbar-breadcrumb-item:hover {
+  color: var(--text-75);
+}
+
+.navbar-breadcrumb-item.active {
+  color: var(--text-90);
+  font-weight: 500;
+}
+
+.navbar-breadcrumb-separator {
+  color: var(--text-40);
+  font-size: 0.75rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .navbar-search-btn {
+    min-width: 150px;
+  }
+  
+  .navbar-search-text {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 0 1rem;
+  }
+  
+  .navbar-nav:not(.mobile) {
+    display: none;
+  }
+  
+  .navbar-menu-btn {
+    display: flex;
+  }
+  
+  .navbar-search-btn {
+    width: 2.5rem;
+    min-width: auto;
+    justify-content: center;
+  }
+  
+  .navbar-search-text,
+  .navbar-search-kbd {
+    display: none;
+  }
+  
+  .navbar-breadcrumb {
+    display: none;
+  }
+}
+
+/* 滚动时的导航栏效果 */
+.navbar.scrolled {
+  box-shadow: var(--shadow-sm);
+}
+
+/* 导航栏加载动画 */
+.navbar.loading {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.navbar.loaded {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+/* 导航栏指示器 */
+.navbar-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--primary);
+  transition: all 0.3s ease;
+  border-radius: 1px;
+}
+
+/* 移动端导航遮罩 */
+.navbar-overlay {
+  display: none;
+  position: fixed;
+  top: var(--navbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 98;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navbar-overlay.open {
+  display: block;
+  opacity: 1;
+}

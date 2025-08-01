@@ -1,0 +1,201 @@
+---
+import "../../styles/components/responsive-image.css";
+/**
+ * 响应式图片组件
+ * 支持懒加载、多种尺寸、占位符和错误处理
+ */
+
+interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  sizes?: string;
+  loading?: 'lazy' | 'eager';
+  priority?: boolean;
+  placeholder?: 'blur' | 'empty' | 'skeleton';
+  fallback?: string;
+  class?: string;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
+  rounded?: boolean;
+  shadow?: boolean;
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+  loading = 'lazy',
+  priority = false,
+  placeholder = 'blur',
+  fallback = '/images/placeholder.jpg',
+  class: className = '',
+  objectFit = 'cover',
+  rounded = false,
+  shadow = false
+} = Astro.props;
+
+// 生成不同尺寸的图片URL（如果支持）
+const generateSrcSet = (baseSrc: string) => {
+  const sizes = [320, 640, 768, 1024, 1280, 1920];
+  return sizes.map(size => `${baseSrc}?w=${size} ${size}w`).join(', ');
+};
+
+const imageClasses = [
+  'responsive-image',
+  'transition-all duration-300',
+  objectFit === 'cover' ? 'object-cover' : 
+  objectFit === 'contain' ? 'object-contain' :
+  objectFit === 'fill' ? 'object-fill' :
+  objectFit === 'scale-down' ? 'object-scale-down' : 'object-none',
+  rounded ? 'rounded-lg' : '',
+  shadow ? 'shadow-lg hover:shadow-xl' : '',
+  className
+].filter(Boolean).join(' ');
+
+const containerClasses = [
+  'relative overflow-hidden',
+  'bg-gray-100 dark:bg-gray-800',
+  rounded ? 'rounded-lg' : ''
+].filter(Boolean).join(' ');
+---
+
+<div class={containerClasses}>
+  <!-- 占位符 -->
+  {placeholder === 'skeleton' && (
+    <div class="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-pulse skeleton-placeholder">
+    </div>
+  )}
+  
+  {placeholder === 'blur' && (
+    <div class="absolute inset-0 bg-gray-200 dark:bg-gray-700 blur-placeholder">
+      <div class="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700 opacity-50"></div>
+    </div>
+  )}
+
+  <!-- 主图片 -->
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    sizes={sizes}
+    srcset={generateSrcSet(src)}
+    loading={priority ? 'eager' : loading}
+    decoding="async"
+    class={imageClasses}
+    data-fallback={fallback}
+    onload="this.parentElement.querySelector('.skeleton-placeholder, .blur-placeholder')?.remove(); this.classList.add('loaded')"
+    onerror="this.src = this.dataset.fallback; this.classList.add('error')"
+  />
+
+  <!-- 加载状态指示器 -->
+  <div class="absolute inset-0 flex items-center justify-center loading-indicator">
+    <div class="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+  </div>
+</div>
+
+
+
+<script>
+  // 图片懒加载优化 - 生产环境性能优化版本
+  function initImageLazyLoading() {
+    // 使用 Intersection Observer 进行更精确的懒加载
+    if ('IntersectionObserver' in window) {
+      const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target as HTMLImageElement;
+
+            // 使用 requestIdleCallback 优化性能
+            const loadImage = () => {
+              const tempImg = new Image();
+              tempImg.onload = () => {
+                img.src = tempImg.src;
+                img.classList.add('loaded');
+              };
+              tempImg.onerror = () => {
+                img.src = img.dataset.fallback || '/images/placeholder.jpg';
+                img.classList.add('error');
+              };
+              tempImg.src = img.dataset.src || img.src;
+            };
+
+            // 在浏览器空闲时加载图片，避免阻塞主线程
+            if ('requestIdleCallback' in window) {
+              requestIdleCallback(loadImage, { timeout: 2000 });
+            } else {
+              setTimeout(loadImage, 0);
+            }
+
+            observer.unobserve(img);
+          }
+        });
+      }, {
+        rootMargin: '100px 0px', // 增加预加载距离，减少频繁触发
+        threshold: 0.01 // 降低阈值，减少计算
+      });
+
+      // 批量观察懒加载图片，避免频繁DOM查询
+      const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+      lazyImages.forEach(img => {
+        imageObserver.observe(img);
+      });
+    }
+
+    // 使用事件委托优化图片错误处理
+    document.addEventListener('error', function(e) {
+      const img = e.target as HTMLImageElement;
+      if (img.tagName === 'IMG' && img.classList.contains('responsive-image')) {
+        if (!img.classList.contains('fallback-loaded')) {
+          img.src = img.dataset.fallback || '/images/placeholder.jpg';
+          img.classList.add('fallback-loaded', 'error');
+        }
+      }
+    }, true);
+
+    // 使用事件委托优化图片加载成功处理
+    document.addEventListener('load', function(e) {
+      const img = e.target as HTMLImageElement;
+      if (img.tagName === 'IMG' && img.classList.contains('responsive-image')) {
+        img.classList.add('loaded');
+        // 移除占位符
+        const placeholder = img.parentElement?.querySelector('.skeleton-placeholder, .blur-placeholder');
+        if (placeholder) {
+          placeholder.style.opacity = '0';
+          setTimeout(() => placeholder.remove(), 300);
+        }
+      }
+    }, true);
+  }
+
+  // 延迟初始化，避免阻塞页面渲染
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initImageLazyLoading, 100);
+    });
+  } else {
+    setTimeout(initImageLazyLoading, 100);
+  }
+
+  // 预加载关键图片
+  function preloadCriticalImages() {
+    const criticalImages = document.querySelectorAll('img[data-priority="true"]');
+    criticalImages.forEach(img => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = (img as HTMLImageElement).src;
+      document.head.appendChild(link);
+    });
+  }
+
+  // 页面加载完成后预加载关键图片
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', preloadCriticalImages);
+  } else {
+    preloadCriticalImages();
+  }
+</script>

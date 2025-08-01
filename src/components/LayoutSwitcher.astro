@@ -1,0 +1,57 @@
+---
+/**
+ * 简化的布局切换按钮组件
+ * JavaScript逻辑已移至独立文件
+ */
+
+import "../styles/components/layout-switcher.css";
+
+export interface Props {
+  className?: string;
+  defaultLayout?: 'grid' | 'masonry';
+  targetSelector?: string;
+}
+
+const {
+  className = '',
+  defaultLayout = 'grid',
+  targetSelector = '.universal-post-list'
+} = Astro.props;
+---
+
+<div
+  class={`layout-switcher ${className}`}
+  data-default-layout={defaultLayout}
+  data-target-selector={targetSelector}
+>
+
+
+  <button
+    class="layout-switch-btn"
+    data-layout="grid"
+    data-active={defaultLayout === 'grid'}
+    title="网格视图"
+    type="button"
+  >
+    <svg class="layout-icon" fill="currentColor" viewBox="0 0 20 20">
+      <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+    </svg>
+  </button>
+
+  <button
+    class="layout-switch-btn"
+    data-layout="masonry"
+    data-active={defaultLayout === 'masonry'}
+    title="列表模式"
+    type="button"
+  >
+    <svg class="layout-icon" fill="currentColor" viewBox="0 0 20 20">
+      <path d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 8a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 12a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 16a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+  // 引入布局切换器脚本
+  import('../scripts/layout-switcher.js');
+</script>

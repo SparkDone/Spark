@@ -1,0 +1,132 @@
+---
+/**
+ * 简洁优雅的404错误页面
+ */
+
+// 静态预渲染404页面
+export const prerender = true;
+
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import "../styles/components/404.css";
+
+
+// const banner = await getBannerForPage('404', '404');
+
+const pageTitle = "页面未找到 - 404";
+const pageDescription = "抱歉，您访问的页面不存在。";
+---
+
+<MainGridLayout title={pageTitle} description={pageDescription}>
+  <!-- 主内容区域 - 使用与其他页面一致的圆角设计 -->
+  <div class="w-full min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-12">
+    <!-- 主内容容器 - 添加圆角和背景 -->
+    <div class="max-w-4xl mx-auto w-full">
+      <div class="card-base page-404-card rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] p-8 md:p-12 text-center shadow-lg">
+
+        <!-- 404图标和数字 -->
+        <div class="mb-8">
+          <div class="relative mb-6">
+            <!-- 背景装饰圆圈 -->
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="w-32 h-32 bg-blue-50 dark:bg-gray-800/50 rounded-full animate-pulse"></div>
+            </div>
+            <!-- 搜索图标 -->
+            <div class="relative flex items-center justify-center h-32">
+              <Icon name="material-symbols:search-off" class="w-16 h-16 text-blue-500 dark:text-blue-400" />
+            </div>
+          </div>
+
+          <!-- 404数字 -->
+          <h1 class="text-6xl md:text-7xl font-bold text-blue-600 dark:text-blue-400 mb-4">
+            404
+          </h1>
+
+          <!-- 主标题 -->
+          <h2 class="text-2xl md:text-3xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
+            页面未找到
+          </h2>
+
+          <!-- 描述文字 -->
+          <p class="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+            抱歉，您访问的页面不存在或已被移动。<br>
+            不过别担心，我们为您准备了一些有用的选项。
+          </p>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <a href="/"
+               class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg">
+              <Icon name="material-symbols:home" class="w-5 h-5" />
+              返回首页
+            </a>
+
+            <button onclick="history.back()"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-200/80 hover:bg-gray-300/80 dark:bg-gray-700/80 dark:hover:bg-gray-600/80 text-gray-800 dark:text-gray-200 rounded-lg font-medium transition-all duration-200 hover:scale-105 backdrop-blur-sm">
+              <Icon name="material-symbols:arrow-back" class="w-5 h-5" />
+              返回上页
+            </button>
+
+            <a href="/archive/"
+               class="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-blue-600/80 text-blue-600 hover:bg-blue-600 hover:text-white dark:border-blue-400/80 dark:text-blue-400 dark:hover:bg-blue-400 dark:hover:text-gray-900 rounded-lg font-medium transition-all duration-200 hover:scale-105 backdrop-blur-sm">
+              <Icon name="material-symbols:library-books" class="w-5 h-5" />
+              浏览文章
+            </a>
+          </div>
+
+          <!-- 推荐文章版块已移除 -->
+
+          <!-- 底部帮助信息 -->
+          <div class="mt-8 pt-6 border-t border-gray-300/50 dark:border-gray-600/50">
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              如果您认为这是一个错误，请
+              <a href="/about/" class="text-blue-700 dark:text-blue-300 hover:underline transition-colors">联系我们</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainGridLayout>
+
+
+
+<script>
+  // 键盘快捷键
+  document.addEventListener('keydown', (e) => {
+    // ESC 键返回首页
+    if (e.key === 'Escape') {
+      window.location.href = '/';
+    }
+    
+    // Backspace 键返回上页
+    if (e.key === 'Backspace' && !e.target.matches('input, textarea')) {
+      e.preventDefault();
+      history.back();
+    }
+  });
+
+  // 添加页面加载动画
+  document.addEventListener('DOMContentLoaded', () => {
+    const elements = document.querySelectorAll('.animate-fade-in');
+    elements.forEach((el, index) => {
+      setTimeout(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+
+    // 添加卡片入场动画
+    const card = document.querySelector('.page-404-card');
+    if (card) {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        card.style.transition = 'all 0.6s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 100);
+    }
+  });
+</script>

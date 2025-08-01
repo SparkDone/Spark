@@ -1,0 +1,148 @@
+---
+import { Icon } from "astro-icon/components";
+import "../../styles/components/error-boundary.css";
+
+interface Props {
+  error?: Error;
+  title?: string;
+  message?: string;
+  showRetry?: boolean;
+  showHome?: boolean;
+  showSearch?: boolean;
+  variant?: 'default' | 'minimal' | 'illustration';
+  class?: string;
+}
+
+const {
+  error,
+  title = "出现了一些问题",
+  message = "我们正在努力解决这个问题，请稍后再试。",
+  showRetry = true,
+  showHome = true,
+  showSearch = false,
+  variant = 'default',
+  class: className = ""
+} = Astro.props;
+
+// 根据错误类型显示不同的消息和图标
+let displayMessage = message;
+let errorIcon = "material-symbols:error-outline";
+let errorColor = "text-red-500";
+
+if (error) {
+  if (error.message.includes('fetch') || error.message.includes('network')) {
+    displayMessage = "网络连接出现问题，请检查您的网络设置后重试。";
+    errorIcon = "material-symbols:wifi-off";
+    errorColor = "text-orange-500";
+  } else if (error.message.includes('timeout')) {
+    displayMessage = "请求超时，请稍后再试。";
+    errorIcon = "material-symbols:schedule";
+    errorColor = "text-yellow-500";
+  } else if (error.message.includes('404')) {
+    displayMessage = "请求的内容不存在。";
+    errorIcon = "material-symbols:search-off";
+    errorColor = "text-blue-500";
+  }
+}
+---
+
+<div class={`error-boundary ${variant === 'minimal' ? 'p-4' : 'p-8'} text-center ${className}`}>
+
+  {variant === 'illustration' && (
+    <div class="mb-8">
+      <div class="relative mx-auto w-48 h-48 mb-6">
+        <!-- SVG插图 -->
+        <svg viewBox="0 0 200 200" class="w-full h-full">
+          <defs>
+            <linearGradient id="errorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#f3f4f6;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#e5e7eb;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <circle cx="100" cy="100" r="80" fill="url(#errorGradient)" stroke="#d1d5db" stroke-width="2"/>
+          <path d="M70 70 L130 130 M130 70 L70 130" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  )}
+
+  <div class="mb-6">
+    {variant !== 'illustration' && (
+      <Icon name={errorIcon} class={`text-6xl ${errorColor} mx-auto mb-4 animate-pulse`} />
+    )}
+
+    <h2 class={`${variant === 'minimal' ? 'text-xl' : 'text-2xl'} font-bold text-black/90 dark:text-white/90 mb-2`}>
+      {title}
+    </h2>
+
+    <p class="text-black/70 dark:text-white/70 mb-6 max-w-md mx-auto">
+      {displayMessage}
+    </p>
+  </div>
+
+  <!-- 操作按钮 -->
+  <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+    {showRetry && (
+      <button
+        onclick="window.location.reload()"
+        class="btn-primary px-6 py-3 rounded-lg font-medium transition-all duration-200
+               bg-blue-600 hover:bg-blue-700 text-white
+               dark:bg-blue-500 dark:hover:bg-blue-600
+               hover:scale-105 hover:shadow-lg
+               focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        <Icon name="material-symbols:refresh" class="inline-block w-5 h-5 mr-2" />
+        重新加载
+      </button>
+    )}
+
+    {showHome && (
+      <a
+        href="/"
+        class="btn-secondary px-6 py-3 rounded-lg font-medium transition-all duration-200
+               bg-gray-200 hover:bg-gray-300 text-gray-800
+               dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200
+               hover:scale-105 hover:shadow-lg
+               focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+      >
+        <Icon name="material-symbols:home" class="inline-block w-5 h-5 mr-2" />
+        返回首页
+      </a>
+    )}
+
+    {showSearch && (
+      <button
+        onclick="document.getElementById('search-input')?.focus()"
+        class="btn-accent px-6 py-3 rounded-lg font-medium transition-all duration-200
+               bg-purple-600 hover:bg-purple-700 text-white
+               dark:bg-purple-500 dark:hover:bg-purple-600
+               hover:scale-105 hover:shadow-lg
+               focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+      >
+        <Icon name="material-symbols:search" class="inline-block w-5 h-5 mr-2" />
+        搜索内容
+      </button>
+    )}
+
+    <button
+      onclick="window.history.back()"
+      class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300
+             transition-colors duration-200 text-sm underline"
+    >
+      返回上页
+    </button>
+  </div>
+
+  {error && import.meta.env.DEV && (
+    <details class="mt-8 text-left">
+      <summary class="cursor-pointer text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+        开发者信息
+      </summary>
+      <pre class="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs overflow-auto">
+        <code>{error.stack || error.message}</code>
+      </pre>
+    </details>
+  )}
+</div>
+
+

@@ -10,20 +10,14 @@ export type SiteConfig = {
 		hue: number;
 		fixed: boolean;
 	};
-	banner: {
-		enable: boolean;
-		src: string;
-		position?: "top" | "center" | "bottom";
-		credit: {
-			enable: boolean;
-			text: string;
-			url?: string;
-		};
-	};
-	toc: {
-		enable: boolean;
-		depth: 1 | 2 | 3;
-	};
+
+	// banner: {
+	//	enable: boolean;
+	//	src: string;
+	//	position?: "top" | "center" | "bottom";
+	//	credit: { enable: boolean; text: string; url?: string; };
+	// };
+
 
 	favicon: Favicon[];
 };
@@ -72,6 +66,18 @@ export type LIGHT_DARK_MODE =
 	| typeof DARK_MODE
 	| typeof AUTO_MODE;
 
+export type AuthorData = {
+	name: string;
+	slug: string;
+	bio?: string;
+	email?: string;
+	website?: string;
+	github?: string;
+	twitter?: string;
+	linkedin?: string;
+	avatar?: string;
+};
+
 export type BlogPostData = {
 	body: string;
 	title: string;
@@ -81,6 +87,7 @@ export type BlogPostData = {
 	draft?: boolean;
 	image?: string;
 	category?: string;
+	author?: AuthorData | string;
 	prevTitle?: string;
 	prevSlug?: string;
 	nextTitle?: string;

@@ -1,0 +1,89 @@
+/**
+ * MobileNavigation 组件样式
+ * 从 1.md 提取
+ * astro-cid: p6ttofqj
+ */
+
+/**
+  * 组件样式
+  * astro-cid: p6ttofqj
+  */
+  .hamburger-icon[data-astro-cid-p6ttofqj]  {
+  width:20px;
+  height:16px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between
+  }
+  .line[data-astro-cid-p6ttofqj]  {
+  width:100%;
+  height:2px;
+  background-color:currentColor;
+  border-radius:1px;
+  transition:all 0.3s ease;
+  transform-origin:center
+  }
+  .mobile-nav-toggle[data-astro-cid-p6ttofqj].active .line-1[data-astro-cid-p6ttofqj]  {
+  transform:rotate(45deg) translate(5px,
+5px)
+  }
+  .mobile-nav-toggle[data-astro-cid-p6ttofqj].active .line-2[data-astro-cid-p6ttofqj]  {
+  opacity:0;
+  transform:scaleX(0)
+  }
+  .mobile-nav-toggle[data-astro-cid-p6ttofqj].active .line-3[data-astro-cid-p6ttofqj]  {
+  transform:rotate(-45deg) translate(7px,
+-6px)
+  }
+  .mobile-nav-menu[data-astro-cid-p6ttofqj].open  {
+  transform:translateX(0)
+  }
+  .mobile-nav-overlay[data-astro-cid-p6ttofqj].open  {
+  opacity:1;
+  pointer-events:auto
+  }
+  .mobile-nav-menu[data-astro-cid-p6ttofqj].open .nav-link[data-astro-cid-p6ttofqj]  {
+  animation:slideInRight 0.3s ease-out forwards;
+  opacity:0;
+  transform:translateX(20px)
+  }
+  @keyframes slideInRight  {
+  to  {
+  opacity:1;
+  transform:translateX(0)
+  }
+  }
+  .nav-link[data-astro-cid-p6ttofqj]  {
+  min-height:48px
+  }
+  .mobile-nav-menu[data-astro-cid-p6ttofqj]  {
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch
+  }
+  @media (prefers-color-scheme: dark)  {
+  .mobile-nav-menu[data-astro-cid-p6ttofqj]  {
+  border-left:1px solid rgba(55,
+65,
+81,
+0.5)
+  }
+  }
+  @media (prefers-reduced-motion: reduce)  {
+  .mobile-nav-toggle[data-astro-cid-p6ttofqj],
+  .mobile-nav-menu[data-astro-cid-p6ttofqj],
+  .mobile-nav-overlay[data-astro-cid-p6ttofqj],
+  .nav-link[data-astro-cid-p6ttofqj],
+  .line[data-astro-cid-p6ttofqj]  {
+  transition:none;
+  animation:none
+  }
+  }
+  @media (prefers-contrast: high)  {
+  .mobile-nav-menu[data-astro-cid-p6ttofqj]  {
+  border:2px solid currentColor
+  }
+  .nav-link[data-astro-cid-p6ttofqj]  {
+  border-bottom:1px solid currentColor
+  }
+  }

@@ -1,0 +1,147 @@
+---
+/**
+ * 安全头组件 - 添加安全相关的meta标签
+ */
+
+// 获取站点配置
+import { siteConfig } from "@/config";
+
+// 获取当前环境
+const isDev = import.meta.env.DEV;
+const isProd = import.meta.env.PROD;
+
+// CSP策略 - 支持WebAssembly (Pagefind需要)
+const csp = isDev
+  ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' http://localhost:* ws://localhost:*; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: http: http://localhost:*; connect-src 'self' https: http: ws: http://localhost:* ws://localhost:*; frame-src 'none'; object-src 'none'"
+  : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: http:; connect-src 'self' https: http:; frame-src 'none'; object-src 'none'; upgrade-insecure-requests";
+
+// 权限策略
+const permissionsPolicy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), autoplay=(self), fullscreen=(self)";
+---
+
+<!-- 安全相关的meta标签 -->
+
+<!-- 内容安全策略 -->
+<meta http-equiv="Content-Security-Policy" content={csp}>
+
+<!-- 权限策略 -->
+<meta http-equiv="Permissions-Policy" content={permissionsPolicy}>
+
+<!-- 防止MIME类型嗅探 -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+<!-- 注意：X-Frame-Options 需要通过服务器HTTP头设置，不能通过meta标签 -->
+
+<!-- XSS保护 -->
+<meta http-equiv="X-XSS-Protection" content="1; mode=block">
+
+<!-- 引用者策略 -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+<!-- DNS预取控制 -->
+<meta http-equiv="x-dns-prefetch-control" content="on">
+
+<!-- 注意：Strict-Transport-Security 需要通过服务器HTTP头设置，不能通过meta标签 -->
+
+<!-- 隐私和安全相关 -->
+<meta name="format-detection" content="telephone=no">
+<meta name="msapplication-tap-highlight" content="no">
+
+<!-- 防止搜索引擎缓存敏感页面 -->
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+<!-- 版权和作者信息 -->
+<meta name="author" content={siteConfig.author?.name || siteConfig.title}>
+<meta name="copyright" content={`© ${new Date().getFullYear()} ${siteConfig.title}`}>
+
+<!-- 网站验证（如果需要） -->
+<!-- <meta name="google-site-verification" content="your-verification-code"> -->
+<!-- <meta name="msvalidate.01" content="your-bing-verification-code"> -->
+
+<!-- 社交媒体安全 -->
+<meta property="fb:app_id" content="">
+<meta name="twitter:dnt" content="on">
+
+<!-- 开发环境提示 -->
+{isDev && (
+  <!-- 开发环境安全提示 -->
+  <meta name="environment" content="development">
+)}
+
+<style>
+  /* 防止内容安全策略违规的样式 */
+  [data-csp-violation] {
+    display: none !important;
+  }
+  
+  /* 安全相关的样式 */
+  iframe {
+    display: none !important; /* 禁止所有iframe */
+  }
+  
+  object, embed {
+    display: none !important; /* 禁止object和embed */
+  }
+</style>
+
+<script is:inline define:vars={{ isDev }}>
+  // 内容安全策略违规报告
+  if (typeof window !== 'undefined') {
+    document.addEventListener('securitypolicyviolation', (e) => {
+      // 检查是否是已知的可忽略违规
+      const knownIgnorableViolations = [
+        'pagefind.js', // Pagefind相关的WASM加载
+        'unsafe-eval', // WebAssembly需要的eval权限
+        'wasm-unsafe-eval' // WebAssembly特定权限
+      ];
+
+      const isIgnorable = knownIgnorableViolations.some(pattern =>
+        e.blockedURI?.includes(pattern) ||
+        e.violatedDirective?.includes(pattern) ||
+        e.sourceFile?.includes(pattern)
+      );
+
+      if (isIgnorable && !isDev) {
+        // 生产环境下忽略已知的可忽略违规
+        return;
+      }
+
+      console.warn('🔒 CSP违规:', {
+        blockedURI: e.blockedURI,
+        violatedDirective: e.violatedDirective,
+        originalPolicy: e.originalPolicy,
+        sourceFile: e.sourceFile,
+        lineNumber: e.lineNumber
+      });
+
+      // 在开发环境下显示更详细的信息
+      if (isDev) {
+        console.group('🔒 CSP违规详情');
+        console.log('被阻止的URI:', e.blockedURI);
+        console.log('违规指令:', e.violatedDirective);
+        console.log('源文件:', e.sourceFile);
+        console.log('行号:', e.lineNumber);
+        console.log('是否可忽略:', isIgnorable);
+        console.groupEnd();
+
+        // 提供修复建议
+        if (e.violatedDirective?.includes('script-src') && e.blockedURI?.includes('wasm')) {
+          console.info('💡 建议: WebAssembly需要在CSP中添加 \'unsafe-eval\' 或 \'wasm-unsafe-eval\'');
+        }
+      }
+    });
+
+    // 防止控制台注入攻击
+    const originalLog = console.log;
+    console.log = function(...args) {
+      // 过滤潜在的恶意内容
+      const filteredArgs = args.map(arg => {
+        if (typeof arg === 'string' && arg.includes('<script')) {
+          return '[已过滤的潜在恶意内容]';
+        }
+        return arg;
+      });
+      originalLog.apply(console, filteredArgs);
+    };
+  }
+</script>

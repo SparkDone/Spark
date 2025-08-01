@@ -1,0 +1,206 @@
+---
+// 静态预渲染友情链接页面
+export const prerender = true;
+
+import { Icon } from "astro-icon/components";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+
+// 获取友情链接数据
+let friendLinks: any[] = [];
+
+try {
+  // 使用配置中的Strapi URL
+  const strapiUrl = import.meta.env.STRAPI_URL || 'http://localhost:1337';
+  const url = `${strapiUrl}/api/friend-links?populate=*&sort=sort_order:asc,createdAt:desc&filters[publishedAt][$notNull]=true`;
+  const response = await fetch(url);
+  const data = await response.json();
+
+  if (data && data.data && Array.isArray(data.data)) {
+    friendLinks = data.data;
+  }
+} catch (error) {
+  console.error('获取友情链接失败:', error);
+}
+
+const title = "友情链接";
+const description = `我的朋友们 (${friendLinks.length}个链接)`;
+
+// 友情链接页面结构化数据
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "友情链接",
+  description: description,
+  url: Astro.url.href,
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: friendLinks.length,
+    itemListElement: friendLinks.map((link, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "WebSite",
+        name: link.name,
+        url: link.url,
+        description: link.description || ""
+      }
+    }))
+  }
+};
+---
+
+<MainGridLayout title={title} description={description}>
+    <!-- 友情链接页面结构化数据 -->
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+
+    <!-- 为 SwupA11yPlugin 添加主标题 -->
+    <h1 class="sr-only">友情链接</h1>
+
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-9 py-6 relative w-full">
+            <!-- 页面标题 -->
+            <div class="flex items-center mb-6">
+                <Icon name="material-symbols:link" class="text-3xl text-[var(--primary)] mr-3" />
+                <h1 class="transition w-full block font-bold
+                    text-3xl md:text-[2.25rem]/[2.75rem]
+                    text-black/90 dark:text-white/90
+                ">
+                    友情链接
+                </h1>
+            </div>
+
+            <!-- 友情链接介绍 -->
+            <div class="mb-8 text-neutral-600 dark:text-neutral-400">
+                <p class="text-base leading-relaxed">
+                    这里是我的朋友们的网站，都是很棒的博客和项目。如果你也想交换友链，欢迎联系我！
+                </p>
+                <p class="text-sm mt-2">
+                    共有 <span class="font-semibold text-[var(--primary)]">{friendLinks.length}</span> 个友情链接
+                </p>
+            </div>
+
+            <!-- 友情链接列表 -->
+            {friendLinks.length > 0 ? (
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {friendLinks.map((link) => (
+                        <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`访问 ${link.name}${link.description ? ': ' + link.description : ''}`}
+                            class="friend-link-card group"
+                        >
+                            <div class="card-base p-4 h-full transition-all duration-300 hover:shadow-lg hover:scale-105 border border-neutral-200 dark:border-neutral-700">
+                                <div class="flex items-start space-x-3">
+                                    <!-- 图标或头像 -->
+                                    <div class="flex-shrink-0">
+                                        {link.icon ? (
+                                            <Icon
+                                                name={link.icon}
+                                                class="w-8 h-8 text-[var(--primary)]"
+                                            />
+                                        ) : (
+                                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] flex items-center justify-center">
+                                                <span class="text-white text-sm font-bold">
+                                                    {link.name.charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <!-- 链接信息 -->
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-semibold text-neutral-800 dark:text-neutral-200 group-hover:text-[var(--primary)] transition-colors truncate">
+                                            {link.name}
+                                        </h3>
+                                        {link.description && (
+                                            <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1 line-clamp-2">
+                                                {link.description}
+                                            </p>
+                                        )}
+                                        <div class="flex items-center mt-2 text-xs text-neutral-500">
+                                            <Icon name="material-symbols:open-in-new" class="w-3 h-3 mr-1" />
+                                            <span class="truncate">{new URL(link.url).hostname}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 特色标记 -->
+                                {link.is_featured && (
+                                    <div class="absolute top-2 right-2">
+                                        <Icon name="material-symbols:star" class="w-4 h-4 text-yellow-500" />
+                                    </div>
+                                )}
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            ) : (
+                <!-- 空状态 -->
+                <div class="text-center py-12">
+                    <Icon name="material-symbols:link-off" class="text-6xl text-neutral-300 dark:text-neutral-600 mx-auto mb-4" />
+                    <p class="text-neutral-500 dark:text-neutral-400">
+                        暂无友情链接
+                    </p>
+                </div>
+            )}
+
+            <!-- 申请友链说明 -->
+            <div class="mt-12 p-6 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg">
+                <h2 class="text-lg font-semibold mb-3 text-neutral-800 dark:text-neutral-200 flex items-center">
+                    <Icon name="material-symbols:handshake" class="text-xl text-[var(--primary)] mr-2" />
+                    申请友链
+                </h2>
+                <div class="text-sm text-neutral-600 dark:text-neutral-400 space-y-2">
+                    <p>如果你想和我交换友情链接，请确保你的网站满足以下条件：</p>
+                    <ul class="list-disc list-inside space-y-1 ml-4">
+                        <li>内容积极向上，无违法违规内容</li>
+                        <li>网站可以正常访问，加载速度合理</li>
+                        <li>最好是技术、生活或其他有意义的内容</li>
+                        <li>希望能够长期维护和更新</li>
+                    </ul>
+                    <p class="mt-3">
+                        符合条件的朋友可以通过邮件或其他方式联系我，我会尽快回复！
+                    </p>
+                </div>
+            </div>
+
+            <!-- 返回链接 -->
+            <div class="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+                <a 
+                    href="/" 
+                    class="inline-flex items-center text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors"
+                >
+                    <Icon name="material-symbols:arrow-back" class="text-lg mr-2" />
+                    返回首页
+                </a>
+            </div>
+        </div>
+    </div>
+</MainGridLayout>
+
+<style>
+/* 友情链接卡片样式 */
+.friend-link-card {
+    position: relative;
+}
+
+.friend-link-card:hover {
+    text-decoration: none;
+}
+
+/* 文本截断 */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

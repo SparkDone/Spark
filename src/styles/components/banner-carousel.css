@@ -1,0 +1,364 @@
+/**
+ * Banner轮播组件样式
+ * 与文章页面图片保持一致的圆角设计
+ */
+
+/* 确保banner轮播与页面内容宽度一致 */
+.banner-carousel {
+  /* 使用与文章列表相同的最大宽度 */
+  max-width: var(--page-width);
+  margin: 0 auto;
+
+  /* 与文章图片相同的圆角 */
+  border-radius: var(--radius-large);
+
+  /* 添加阴影效果，与卡片保持一致 */
+  box-shadow: var(--shadow-md);
+
+  /* 平滑过渡效果 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 添加微妙的边框效果 */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 悬停效果 - 与文章图片保持一致 */
+.banner-carousel:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.banner-carousel:hover .slide-image {
+  transform: scale(1.05);
+}
+
+/* 确保轮播容器的圆角正确应用 */
+.banner-carousel .carousel-container {
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+/* 图片样式优化 */
+.banner-carousel .slide-image {
+  /* 确保图片完全填充容器 */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+
+  /* 图片过渡效果 - 与文章图片保持一致 */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 文字内容样式优化 */
+.banner-carousel .slide-content {
+  /* 紧贴底部，固定高度 */
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 70px !important; /* 固定高度70px */
+
+  /* 移除渐变背景，改用色块 */
+  background: none !important;
+
+  /* 文字容器样式 - 上下两行布局 */
+  padding: 0 20px !important; /* 左右内边距 */
+  border-radius: 0 !important; /* 紧贴底部不需要圆角 */
+  display: flex !important;
+  flex-direction: column !important; /* 垂直排列 */
+  justify-content: center !important; /* 垂直居中 */
+  align-items: flex-start !important; /* 水平左对齐 */
+
+  /* 默认隐藏文字和背景 */
+  background-color: transparent !important;
+  opacity: 0 !important; /* 默认完全隐藏 */
+
+  /* 平滑过渡效果 */
+  transition: opacity 0.3s ease, background-color 0.3s ease, backdrop-filter 0.3s ease !important;
+
+  /* 默认无模糊效果 */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Banner悬停时显示文字和背景 */
+.banner-carousel:hover .slide-content {
+  opacity: 1 !important; /* 悬停时显示文字 */
+  background-color: rgba(0, 0, 0, 0.05) !important; /* 悬停时显示背景 */
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+}
+
+/* 动态文字颜色支持 - 悬停时的色块效果 */
+.banner-carousel:hover .slide-content[data-text-color="light"] {
+  color: white !important;
+  background-color: rgba(0, 0, 0, 0.05) !important; /* 悬停时显示黑色背景 */
+}
+
+.banner-carousel:hover .slide-content[data-text-color="dark"] {
+  color: #1a1a1a !important;
+  background-color: rgba(255, 255, 255, 0.05) !important; /* 悬停时显示白色背景 */
+}
+
+.banner-carousel .slide-title {
+  /* 使用主题字体 */
+  font-family: var(--font-family-base);
+  font-weight: 600;
+
+  /* 调小文字阴影 */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  /* 调大标题字体 */
+  font-size: 1.3rem !important;
+  margin: 0 !important;
+  line-height: 1.2 !important; /* 适中行高 */
+}
+
+.banner-carousel .slide-subtitle {
+  /* 使用主题字体 */
+  font-family: var(--font-family-base);
+
+  /* 调小副标题 */
+  font-size: 0.9rem !important;
+  margin: 4px 0 0 0 !important; /* 与标题间隔4px */
+  line-height: 1.1 !important; /* 紧凑行高 */
+  opacity: 0.9 !important;
+}
+
+/* 动态文字颜色的标题和副标题样式 */
+.banner-carousel .slide-content[data-text-color="light"] .slide-title,
+.banner-carousel .slide-content[data-text-color="light"] .slide-subtitle {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
+.banner-carousel .slide-content[data-text-color="dark"] .slide-title,
+.banner-carousel .slide-content[data-text-color="dark"] .slide-subtitle {
+  color: #1a1a1a !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 导航箭头样式 - 圆角正方形透明按钮 */
+.banner-carousel .carousel-arrow {
+  /* 50%透明黑色背景 */
+  background: rgba(0, 0, 0, 0.5) !important;
+  /* 无边框 */
+  border: none !important;
+  color: white !important;
+  /* 圆角正方形 */
+  border-radius: 6px !important;
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 14px !important;
+  font-weight: bold !important; /* 加粗箭头，确保清晰 */
+  /* 无阴影，保持简洁 */
+  box-shadow: none !important;
+  /* 平滑过渡 */
+  transition: all 0.2s ease !important;
+  /* 确保图标居中 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-carousel .carousel-arrow:hover {
+  /* 悬停时保持50%透明黑色背景 */
+  background: rgba(0, 0, 0, 0.5) !important;
+  color: white !important;
+  font-weight: bold !important; /* 确保箭头始终加粗 */
+  /* 无阴影 */
+  box-shadow: none !important;
+  /* 轻微放大 */
+  transform: translateY(-50%) scale(1.08) !important;
+}
+
+.banner-carousel .carousel-arrow:active {
+  /* 点击时的反馈 */
+  transform: translateY(-50%) scale(0.98);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 指示点样式 - Web3.0/macOS风格 */
+.banner-carousel .carousel-dot {
+  /* macOS风格的毛玻璃效果 */
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  /* 边框和尺寸 */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+
+  /* 阴影效果 */
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+  /* 过渡效果 */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.banner-carousel .carousel-dot.active {
+  /* 活跃状态 - 使用渐变色 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.4);
+
+  /* 增强阴影 */
+  box-shadow:
+    0 4px 12px rgba(102, 126, 234, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.banner-carousel .carousel-dot:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.2);
+
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .banner-carousel {
+    /* 移动端减少外边距 */
+    margin: 0;
+    border-radius: 0.75rem;
+  }
+  
+  .banner-carousel .slide-content {
+    padding: 1.5rem 1rem 1rem;
+  }
+  
+  .banner-carousel .carousel-arrow {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .banner-carousel .carousel-arrow-prev {
+    left: 0.75rem;
+  }
+
+  .banner-carousel .carousel-arrow-next {
+    right: 0.75rem;
+  }
+
+  /* 添加微妙的脉冲动画 */
+  .banner-carousel .carousel-arrow:not(:hover) {
+    animation: subtle-pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes subtle-pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.95; }
+  }
+
+  .banner-carousel .carousel-dots {
+    bottom: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .banner-carousel .carousel-dot {
+    width: 7px;
+    height: 7px;
+  }
+}
+
+/* 小屏幕优化 */
+@media (max-width: 480px) {
+  .banner-carousel .slide-content {
+    padding: 1rem 0.75rem 0.75rem;
+  }
+
+  .banner-carousel .slide-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .banner-carousel .slide-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .banner-carousel .carousel-arrow {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .banner-carousel .carousel-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  /* 移动端触摸优化 */
+  .banner-carousel .carousel-arrow {
+    /* 增加触摸区域 */
+    padding: 4px;
+    /* 防止意外触摸 */
+    touch-action: manipulation;
+  }
+
+  .banner-carousel .carousel-dot {
+    /* 增加触摸区域 */
+    min-width: 24px;
+    min-height: 24px;
+    /* 使用伪元素显示小点 */
+    position: relative;
+  }
+
+  .banner-carousel .carousel-dot::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: inherit;
+    border: inherit;
+  }
+}
+
+
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .banner-carousel .slide-content {
+    background: linear-gradient(
+      transparent 0%, 
+      rgba(0, 0, 0, 0.8) 30%, 
+      rgba(0, 0, 0, 0.95) 100%
+    );
+  }
+  
+  .banner-carousel .slide-title,
+  .banner-carousel .slide-subtitle {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  .banner-carousel,
+  .banner-carousel .carousel-slide,
+  .banner-carousel .slide-content,
+  .banner-carousel .carousel-arrow,
+  .banner-carousel .carousel-dot,
+  .banner-carousel .slide-image {
+    transition: none;
+    animation: none;
+  }
+
+  .banner-carousel:hover .slide-image {
+    transform: none;
+  }
+}

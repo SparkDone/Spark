@@ -1,0 +1,46 @@
+/**
+ * Back to Top Component Styles
+ * 返回顶部组件样式 - 清理版本
+ */
+
+/* 返回顶部包装器 */
+.back-to-top-wrapper {
+  width: 3.75rem;
+  height: 3.75rem;
+  position: absolute;
+  right: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+/* 返回顶部按钮 */
+.back-to-top-btn {
+  color: var(--primary);
+  font-size: 2.25rem;
+  font-weight: bold;
+  border: none;
+  background: transparent;
+  position: fixed;
+  bottom: 10rem;
+  opacity: 1;
+  cursor: pointer;
+  transform: translateX(5rem);
+  pointer-events: auto;
+  transition: all 0.3s ease;
+}
+
+.back-to-top-btn i {
+  font-size: 1.75rem;
+}
+
+/* 隐藏状态 */
+.back-to-top-btn.hide {
+  transform: translateX(5rem) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 点击效果 */
+.back-to-top-btn:active {
+  transform: translateX(5rem) scale(0.9);
+}

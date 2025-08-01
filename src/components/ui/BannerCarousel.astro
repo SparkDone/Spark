@@ -1,0 +1,721 @@
+---
+/**
+ * Banner轮播组件
+ * 支持多张图片轮播，与文章页面图片保持一致的圆角设计
+ */
+
+interface BannerImage {
+  src: string;
+  alt: string;
+  title?: string;
+  subtitle?: string;
+  link?: string;
+}
+
+interface Props {
+  images: BannerImage[];
+  autoPlay?: boolean;
+  interval?: number;
+  showDots?: boolean;
+  showArrows?: boolean;
+  height?: string;
+  className?: string;
+}
+
+const {
+  images = [],
+  autoPlay = true,
+  interval = 5000,
+  showDots = true,
+  showArrows = true,
+  height = "400px",
+  className = ""
+} = Astro.props;
+
+// 如果没有图片，不渲染组件
+if (!images || images.length === 0) {
+  return null;
+}
+
+// 生成唯一ID
+const carouselId = `banner-carousel-${Math.random().toString(36).substr(2, 9)}`;
+
+// 判断是否为外部链接的函数
+function isExternalLink(url: string): boolean {
+  if (!url) return false;
+
+  // 检查明确的外部链接格式
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
+    return true;
+  }
+
+  // 检查纯域名格式（如 baidu.com, google.com）
+  if (url.includes('.') && !url.startsWith('/') && !url.includes(' ')) {
+    return true;
+  }
+
+  return false;
+}
+
+// 判断是否为邮箱链接
+function isEmailLink(url: string): boolean {
+  return url.startsWith('mailto:');
+}
+
+// 判断是否为电话链接
+function isTelLink(url: string): boolean {
+  return url.startsWith('tel:');
+}
+
+// 修正链接格式，为纯域名添加协议
+function fixLinkFormat(url: string): string {
+  if (!url) return url;
+
+  // 如果已经有协议，直接返回
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) {
+    return url;
+  }
+
+  // 如果是邮箱或电话链接，直接返回
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) {
+    return url;
+  }
+
+  // 如果是内部链接（以/开头），直接返回
+  if (url.startsWith('/')) {
+    return url;
+  }
+
+  // 如果是纯域名格式，添加https协议
+  if (url.includes('.') && !url.includes(' ')) {
+    return `https://${url}`;
+  }
+
+  // 其他情况直接返回
+  return url;
+}
+---
+
+<div 
+  class={`banner-carousel ${className}`}
+  data-carousel-id={carouselId}
+  data-auto-play={autoPlay}
+  data-interval={interval}
+  style={`height: ${height}`}
+>
+  <!-- 轮播容器 -->
+  <div class="carousel-container">
+    <!-- 图片列表 -->
+    <div class="carousel-track" data-track>
+      {images.map((image, index) => (
+        <div 
+          class={`carousel-slide ${index === 0 ? 'active' : ''}`}
+          data-slide={index}
+        >
+          {image.link ? (
+            <a
+              href={fixLinkFormat(image.link)}
+              class="slide-link"
+              target={isExternalLink(image.link) ? "_blank" : "_self"}
+              rel={isExternalLink(image.link) ? "noopener noreferrer" : undefined}
+            >
+              <img 
+                src={image.src} 
+                alt={image.alt}
+                class="slide-image"
+                loading={index === 0 ? "eager" : "lazy"}
+              />
+              {(image.title || image.subtitle) && (
+                <div
+                  class="slide-content"
+                  data-text-color={image.textColor || 'light'}
+                  style={image.textColorCustom ? `--custom-text-color: ${image.textColorCustom}` : ''}
+                >
+                  {image.title && <h3 class="slide-title">{image.title}</h3>}
+                  {image.subtitle && <p class="slide-subtitle">{image.subtitle}</p>}
+                </div>
+              )}
+            </a>
+          ) : (
+            <div class="slide-content-wrapper">
+              <img 
+                src={image.src} 
+                alt={image.alt}
+                class="slide-image"
+                loading={index === 0 ? "eager" : "lazy"}
+              />
+              {(image.title || image.subtitle) && (
+                <div
+                  class="slide-content"
+                  data-text-color={image.textColor || 'light'}
+                  style={image.textColorCustom ? `--custom-text-color: ${image.textColorCustom}` : ''}
+                >
+                  {image.title && <h3 class="slide-title">{image.title}</h3>}
+                  {image.subtitle && <p class="slide-subtitle">{image.subtitle}</p>}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    <!-- 导航箭头 -->
+    {showArrows && images.length > 1 && (
+      <>
+        <button class="carousel-arrow carousel-arrow-prev" data-prev>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="carousel-arrow carousel-arrow-next" data-next>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </>
+    )}
+  </div>
+
+  <!-- 指示点 -->
+  {showDots && images.length > 1 && (
+    <div class="carousel-dots">
+      {images.map((_, index) => (
+        <button 
+          class={`carousel-dot ${index === 0 ? 'active' : ''}`}
+          data-dot={index}
+          aria-label={`Go to slide ${index + 1}`}
+        ></button>
+      ))}
+    </div>
+  )}
+</div>
+
+<style>
+  .banner-carousel {
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius-large);
+    overflow: hidden;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .carousel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .carousel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .carousel-slide.active {
+    opacity: 1;
+  }
+
+  .slide-link,
+  .slide-content-wrapper {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    z-index: 1; /* 确保链接在基础层级之上 */
+  }
+
+  .slide-link {
+    z-index: 3; /* 链接层级高于导航箭头和指示点 */
+  }
+
+  .slide-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .slide-content {
+    position: absolute;
+    bottom: 0; /* 紧贴底部 */
+    left: 0;
+    right: 0;
+    height: 70px; /* 固定高度70px */
+    /* 默认隐藏文字和背景 */
+    background-color: transparent;
+    color: white;
+    opacity: 0; /* 默认完全隐藏 */
+    pointer-events: none; /* 防止内容层阻挡链接点击 */
+    /* 平滑过渡效果 */
+    transition: opacity 0.3s ease, background-color 0.3s ease, backdrop-filter 0.3s ease;
+    /* 上下两行布局 */
+    display: flex;
+    flex-direction: column; /* 垂直排列 */
+    justify-content: center; /* 垂直居中 */
+    align-items: flex-start; /* 水平左对齐 */
+    padding: 0 20px; /* 左右内边距 */
+    border-radius: 0;
+    /* 默认无模糊效果 */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .carousel-slide.active .slide-content {
+    transform: translateY(0);
+  }
+
+  .slide-title {
+    font-size: 1.3rem; /* 调大标题 */
+    font-weight: 600;
+    margin: 0; /* 移除边距 */
+    line-height: 1.2; /* 适中行高 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .slide-subtitle {
+    font-size: 0.9rem; /* 调小副标题 */
+    margin: 4px 0 0 0; /* 与标题间隔4px */
+    opacity: 0.9;
+    line-height: 1.1; /* 紧凑行高 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Banner悬停时显示文字和背景 */
+  .banner-carousel:hover .slide-content {
+    opacity: 1 !important; /* 悬停时显示文字 */
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+  }
+
+  /* 动态文字颜色支持 - 悬停时的色块效果 */
+  .banner-carousel:hover .slide-content[data-text-color="light"] {
+    color: white !important;
+    background-color: rgba(0, 0, 0, 0.05) !important; /* 悬停时显示黑色背景 */
+  }
+
+  .banner-carousel:hover .slide-content[data-text-color="dark"] {
+    color: #1a1a1a !important;
+    background-color: rgba(255, 255, 255, 0.05) !important; /* 悬停时显示白色背景 */
+  }
+
+  .banner-carousel:hover .slide-content[data-text-color="auto"] {
+    /* 自动模式悬停时显示黑色背景 */
+    color: white !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* 自定义颜色支持 */
+  .slide-content[style*="--custom-text-color"] {
+    color: var(--custom-text-color) !important;
+  }
+
+  /* 强制确保标题和副标题颜色正确 */
+  .banner-carousel .slide-content[data-text-color="light"],
+  .slide-content[data-text-color="light"] {
+    color: white !important;
+  }
+
+  .banner-carousel .slide-content[data-text-color="light"] .slide-title,
+  .banner-carousel .slide-content[data-text-color="light"] .slide-subtitle,
+  .slide-content[data-text-color="light"] .slide-title,
+  .slide-content[data-text-color="light"] .slide-subtitle {
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .banner-carousel .slide-content[data-text-color="dark"],
+  .slide-content[data-text-color="dark"] {
+    color: #1a1a1a !important;
+  }
+
+  .banner-carousel .slide-content[data-text-color="dark"] .slide-title,
+  .banner-carousel .slide-content[data-text-color="dark"] .slide-subtitle,
+  .slide-content[data-text-color="dark"] .slide-title,
+  .slide-content[data-text-color="dark"] .slide-subtitle {
+    color: #1a1a1a !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+  }
+
+  /* 自定义颜色的标题和副标题 */
+  .slide-content[style*="--custom-text-color"] .slide-title,
+  .slide-content[style*="--custom-text-color"] .slide-subtitle {
+    color: var(--custom-text-color) !important;
+  }
+
+  /* 导航箭头 - 强制覆盖所有样式 */
+  .banner-carousel .carousel-arrow,
+  .carousel-arrow {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: rgba(0, 0, 0, 0.5) !important; /* 50%透明度 */
+    border: none !important;
+    border-radius: 6px !important; /* 圆角正方形 */
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    z-index: 10 !important; /* 提高层级，确保在链接之上 */
+    color: white !important; /* 白色箭头 */
+    font-size: 14px !important; /* 小箭头 */
+    font-weight: bold !important; /* 加粗箭头，确保清晰 */
+    box-shadow: none !important;
+  }
+
+  .banner-carousel .carousel-arrow:hover,
+  .carousel-arrow:hover {
+    background: rgba(0, 0, 0, 0.5) !important; /* 保持50%透明度 */
+    transform: translateY(-50%) scale(1.08) !important;
+    box-shadow: none !important;
+    color: white !important; /* 确保箭头始终白色 */
+    font-weight: bold !important; /* 确保箭头始终加粗 */
+  }
+
+  .carousel-arrow-prev {
+    left: 1rem;
+  }
+
+  .carousel-arrow-next {
+    right: 1rem;
+  }
+
+  /* 指示点 - 右下角位置 */
+  .carousel-dots {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem; /* 改为右下角 */
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10; /* 提高层级，确保在链接之上 */
+  }
+
+  .carousel-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .carousel-dot.active,
+  .carousel-dot:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 1);
+    transform: scale(1.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .slide-content {
+      padding: 1.5rem 1rem 1rem;
+    }
+
+    .slide-title {
+      font-size: 1.25rem;
+    }
+
+    .slide-subtitle {
+      font-size: 0.875rem;
+    }
+
+    .carousel-arrow {
+      width: 40px;
+      height: 40px;
+    }
+
+    .carousel-arrow-prev {
+      left: 0.5rem;
+    }
+
+    .carousel-arrow-next {
+      right: 0.5rem;
+    }
+  }
+
+
+</style>
+
+<script>
+  class BannerCarousel {
+    private container: HTMLElement;
+    private slides: NodeListOf<HTMLElement>;
+    private dots: NodeListOf<HTMLElement>;
+    private prevBtn: HTMLElement | null;
+    private nextBtn: HTMLElement | null;
+    private currentIndex: number = 0;
+    private autoPlayInterval: number | null = null;
+    private autoPlay: boolean;
+    private interval: number;
+    private boundHandlers: Map<string, EventListener> = new Map();
+
+    constructor(container: HTMLElement) {
+      this.container = container;
+      this.slides = container.querySelectorAll('.carousel-slide');
+      this.dots = container.querySelectorAll('.carousel-dot');
+      this.prevBtn = container.querySelector('[data-prev]');
+      this.nextBtn = container.querySelector('[data-next]');
+
+      this.autoPlay = container.dataset.autoPlay === 'true';
+      this.interval = parseInt(container.dataset.interval || '5000');
+
+      this.init();
+    }
+
+    private init() {
+      // 创建绑定的事件处理器
+      const prevHandler = () => this.prev();
+      const nextHandler = () => this.next();
+      const mouseEnterHandler = () => this.pauseAutoPlay();
+      const mouseLeaveHandler = () => this.resumeAutoPlay();
+      const keydownHandler = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowLeft') this.prev();
+        if (e.key === 'ArrowRight') this.next();
+      };
+
+      // 存储处理器引用以便后续清理
+      this.boundHandlers.set('prev', prevHandler);
+      this.boundHandlers.set('next', nextHandler);
+      this.boundHandlers.set('mouseenter', mouseEnterHandler);
+      this.boundHandlers.set('mouseleave', mouseLeaveHandler);
+      this.boundHandlers.set('keydown', keydownHandler);
+
+      // 绑定事件
+      this.prevBtn?.addEventListener('click', prevHandler);
+      this.nextBtn?.addEventListener('click', nextHandler);
+
+      this.dots.forEach((dot, index) => {
+        const dotHandler = () => this.goTo(index);
+        this.boundHandlers.set(`dot-${index}`, dotHandler);
+        dot.addEventListener('click', dotHandler);
+      });
+
+      // 鼠标悬停时暂停自动播放
+      this.container.addEventListener('mouseenter', mouseEnterHandler);
+      this.container.addEventListener('mouseleave', mouseLeaveHandler);
+
+      // 键盘导航
+      this.container.addEventListener('keydown', keydownHandler);
+
+      // 触摸滑动支持
+      this.addTouchSupport();
+
+      // 初始化第一个slide为active状态
+      if (this.slides.length > 0) {
+        this.slides[0].classList.add('active');
+        this.dots[0]?.classList.add('active');
+      }
+
+      // 启动自动播放
+      if (this.autoPlay && this.slides.length > 1) {
+        this.startAutoPlay();
+      }
+    }
+
+    private goTo(index: number) {
+      if (index === this.currentIndex) return;
+
+      // 移除当前活动状态
+      this.slides[this.currentIndex]?.classList.remove('active');
+      this.dots[this.currentIndex]?.classList.remove('active');
+
+      // 设置新的活动状态
+      this.currentIndex = index;
+      this.slides[this.currentIndex]?.classList.add('active');
+      this.dots[this.currentIndex]?.classList.add('active');
+    }
+
+    private next() {
+      const nextIndex = (this.currentIndex + 1) % this.slides.length;
+      this.goTo(nextIndex);
+    }
+
+    private prev() {
+      const prevIndex = (this.currentIndex - 1 + this.slides.length) % this.slides.length;
+      this.goTo(prevIndex);
+    }
+
+    private startAutoPlay() {
+      if (this.autoPlayInterval) return;
+
+      this.autoPlayInterval = window.setInterval(() => {
+        this.next();
+      }, this.interval);
+    }
+
+    private pauseAutoPlay() {
+      if (this.autoPlayInterval) {
+        clearInterval(this.autoPlayInterval);
+        this.autoPlayInterval = null;
+      }
+    }
+
+    private resumeAutoPlay() {
+      if (this.autoPlay && this.slides.length > 1) {
+        this.startAutoPlay();
+      }
+    }
+
+    private addTouchSupport() {
+      let startX = 0;
+      let startY = 0;
+      let endX = 0;
+      let endY = 0;
+
+      const touchStartHandler = (e: TouchEvent) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        // 暂停自动播放，避免冲突
+        this.pauseAutoPlay();
+      };
+
+      const touchEndHandler = (e: TouchEvent) => {
+        endX = e.changedTouches[0].clientX;
+        endY = e.changedTouches[0].clientY;
+
+        const deltaX = endX - startX;
+        const deltaY = endY - startY;
+
+        // 只有水平滑动距离大于垂直滑动距离时才触发
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+          if (deltaX > 0) {
+            this.prev();
+          } else {
+            this.next();
+          }
+        }
+
+        // 恢复自动播放
+        setTimeout(() => {
+          this.resumeAutoPlay();
+        }, 1000);
+      };
+
+      // 存储触摸事件处理器
+      this.boundHandlers.set('touchstart', touchStartHandler);
+      this.boundHandlers.set('touchend', touchEndHandler);
+
+      this.container.addEventListener('touchstart', touchStartHandler, { passive: true });
+      this.container.addEventListener('touchend', touchEndHandler, { passive: true });
+    }
+
+    // 公共方法
+    public destroy() {
+      // 停止自动播放
+      this.pauseAutoPlay();
+
+      // 移除事件监听器
+      if (this.prevBtn && this.boundHandlers.has('prev')) {
+        this.prevBtn.removeEventListener('click', this.boundHandlers.get('prev')!);
+      }
+      if (this.nextBtn && this.boundHandlers.has('next')) {
+        this.nextBtn.removeEventListener('click', this.boundHandlers.get('next')!);
+      }
+
+      this.dots.forEach((dot, index) => {
+        const handler = this.boundHandlers.get(`dot-${index}`);
+        if (handler) {
+          dot.removeEventListener('click', handler);
+        }
+      });
+
+      // 移除容器事件监听器
+      if (this.boundHandlers.has('mouseenter')) {
+        this.container.removeEventListener('mouseenter', this.boundHandlers.get('mouseenter')!);
+      }
+      if (this.boundHandlers.has('mouseleave')) {
+        this.container.removeEventListener('mouseleave', this.boundHandlers.get('mouseleave')!);
+      }
+      if (this.boundHandlers.has('keydown')) {
+        this.container.removeEventListener('keydown', this.boundHandlers.get('keydown')!);
+      }
+
+      // 移除触摸事件监听器
+      if (this.boundHandlers.has('touchstart')) {
+        this.container.removeEventListener('touchstart', this.boundHandlers.get('touchstart')!, { passive: true } as any);
+      }
+      if (this.boundHandlers.has('touchend')) {
+        this.container.removeEventListener('touchend', this.boundHandlers.get('touchend')!, { passive: true } as any);
+      }
+
+      // 清理处理器映射
+      this.boundHandlers.clear();
+    }
+  }
+
+  // 存储轮播实例，用于清理
+  const carouselInstances = new Map<HTMLElement, BannerCarousel>();
+
+  // 初始化所有轮播组件
+  function initBannerCarousels() {
+    // 清理旧实例
+    carouselInstances.forEach((instance, element) => {
+      instance.destroy();
+    });
+    carouselInstances.clear();
+
+    // 初始化新实例
+    const carousels = document.querySelectorAll('.banner-carousel');
+    carousels.forEach(carousel => {
+      const instance = new BannerCarousel(carousel as HTMLElement);
+      carouselInstances.set(carousel as HTMLElement, instance);
+    });
+
+    if (window.location.hostname === 'localhost') {
+      console.log(`🎠 初始化了 ${carousels.length} 个轮播组件`);
+    }
+  }
+
+  // 清理所有轮播实例
+  function destroyBannerCarousels() {
+    carouselInstances.forEach((instance) => {
+      instance.destroy();
+    });
+    carouselInstances.clear();
+  }
+
+  // 页面加载时初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBannerCarousels);
+  } else {
+    initBannerCarousels();
+  }
+
+  // Swup页面切换支持
+  if (window.swup) {
+    // 页面切换前清理
+    window.swup.hooks.on('content:replace', destroyBannerCarousels, { before: true });
+    // 页面切换后重新初始化
+    window.swup.hooks.on('page:view', initBannerCarousels);
+  } else {
+    // 如果Swup还没加载，监听Swup启用事件
+    document.addEventListener('swup:enable', () => {
+      if (window.swup) {
+        window.swup.hooks.on('content:replace', destroyBannerCarousels, { before: true });
+        window.swup.hooks.on('page:view', initBannerCarousels);
+      }
+    });
+  }
+</script>

@@ -1,0 +1,22 @@
+/**
+ * InfiniteGridPostList 组件样式
+ * 从 1.md 提取
+ * astro-cid: aaqyujso
+ */
+
+/**
+  * 组件样式
+  * astro-cid: aaqyujso
+  */
+  .line-clamp-2[data-astro-cid-aaqyujso]  {
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden
+  }
+  .line-clamp-3[data-astro-cid-aaqyujso]  {
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden
+  }

@@ -1,0 +1,30 @@
+/**
+ * ErrorBoundary 组件样式
+ * 从 1.md 提取
+ * astro-cid: xzmv7ixs
+ */
+
+/**
+  * 组件样式
+  * astro-cid: xzmv7ixs
+  */
+  .error-boundary[data-astro-cid-xzmv7ixs]  {
+  min-height:300px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center
+  }
+  .btn-primary[data-astro-cid-xzmv7ixs]:hover  {
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,
+0,
+0,
+0.15)
+  }
+  .btn-secondary[data-astro-cid-xzmv7ixs]:hover  {
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,
+0,
+0,
+0.1)
+  }

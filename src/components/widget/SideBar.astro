@@ -1,8 +1,9 @@
 ---
 import type { MarkdownHeading } from "astro";
 import Categories from "./Categories.astro";
-import Profile from "./Profile.astro";
-import Tag from "./Tags.astro";
+import DynamicProfile from "./DynamicProfile.astro";
+import Tags from "./Tags.astro";
+import FriendLinks from "./FriendLinks.astro";
 
 interface Props {
 	class?: string;
@@ -11,12 +12,13 @@ interface Props {
 
 const className = Astro.props.class;
 ---
-<div id="sidebar" class:list={[className, "w-full"]}>
+<div id="sidebar" class:list={[className, "w-full h-full p-4"]}>
     <div class="flex flex-col w-full gap-4 mb-4">
-        <Profile></Profile>
+        <DynamicProfile></DynamicProfile>
     </div>
-    <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
+    <div id="sidebar-sticky" class="transition-all duration-700 flex flex-col w-full gap-4">
         <Categories class="onload-animation" style="animation-delay: 150ms"></Categories>
-        <Tag class="onload-animation" style="animation-delay: 200ms"></Tag>
+        <Tags class="onload-animation" style="animation-delay: 200ms"></Tags>
+        <FriendLinks class="onload-animation" style="animation-delay: 250ms"></FriendLinks>
     </div>
 </div>

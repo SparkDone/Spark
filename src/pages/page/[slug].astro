@@ -1,0 +1,61 @@
+---
+/**
+ * 动态页面路由
+ * 使用about页面的样式，从Strapi获取内容
+ */
+
+import Markdown from "@components/misc/Markdown.astro";
+import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import { getPageBySlug, getAllPages } from "../../lib/strapi-pages";
+
+// 静态构建模式下启用预渲染
+export const prerender = true;
+
+export async function getStaticPaths() {
+  try {
+    // 获取所有页面来生成静态路径
+    const pages = await getAllPages();
+    return pages.map(page => ({
+      params: { slug: page.slug }
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for pages:', error);
+    return []; // 如果获取失败，返回空数组
+  }
+}
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/404/');
+}
+
+const page = await getPageBySlug(slug);
+
+if (!page) {
+  return Astro.redirect('/404/');
+}
+
+const title = page.metaTitle || page.title;
+const description = page.metaDescription || page.title;
+---
+
+<MainGridLayout title={title} description={description}>
+    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+        <div class="card-base z-10 px-9 py-6 relative w-full">
+            <!-- 页面标题 -->
+            <h1 class="transition w-full block font-bold mb-6
+                text-3xl md:text-[2.25rem]/[2.75rem]
+                text-black/90 dark:text-white/90
+                md:before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
+                before:absolute before:top-[0.75rem] before:left-[-1.125rem]
+            ">
+                {page.title}
+            </h1>
+            <!-- 页面内容 -->
+            <Markdown class="mt-2">
+                <div set:html={page.content}></div>
+            </Markdown>
+        </div>
+    </div>
+</MainGridLayout>

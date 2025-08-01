@@ -1,0 +1,58 @@
+# Cloudflare Pages Headers Configuration
+
+# 静态资源缓存 (1年)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 图片缓存 (30天)
+/*.jpg
+  Cache-Control: public, max-age=2592000
+
+/*.jpeg
+  Cache-Control: public, max-age=2592000
+
+/*.png
+  Cache-Control: public, max-age=2592000
+
+/*.webp
+  Cache-Control: public, max-age=2592000
+
+/*.avif
+  Cache-Control: public, max-age=2592000
+
+# 文章页面缓存 (1小时)
+/posts/*
+  Cache-Control: public, max-age=3600, s-maxage=3600
+
+# 关于页面缓存 (1天)
+/about/
+  Cache-Control: public, max-age=86400
+
+# 归档页面缓存 (1小时)
+/archive/
+  Cache-Control: public, max-age=3600
+
+# 首页短缓存 (5分钟)
+/
+  Cache-Control: public, max-age=300, s-maxage=300
+
+# API端点不缓存
+/api/*
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# RSS和站点地图缓存 (1小时)
+/rss.xml
+  Cache-Control: public, max-age=3600
+
+/sitemap*.xml
+  Cache-Control: public, max-age=3600
+
+# 安全头
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()

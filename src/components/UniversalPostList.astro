@@ -1,0 +1,192 @@
+---
+import type { CollectionEntry } from "astro:content";
+import path from "node:path";
+import { Icon } from "astro-icon/components";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+import { getDir, getPostUrlBySlug, getTagUrl } from "../utils/url-utils";
+import ImageWrapper from "./misc/ImageWrapper.astro";
+import PostMetadata from "./PostMeta.astro";
+import "../styles/components/universal-post-list.css";
+
+interface Props {
+  posts: CollectionEntry<"posts">[];
+  defaultLayout?: 'grid' | 'masonry';
+  class?: string;
+}
+
+const {
+  posts,
+  defaultLayout = 'grid',
+  class: className = ''
+} = Astro.props;
+
+// 判断是否需要居中显示（文章数量少于等于3篇时）
+const shouldCenter = posts.length <= 3;
+
+// 处理不同数据源的统一函数
+async function processPostData(entry: CollectionEntry<"posts">) {
+  let remarkPluginFrontmatter;
+
+  if (entry.render) {
+    // Astro Content Collection 数据
+    const renderResult = await entry.render();
+    remarkPluginFrontmatter = renderResult.remarkPluginFrontmatter;
+  } else {
+    // Strapi 数据 - 使用 reading-time 插件自动计算
+    const getReadingTime = (await import('reading-time')).default;
+    const content = entry.body || '';
+    const readingTimeStats = getReadingTime(content);
+
+    remarkPluginFrontmatter = {
+      words: readingTimeStats.words,
+      minutes: Math.max(1, Math.round(readingTimeStats.minutes)),
+      excerpt: entry.data.description || content.substring(0, 150) + '...'
+    };
+  }
+
+  return remarkPluginFrontmatter;
+}
+
+// 预处理所有文章数据
+const processedPosts = await Promise.all(
+  posts.map(async (entry, index) => {
+    const remarkPluginFrontmatter = await processPostData(entry);
+    return {
+      entry,
+      remarkPluginFrontmatter,
+      index,
+      url: getPostUrlBySlug(entry.slug),
+      hasCover: entry.data.image && entry.data.image.trim() !== ""
+    };
+  })
+);
+---
+
+<!-- 统一文章列表容器 -->
+<div
+  class={`universal-post-list ${className}`}
+  data-layout={defaultLayout}
+  data-total-posts={posts.length}
+  data-center={shouldCenter}
+>
+  <!-- 空状态处理 -->
+  {posts.length === 0 && (
+    <div class="empty-state">
+      <div class="empty-state-content">
+        <Icon name="material-symbols:article-outline" class="empty-icon" />
+        <h3 class="empty-title">No Posts Available</h3>
+        <p class="empty-description">
+          Development environment cannot connect to Strapi. Please check if Strapi service is running or configure the correct API Token.
+        </p>
+        <div class="dev-tips">
+          <p><strong>Development Tips:</strong></p>
+          <ul>
+            <li>Ensure Strapi service is running at <code>http://localhost:1337</code></li>
+            <li>Check <code>STRAPI_API_TOKEN</code> in <code>.env.local</code></li>
+            <li>Or add some test articles in Strapi</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {processedPosts.map(({ entry, remarkPluginFrontmatter, index, url, hasCover }) => (
+    <article 
+      class="post-item onload-animation"
+      style={`animation-delay: calc(var(--content-delay) + ${index * 50}ms);`}
+      data-post-id={entry.slug}
+      data-has-cover={hasCover}
+    >
+      <!-- 文章图片 -->
+      {hasCover && (
+        <div class="post-image">
+          <a href={url} aria-label={entry.data.title} class="image-link">
+            <div class="image-overlay"></div>
+            <div class="image-icon">
+              <Icon name="material-symbols:chevron-right-rounded" class="chevron-icon" />
+            </div>
+            <ImageWrapper
+              src={entry.data.image}
+              basePath={path.join("content/posts/", getDir(entry.id))}
+              alt={`Cover image for ${entry.data.title}`}
+              class="post-cover-image"
+            />
+          </a>
+        </div>
+      )}
+
+      <!-- 文章内容 -->
+      <div class="post-content">
+        <!-- 标题 - 所有布局都显示 -->
+        <a href={url} class="post-title-link">
+          <h3 class="post-title">
+            {entry.data.title}
+            <Icon class="title-chevron" name="material-symbols:chevron-right-rounded" />
+          </h3>
+        </a>
+
+        <!-- 描述 -->
+        {(entry.data.description || remarkPluginFrontmatter.excerpt) && (
+          <div class="post-description">
+            {entry.data.description || remarkPluginFrontmatter.excerpt}
+          </div>
+        )}
+
+        <!-- 日期和分类信息 -->
+        <div class="post-meta">
+          <span class="post-date">
+            {new Date(entry.data.published).toLocaleDateString('zh-CN', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })}
+          </span>
+          {entry.data.category && (
+            <div class="category-section">
+              <span class="meta-separator">·</span>
+              <a href={`/categories/${entry.data.category.toLowerCase().replace(/\s+/g, '-')}/`} class="post-category-link">
+                <span class="post-category">
+                  {entry.data.category}
+                </span>
+              </a>
+            </div>
+          )}
+
+          <!-- 列表模式专用：标签和复制链接 -->
+          <div class="masonry-only-meta">
+            <!-- 标签 -->
+            {entry.data.tags && entry.data.tags.length > 0 && (
+              <>
+                {entry.data.tags.map((tag) => (
+                  <>
+                    <span class="meta-separator">·</span>
+                    <a href={getTagUrl(tag)} class="post-tag-link">
+                      <span class="post-tag">#{tag}</span>
+                    </a>
+                  </>
+                ))}
+              </>
+            )}
+
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 无图片时的进入按钮 -->
+      {!hasCover && (
+        <div class="post-enter-btn">
+          <a href={url} aria-label={entry.data.title} class="enter-btn">
+            <Icon name="material-symbols:chevron-right-rounded" class="enter-icon" />
+          </a>
+        </div>
+      )}
+
+    </article>
+  ))}
+</div>
+
+
+
+

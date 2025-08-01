@@ -1,0 +1,146 @@
+---
+/**
+ * 高级资源预加载提示组件 - 环境感知的资源预加载
+ */
+
+// 获取站点配置
+import { siteConfig } from "@/config";
+
+// 获取环境变量中的Strapi URL - 使用环境变量或默认值
+const strapiUrl = import.meta.env.STRAPI_PUBLIC_URL || import.meta.env.STRAPI_URL || 'http://localhost:1337';
+
+// 解析URL获取域名和协议
+let strapiDomain = 'localhost:1337';
+let strapiProtocol = 'http:';
+
+try {
+  const url = new URL(strapiUrl);
+  strapiDomain = url.host; // 包含端口号
+  strapiProtocol = url.protocol;
+} catch (error) {
+  console.warn('解析Strapi URL失败，使用默认值:', error);
+}
+
+// 根据环境判断是否需要预加载
+const isDev = import.meta.env.DEV;
+const isProd = import.meta.env.PROD;
+
+// 关键CSS文件 - 移除硬编码的文件名，让Astro自动处理
+// 这些文件名在每次构建时都会变化，硬编码会导致404错误
+const criticalCSS = [];
+// 注释：Astro会自动处理CSS的预加载和优化
+
+// 根据页面类型决定是否预加载JavaScript
+const currentPath = Astro.url.pathname;
+const isHomePage = currentPath === '/';
+const isPostPage = currentPath.startsWith('/posts/');
+const isArchivePage = currentPath.startsWith('/archive');
+const isCategoryPage = currentPath.startsWith('/categories/');
+
+// 简化预加载策略：不预加载易变的JavaScript文件
+// 这些文件名在每次构建时都会变化，预加载它们容易导致404错误
+// 让浏览器自然加载这些文件，现代浏览器的缓存机制已经足够高效
+const criticalJS = [];
+// 移除JavaScript预加载，避免构建后文件名变化导致的404错误
+
+// 第三方域名预连接
+const thirdPartyDomains = [
+  'fonts.googleapis.com',
+  'fonts.gstatic.com'
+];
+
+---
+
+<!-- 高级资源预加载优化 - 环境感知 -->
+
+{/* 1. DNS预解析 - 提前解析域名 */}
+<link rel="dns-prefetch" href={`//${strapiDomain}`}>
+{thirdPartyDomains.map(domain => (
+  <link rel="dns-prefetch" href={`//${domain}`}>
+))}
+
+{/* 2. 预连接 - 建立连接 */}
+<link rel="preconnect" href={`${strapiProtocol}//${strapiDomain}`} crossorigin>
+{thirdPartyDomains.map(domain => (
+  <link rel="preconnect" href={`https://${domain}`} crossorigin>
+))}
+
+{/* 3. 预加载关键CSS */}
+{criticalCSS.map(css => (
+  <link rel="preload" href={css} as="style">
+))}
+
+{/* 4. 预加载关键JavaScript */}
+{criticalJS.map(js => (
+  <link rel="preload" href={js} as="script" crossorigin>
+))}
+
+{/* 5. 模块预加载（现代浏览器，仅在需要的页面） */}
+{isProd && criticalJS.length > 0 && (
+  <>
+    {criticalJS.map(js => (
+      <link rel="modulepreload" href={js}>
+    ))}
+  </>
+)}
+
+{/* 开发环境的额外提示 */}
+{isDev && (
+  <>
+    <!-- 开发环境资源提示 -->
+    <link rel="dns-prefetch" href="//localhost">
+    <link rel="preconnect" href="http://localhost:4321" crossorigin>
+  </>
+)}
+
+{/* 环境信息注释（仅开发环境） */}
+{isDev && (
+  <!--
+    资源预加载配置:
+    - Strapi URL: {strapiUrl}
+    - Strapi Domain: {strapiDomain}
+    - Environment: {import.meta.env.MODE}
+    - Current Path: {currentPath}
+    - Is Home Page: {isHomePage}
+    - Is Post Page: {isPostPage}
+    - Is Archive Page: {isArchivePage}
+    - Critical JS Count: {criticalJS.length}
+    - Critical JS Files: {criticalJS.join(', ')}
+  -->
+)}
+
+<style>
+  /* 确保资源提示不影响布局 */
+  link[rel="dns-prefetch"],
+  link[rel="preconnect"],
+  link[rel="preload"] {
+    display: none;
+  }
+</style>
+
+<script>
+  // 客户端资源预加载监控（仅开发环境且非构建模式）
+  if (import.meta.env.DEV && !import.meta.env.PROD) {
+    const strapiUrl = import.meta.env.STRAPI_PUBLIC_URL || import.meta.env.STRAPI_URL || 'http://localhost:1337';
+    const strapiDomain = strapiUrl.replace(/^https?:\/\//, '');
+
+    console.log('🔗 资源预加载配置:', {
+      strapiUrl: strapiUrl,
+      strapiDomain: strapiDomain,
+      environment: import.meta.env.MODE
+    });
+
+    // 监控预加载资源的加载状态
+    document.addEventListener('DOMContentLoaded', () => {
+      const preloadLinks = document.querySelectorAll('link[rel="preload"]');
+      preloadLinks.forEach(link => {
+        link.addEventListener('load', () => {
+          console.log('✅ 预加载成功:', link.href);
+        });
+        link.addEventListener('error', () => {
+          console.warn('❌ 预加载失败:', link.href);
+        });
+      });
+    });
+  }
+</script>

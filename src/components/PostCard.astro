@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { PostEntry } from "../types/post";
 import path from "node:path";
 import { Icon } from "astro-icon/components";
 import I18nKey from "../i18n/i18nKey";
@@ -10,7 +10,7 @@ import PostMetadata from "./PostMeta.astro";
 
 interface Props {
 	class?: string;
-	entry: CollectionEntry<"posts">;
+	entry: PostEntry;
 	title: string;
 	url: string;
 	published: Date;
@@ -40,12 +40,30 @@ const hasCover = image !== undefined && image !== null && image !== "";
 
 const coverWidth = "28%";
 
-const { remarkPluginFrontmatter } = await entry.render();
+// 处理不同的数据源（Astro Content Collection vs Strapi）
+let remarkPluginFrontmatter;
+
+if (entry.render) {
+	// Astro Content Collection 数据
+	const renderResult = await entry.render();
+	remarkPluginFrontmatter = renderResult.remarkPluginFrontmatter;
+} else {
+	// Strapi 数据 - 使用 reading-time 插件自动计算
+	const getReadingTime = (await import('reading-time')).default;
+	const content = entry.body || '';
+	const readingTimeStats = getReadingTime(content);
+
+	remarkPluginFrontmatter = {
+		words: readingTimeStats.words,
+		minutes: Math.max(1, Math.round(readingTimeStats.minutes)),
+		excerpt: entry.data.description || content.substring(0, 150) + '...'
+	};
+}
 ---
 <div class:list={["card-base flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative", className]} style={style}>
     <div class:list={["pl-6 md:pl-9 pr-6 md:pr-2 pt-6 md:pt-7 pb-6 relative", {"w-full md:w-[calc(100%_-_52px_-_12px)]": !hasCover, "w-full md:w-[calc(100%_-_var(--coverWidth)_-_12px)]": hasCover}]}>
         <a href={url}
-           class="transition group w-full block font-bold mb-3 text-3xl text-90
+           class="transition group w-full block font-bold mb-3 text-[1.2rem] text-90
         hover:text-[var(--primary)] dark:hover:text-[var(--primary)]
         active:text-[var(--title-active)] dark:active:text-[var(--title-active)]
         before:w-1 before:h-5 before:rounded-md before:bg-[var(--primary)]
@@ -106,5 +124,4 @@ const { remarkPluginFrontmatter } = await entry.render();
 </div>
 <div class="transition border-t-[1px] border-dashed mx-6 border-black/10 dark:border-white/[0.15] last:border-t-0 md:hidden"></div>
 
-<style define:vars={{coverWidth}}>
-</style>
+

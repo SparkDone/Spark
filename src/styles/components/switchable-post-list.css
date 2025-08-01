@@ -1,0 +1,19 @@
+/**
+ * SwitchablePostList 组件样式
+ * 从 1.md 提取
+ * astro-cid: h2vjdwgc
+ */
+
+/**
+  * 组件样式
+  * astro-cid: h2vjdwgc
+  */
+  .layout-container[data-astro-cid-h2vjdwgc]  {
+  width:100%
+  }
+  .line-clamp-2[data-astro-cid-h2vjdwgc]  {
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden
+  }

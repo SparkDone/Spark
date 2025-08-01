@@ -5,95 +5,92 @@ import Navbar from "@components/Navbar.astro";
 import SideBar from "@components/widget/SideBar.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
-import ImageWrapper from "../components/misc/ImageWrapper.astro";
-import TOC from "../components/widget/TOC.astro";
+
 import { siteConfig } from "../config";
-import {
-	BANNER_HEIGHT,
-	BANNER_HEIGHT_EXTEND,
-	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
-} from "../constants/constants";
+// Banner常量导入已删除
+// import {
+//	BANNER_HEIGHT,
+//	BANNER_HEIGHT_EXTEND,
+//	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT,
+// } from "../constants/constants";
 import Layout from "./Layout.astro";
+// import type { BannerData } from "../utils/banner-utils"; // Banner已删除
 
 interface Props {
 	title?: string;
-	banner?: string;
+	// banner?: BannerData | null; // Banner已删除
 	description?: string;
 	lang?: string;
 	setOGTypeArticle?: boolean;
 	headings?: MarkdownHeading[];
+	author?: string;
 }
 
 const {
 	title,
-	banner,
 	description,
 	lang,
 	setOGTypeArticle,
 	headings = [],
+	author,
 } = Astro.props;
-const hasBannerCredit =
-	siteConfig.banner.enable && siteConfig.banner.credit.enable;
-const hasBannerLink = !!siteConfig.banner.credit.url;
 
-const mainPanelTop = siteConfig.banner.enable
-	? `calc(${BANNER_HEIGHT}vh - ${MAIN_PANEL_OVERLAPS_BANNER_HEIGHT}rem)`
-	: "5.5rem";
+// 判断是否显示Banner - 已删除
+// const showBanner = banner && banner.src;
+// const hasBannerCredit = showBanner && banner.creditText;
+// const hasBannerLink = showBanner && banner.creditUrl;
+
+const mainPanelTop = "5.5rem"; // 固定高度，不再依赖Banner
 ---
 
-<Layout title={title} banner={banner} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle}>
+<Layout title={title} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} author={author}>
 
 <!-- Navbar -->
 <slot slot="head" name="head"></slot>
-<div id="top-row" class="z-50 pointer-events-none relative transition-all duration-700 max-w-[var(--page-width)] px-0 md:px-4 mx-auto" class:list={[""]}>
-    <div id="navbar-wrapper" class="pointer-events-auto sticky top-0 transition-all">
+<div id="top-row" class="z-50 pointer-events-none fixed top-0 left-0 right-0 transition-all duration-700 w-full" class:list={[""]}>
+    <div id="navbar-wrapper" class="pointer-events-auto transition-all">
         <Navbar></Navbar>
     </div>
 </div>
 
-<!-- Banner -->
-{siteConfig.banner.enable && <div id="banner-wrapper" class={`absolute z-10 w-full transition duration-700 overflow-hidden`} style={`top: -${BANNER_HEIGHT_EXTEND}vh`}>
-    <ImageWrapper id="banner" alt="Banner image of the blog" class:list={["object-cover h-full transition duration-700 opacity-0 scale-105"]}
-                  src={siteConfig.banner.src} position={siteConfig.banner.position}
-    >
-    </ImageWrapper>
-</div>}
+<!-- Banner已删除 -->
 
-<!-- Main content -->
-<div class="absolute w-full z-30 pointer-events-none" style={`top: ${mainPanelTop}`}>
-    <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
-    <div class="relative max-w-[var(--page-width)] mx-auto pointer-events-auto">
-        <div id="main-grid" class="transition duration-700 w-full left-0 right-0 grid grid-cols-[17.5rem_auto] grid-rows-[auto_1fr_auto] lg:grid-rows-[auto]
-    mx-auto gap-4 px-0 md:px-4"
-        >
-            <!-- Banner image credit -->
-            {hasBannerCredit && <a href={siteConfig.banner.credit.url} id="banner-credit" target="_blank" rel="noopener" aria-label="Visit image source"
-                                   class:list={["group onload-animation transition-all absolute flex justify-center items-center rounded-full " +
-                                   "px-3 right-4 -top-[3.25rem] bg-black/60 hover:bg-black/70 h-9", {"hover:pr-9 active:bg-black/80": hasBannerLink}]}
-            >
-                <Icon class="text-white/75 text-[1.25rem] mr-1" name="material-symbols:copyright-outline-rounded" ></Icon>
-                <div class="text-white/75 text-xs">{siteConfig.banner.credit.text}</div>
-                <Icon class:list={["transition absolute text-[oklch(0.75_0.14_var(--hue))] right-4 text-[0.75rem] opacity-0",
-                    {"group-hover:opacity-100": hasBannerLink}]}
-                      name="fa6-solid:arrow-up-right-from-square">
-                </Icon>
-            </a>}
+<!-- Fixed Left Sidebar - 在大屏幕上显示，小屏幕上隐藏 -->
+<div id="sidebar-desktop" class="sidebar-hidden fixed left-0 z-40 w-[280px] bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-r border-gray-200/20 dark:border-gray-700/20 overflow-y-auto sidebar-scroll" style={`top: 4.5rem; bottom: 0; height: calc(100vh - 4.5rem); padding-bottom: 20px; pointer-events: auto; user-select: text;`}>
+    <SideBar class="onload-animation" headings={headings}></SideBar>
+</div>
 
+<!-- Mobile Sidebar Overlay - 移动端抽屉式侧边栏 -->
+<div id="sidebar-overlay" class="fixed inset-0 z-40 opacity-0 pointer-events-none transition-opacity duration-300 bg-black/50">
+    <div id="sidebar-mobile" class="fixed left-0 top-0 z-50 w-[280px] bg-white dark:bg-gray-900 transform -translate-x-full transition-transform duration-300 overflow-y-auto sidebar-scroll" style={`padding-top: 4.5rem; height: 100vh; padding-bottom: 20px; user-select: text;`}>
+        <SideBar class="onload-animation" headings={headings}></SideBar>
+    </div>
+</div>
 
-            <SideBar class="mb-4 row-start-2 row-end-3 col-span-2 lg:row-start-1 lg:row-end-2 lg:col-span-1 lg:max-w-[17.5rem] onload-animation" headings={headings}></SideBar>
+<!-- Mobile Sidebar Toggle Button - 移动端侧边栏切换按钮 -->
+<button id="mobile-sidebar-toggle" class="hidden fixed left-4 z-30 w-12 h-12 bg-white dark:bg-gray-900 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors shadow-lg" style="top: 5.5rem;">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+    </svg>
+</button>
 
-            <main id="swup-container" class="transition-swup-fade col-span-2 lg:col-span-1 overflow-hidden">
+<!-- Main content - 在大屏幕上添加左边距，小屏幕上全宽 -->
+<div class="w-full z-20 pt-[4.5rem]">
+    <!-- 移除pointer-events-none，避免影响其他元素 -->
+    <div class="relative w-full">
+        <div id="main-grid" class="transition duration-700">
+            <!-- Banner image credit 已删除 -->
+
+            <main id="swup-container" class="transition-swup-fade w-full">
                 <div id="content-wrapper" class="onload-animation">
                     <!-- the overflow-hidden here prevent long text break the layout-->
                     <!-- make id different from windows.swup global property -->
                     <slot></slot>
-                    <div class="footer col-span-2 onload-animation hidden lg:block">
-                        <Footer></Footer>
-                    </div>
                 </div>
             </main>
 
-            <div class="footer col-span-2 onload-animation block lg:hidden">
+            <!-- Footer在主内容区域内 -->
+            <div class="footer-content onload-animation">
                 <Footer></Footer>
             </div>
         </div>
@@ -102,24 +99,338 @@ const mainPanelTop = siteConfig.banner.enable
     </div>
 </div>
 
-<!-- The things that should be under the banner, only the TOC for now -->
-<div class="absolute w-full z-0 hidden 2xl:block">
-    <div class="relative max-w-[var(--page-width)] mx-auto">
-        <!-- TOC component -->
-        {siteConfig.toc.enable && <div id="toc-wrapper" class:list={["hidden lg:block transition absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] items-center",
-            {"toc-hide": siteConfig.banner.enable}]}
-        >
-            <div id="toc-inner-wrapper" class="fixed top-14 w-[var(--toc-width)] h-[calc(100vh_-_20rem)] overflow-y-scroll overflow-x-hidden hide-scrollbar">
-                <div id="toc" class="w-full h-full transition-swup-fade ">
-                    <div class="h-8 w-full"></div>
-                    <TOC headings={headings}></TOC>
-                    <div class="h-8 w-full"></div>
-                </div>
-            </div>
-        </div>}
-
-        <!-- #toc needs to exist for Swup to work normally -->
-        {!siteConfig.toc.enable && <div id="toc"></div>}
-    </div>
-</div>
 </Layout>
+<!-- Banner脚本已删除 -->
+<script>
+
+
+</script>
+
+<!-- Banner CSS样式已删除 -->
+
+<script>
+
+
+    // 首页Banner函数已删除
+
+    // 分类Banner函数已删除
+
+    // 所有Banner相关函数已删除
+</script>
+
+
+
+<script>
+// 智能侧边栏控制系统
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const sidebarMobile = document.getElementById('sidebar-mobile');
+    const sidebarDesktop = document.getElementById('sidebar-desktop');
+
+    if (!mobileToggle || !sidebarOverlay || !sidebarMobile || !sidebarDesktop) return;
+
+    // 智能折叠状态：根据窗口宽度初始化
+    const currentWidth = window.innerWidth;
+    window.isAutoCollapsed = currentWidth < 1500;
+    window.wasInSmartMode = currentWidth >= 1200 && currentWidth < 1500;
+    console.log('🎯 初始化智能侧边栏系统，窗口宽度:', currentWidth, '折叠状态:', window.isAutoCollapsed);
+
+    // 打开侧边栏
+    function openSidebar() {
+        if (import.meta.env.DEV) console.log('📂 执行打开侧边栏');
+        sidebarOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        sidebarOverlay.classList.add('opacity-100');
+        sidebarMobile.classList.remove('-translate-x-full');
+        document.body.style.overflow = 'hidden';
+        if (import.meta.env.DEV) console.log('✅ 侧边栏已打开');
+    }
+
+    // 关闭侧边栏
+    function closeSidebar() {
+        if (import.meta.env.DEV) console.log('📁 执行关闭侧边栏');
+        sidebarOverlay.classList.add('opacity-0', 'pointer-events-none');
+        sidebarOverlay.classList.remove('opacity-100');
+        sidebarMobile.classList.add('-translate-x-full');
+        document.body.style.overflow = '';
+        if (import.meta.env.DEV) console.log('✅ 侧边栏已关闭');
+    }
+
+    // 折叠按钮点击事件
+    mobileToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const currentWidth = window.innerWidth;
+
+        console.log('🔘 折叠按钮被点击，窗口宽度:', currentWidth);
+
+        if (currentWidth >= 1200 && currentWidth < 1500) {
+            // 1200-1500px：智能折叠模式
+            if (window.isAutoCollapsed) {
+                // 当前是折叠状态，点击展开
+                window.isAutoCollapsed = false;
+                sidebarDesktop.classList.remove('sidebar-hidden');
+                sidebarDesktop.classList.add('sidebar-visible');
+                // 移除任何内联样式，让CSS类生效
+                sidebarDesktop.style.removeProperty('display');
+                mobileToggle.style.display = 'none'; // 隐藏按钮，因为侧边栏z-index更高
+                console.log('🔓 智能展开侧边栏');
+            }
+        } else if (currentWidth < 1200) {
+            // 移动端：原有逻辑
+            console.log('📱 移动端模式');
+            if (sidebarOverlay.classList.contains('opacity-0')) {
+                console.log('🔓 打开移动端侧边栏');
+                openSidebar();
+            } else {
+                console.log('🔒 关闭移动端侧边栏');
+                closeSidebar();
+            }
+        }
+    });
+
+    // 点击空白区域自动折叠侧边栏
+    document.addEventListener('click', function(e) {
+        const currentWidth = window.innerWidth;
+
+        if (currentWidth >= 1200 && currentWidth < 1500 && !window.isAutoCollapsed) {
+            // 检查点击的是否是侧边栏或其子元素
+            if (!sidebarDesktop.contains(e.target) && !mobileToggle.contains(e.target)) {
+                console.log('🔒 点击空白区域，自动折叠侧边栏');
+                window.isAutoCollapsed = true;
+                sidebarDesktop.classList.remove('sidebar-visible');
+                sidebarDesktop.classList.add('sidebar-hidden');
+                sidebarDesktop.style.removeProperty('display');
+                mobileToggle.style.display = 'flex'; // 显示折叠按钮
+            }
+        }
+    });
+
+    // 点击侧边栏内的链接后自动折叠
+    sidebarDesktop.addEventListener('click', function(e) {
+        const currentWidth = window.innerWidth;
+
+        if (currentWidth >= 1200 && currentWidth < 1500 && !window.isAutoCollapsed) {
+            // 检查点击的是否是链接
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                console.log('🔗 点击侧边栏链接，自动折叠');
+                setTimeout(() => {
+                    window.isAutoCollapsed = true;
+                    sidebarDesktop.classList.remove('sidebar-visible');
+                    sidebarDesktop.classList.add('sidebar-hidden');
+                    sidebarDesktop.style.removeProperty('display');
+                    mobileToggle.style.display = 'flex';
+                }, 100); // 延迟一点让导航先执行
+            }
+        }
+    });
+
+    // 点击遮罩层关闭侧边栏
+    sidebarOverlay.addEventListener('click', function(e) {
+        if (e.target === sidebarOverlay) {
+            closeSidebar();
+        }
+    });
+
+    // ESC键关闭侧边栏
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !sidebarOverlay.classList.contains('opacity-0')) {
+            closeSidebar();
+        }
+    });
+
+    // 动态控制侧边栏显示
+    function updateSidebarDisplay() {
+        const sidebarDesktop = document.getElementById('sidebar-desktop');
+        const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const currentWidth = window.innerWidth;
+
+        // 只在开发环境或宽度变化较大时输出日志
+        if (import.meta.env.DEV && Math.abs(currentWidth - (window.lastLoggedWidth || 0)) > 100) {
+            console.log(`🔍 窗口宽度: ${currentWidth}px, 当前折叠状态: ${window.isAutoCollapsed}, 智能模式标记: ${window.wasInSmartMode}`);
+            window.lastLoggedWidth = currentWidth;
+        }
+
+        if (currentWidth >= 1500) {
+            // ≥1500px：始终显示侧边栏，隐藏按钮
+            window.isAutoCollapsed = false;
+            if (sidebarDesktop) {
+                sidebarDesktop.classList.remove('sidebar-hidden');
+                sidebarDesktop.classList.add('sidebar-visible');
+                // 移除任何内联样式，让CSS类生效
+                sidebarDesktop.style.removeProperty('display');
+                if (window.location.hostname === 'localhost') {
+                    console.log('🖥️ 大屏模式：侧边栏始终显示');
+                }
+            }
+            if (mobileToggle) {
+                mobileToggle.style.display = 'none';
+                if (window.location.hostname === 'localhost') {
+                    console.log('🚫 大屏模式：隐藏折叠按钮');
+                }
+            }
+            if (sidebarOverlay) {
+                sidebarOverlay.style.display = 'none';
+            }
+            // 大屏模式下不需要关闭侧边栏，因为使用的是桌面版侧边栏
+        } else if (currentWidth >= 1200) {
+            // 1200-1500px：智能折叠模式
+            // 重要修复：进入智能模式时，如果之前不是智能模式，则重置为折叠状态
+            if (!window.wasInSmartMode) {
+                window.isAutoCollapsed = true;
+                window.wasInSmartMode = true;
+                if (window.location.hostname === 'localhost') {
+                    console.log('🧠 进入智能折叠模式，重置为折叠状态');
+                }
+            }
+
+            if (window.isAutoCollapsed) {
+                // 折叠状态：隐藏侧边栏，显示按钮
+                sidebarDesktop.classList.remove('sidebar-visible');
+                sidebarDesktop.classList.add('sidebar-hidden');
+                sidebarDesktop.style.removeProperty('display');
+                mobileToggle.style.display = 'flex';
+                if (window.location.hostname === 'localhost') {
+                    console.log('🔒 智能模式：侧边栏已折叠');
+                }
+            } else {
+                // 展开状态：显示侧边栏，隐藏按钮
+                sidebarDesktop.classList.remove('sidebar-hidden');
+                sidebarDesktop.classList.add('sidebar-visible');
+                // 移除任何内联样式，让CSS类生效
+                sidebarDesktop.style.removeProperty('display');
+                mobileToggle.style.display = 'none';
+                console.log('🔓 智能模式：侧边栏已展开');
+            }
+            if (sidebarOverlay) {
+                sidebarOverlay.style.display = 'none';
+            }
+            // 只在移动端侧边栏打开时才关闭
+            if (!sidebarMobile.classList.contains('-translate-x-full')) {
+                closeSidebar();
+            }
+        } else {
+            // <1200px：移动端模式
+            window.isAutoCollapsed = true;
+            window.wasInSmartMode = false;
+            if (sidebarDesktop) {
+                // 使用专用CSS类隐藏，保持fixed定位
+                sidebarDesktop.classList.remove('sidebar-visible');
+                sidebarDesktop.classList.add('sidebar-hidden');
+                // 移除任何内联样式，让CSS类生效
+                sidebarDesktop.style.removeProperty('display');
+                if (window.location.hostname === 'localhost') {
+                    console.log('📱 移动端模式：隐藏桌面侧边栏');
+                }
+            }
+            if (mobileToggle) {
+                mobileToggle.style.display = 'flex';
+                if (window.location.hostname === 'localhost') {
+                    console.log('📱 移动端模式：显示控制按钮');
+                }
+            }
+            if (sidebarOverlay) {
+                sidebarOverlay.style.display = 'block';
+                if (window.location.hostname === 'localhost') {
+                    console.log('📱 移动端模式：显示遮罩层');
+                }
+            }
+            // 确保移动端侧边栏也是关闭状态
+            closeSidebar();
+        }
+
+        // 在大屏模式下，标记不在智能模式
+        if (currentWidth >= 1500) {
+            window.wasInSmartMode = false;
+        }
+    }
+
+    // 优化的resize事件处理 - 立即响应 + 防抖优化
+    let resizeTimer;
+    let lastWidth = window.innerWidth;
+
+    window.addEventListener('resize', function() {
+        const currentWidth = window.innerWidth;
+
+        // 检查是否跨越了关键断点
+        const crossedBreakpoint =
+            (lastWidth >= 1500 && currentWidth < 1500) ||
+            (lastWidth < 1500 && currentWidth >= 1500) ||
+            (lastWidth >= 1200 && currentWidth < 1200) ||
+            (lastWidth < 1200 && currentWidth >= 1200);
+
+        if (crossedBreakpoint) {
+            // 跨越断点时立即响应
+            if (window.location.hostname === 'localhost') {
+                console.log(`⚡ 跨越断点：${lastWidth}px → ${currentWidth}px，立即更新`);
+            }
+            clearTimeout(resizeTimer);
+            updateSidebarDisplay();
+            lastWidth = currentWidth;
+        } else {
+            // 同一区间内的变化使用防抖，增加防抖时间
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                updateSidebarDisplay();
+                lastWidth = window.innerWidth;
+            }, 150); // 增加防抖时间，减少频繁触发
+        }
+    });
+
+    // 状态验证函数 - 仅在必要时验证
+    function validateSidebarState(force = false) {
+        const currentWidth = window.innerWidth;
+        const sidebarDesktop = document.getElementById('sidebar-desktop');
+        const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+
+        if (!sidebarDesktop || !mobileToggle) return;
+
+        const isVisible = window.getComputedStyle(sidebarDesktop).display !== 'none';
+        const buttonVisible = window.getComputedStyle(mobileToggle).display !== 'none';
+
+        // 只在强制验证或调试模式下输出日志
+        if (force || window.location.search.includes('debug=sidebar')) {
+            console.log(`🔧 状态验证 - 宽度:${currentWidth}px, 侧边栏可见:${isVisible}, 按钮可见:${buttonVisible}, 折叠状态:${window.isAutoCollapsed}`);
+        }
+
+        // 检查状态是否正确
+        let needsUpdate = false;
+
+        if (currentWidth >= 1500) {
+            // 大屏模式：侧边栏应该显示，按钮应该隐藏
+            if (!isVisible || buttonVisible) needsUpdate = true;
+        } else if (currentWidth >= 1200) {
+            // 智能模式：根据折叠状态
+            if (window.isAutoCollapsed) {
+                if (isVisible || !buttonVisible) needsUpdate = true;
+            } else {
+                if (!isVisible || buttonVisible) needsUpdate = true;
+            }
+        } else {
+            // 移动端：桌面侧边栏应该隐藏，按钮应该显示
+            if (isVisible || !buttonVisible) needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+            console.log('⚠️ 检测到状态不一致，强制更新');
+            updateSidebarDisplay();
+        }
+    }
+
+    // 页面加载时初始化
+    updateSidebarDisplay();
+
+    // 优化：只在页面可见性变化时验证状态（例如从其他标签页切回来）
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            // 页面重新可见时验证一次状态
+            setTimeout(() => validateSidebarState(true), 100);
+        }
+    });
+
+    // 优化：在窗口获得焦点时验证一次状态
+    window.addEventListener('focus', function() {
+        setTimeout(() => validateSidebarState(true), 100);
+    });
+});
+</script>

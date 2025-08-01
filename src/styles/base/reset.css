@@ -1,0 +1,67 @@
+/**
+ * 基础重置样式
+ * 提供一致的浏览器默认样式重置
+ */
+
+/* 基础重置 - 这些样式通常由 Tailwind 提供，这里作为备用 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 确保图片响应式 */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 按钮重置 */
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* 链接重置 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 列表重置 */
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 表单元素重置 */
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 确保可访问性 */
+:focus-visible {
+  outline: 2px solid var(--primary, #3b82f6);
+  outline-offset: 2px;
+}

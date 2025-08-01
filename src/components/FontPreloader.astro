@@ -1,0 +1,53 @@
+---
+/**
+ * 简化的字体预加载组件 - 只预加载实际使用的字体
+ */
+
+// 获取环境信息
+const isDev = import.meta.env.DEV;
+const isProd = import.meta.env.PROD;
+
+---
+
+<!-- 简化的字体预加载优化 -->
+
+<!-- Google Fonts DNS预解析和预连接 -->
+<link rel="dns-prefetch" href="//fonts.googleapis.com">
+<link rel="dns-prefetch" href="//fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- 简化的字体优化CSS -->
+<style is:inline>
+  /* 防止字体加载时的布局偏移 */
+  body {
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  /* 字体加载期间的回退样式 */
+  .font-loading {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+</style>
+
+<!-- 简化的字体加载检测 - 避免字体切换 -->
+<script is:inline>
+  // 预加载字体但不改变显示状态，避免页面切换时字体变化
+  if ('fonts' in document) {
+    // 预加载Noto Sans SC字体的常用字重
+    const fontPromises = [
+      document.fonts.load('400 1em "Noto Sans SC"'),
+      document.fonts.load('500 1em "Noto Sans SC"'),
+      document.fonts.load('600 1em "Noto Sans SC"'),
+      document.fonts.load('700 1em "Noto Sans SC"')
+    ];
+
+    Promise.all(fontPromises).then(function() {
+      // 字体加载完成，但不改变CSS类，保持字体显示一致
+      console.log('✅ Noto Sans SC 字体预加载完成');
+    }).catch(function() {
+      // 字体加载失败也不影响显示
+      console.log('⚠️ 字体预加载失败，使用回退字体');
+    });
+  }
+</script>

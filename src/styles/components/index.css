@@ -1,0 +1,124 @@
+/**
+ * index 组件样式
+ * 从 1.md 提取
+ * astro-cid: j7pv25f6
+ */
+
+/**
+  * 组件样式
+  * astro-cid: j7pv25f6
+  */
+  /* 首页网格布局样式 - 移除data-astro-cid依赖 */
+  #grid-layout .grid-post-list {
+    display: grid;
+    width: 100%;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  /* 网格布局响应式断点 */
+  @media (max-width: 639px) {
+    #grid-layout .grid-post-list {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    #grid-layout .grid-post-list {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #grid-layout .grid-post-list {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    #grid-layout .grid-post-list {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  /* 网格项目样式 */
+  #grid-layout .grid-post-list article {
+    height: fit-content;
+    min-height: 300px;
+  }
+  .line-clamp-2[data-astro-cid-j7pv25f6]  {
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden
+  }
+  .layout-view {
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  /* 首页内容区间距 */
+  #post-container {
+    margin-top: 1rem;
+  }
+
+  /* 列表布局间距 */
+  #list-layout .post-card {
+    margin-bottom: 1.5rem;
+  }
+
+  /* 网格布局间距已通过gap属性设置 */
+
+  /* 旧的瀑布流样式已移除，现在使用 universal-post-list 组件 */
+  .hidden[data-astro-cid-j7pv25f6]  {
+  display:none!important
+  }
+  /* 首页布局切换按钮样式 - 移除data-astro-cid依赖 */
+  .layout-switch {
+    position: relative;
+  }
+
+  .layout-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--text-75);
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+    user-select: none;
+  }
+
+  .layout-btn:hover {
+    color: var(--text-90);
+    background: var(--btn-plain-bg-hover);
+  }
+
+  .layout-btn.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  .layout-btn.active:hover {
+    background: var(--primary);
+    opacity: 0.9;
+  }
+
+  .layout-btn svg {
+    transition: all 0.2s ease;
+    pointer-events: none;
+  }
+
+  /* 确保按钮在动画期间也可点击 */
+  .layout-btn.onload-animation {
+    pointer-events: auto !important;
+  }
+  /* 旧的 astro-cid 瀑布流样式已移除 */

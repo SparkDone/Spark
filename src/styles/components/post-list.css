@@ -1,0 +1,60 @@
+/**
+ * GridPostList 组件样式
+ * 通用网格布局样式，适用于所有页面
+ */
+
+/* 网格布局基础样式 */
+.grid-post-list {
+  display: grid;
+  width: 100%;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+/* 响应式网格布局 */
+@media (max-width: 639px) {
+  .grid-post-list {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .grid-post-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-post-list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .grid-post-list {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* 网格项目样式 */
+.grid-post-list article {
+  height: fit-content;
+  min-height: 300px;
+}
+
+/* 分类页网格布局特殊样式 */
+#infinite-grid-container .grid-post-list {
+  display: grid;
+  width: 100%;
+}
+
+/* 确保GridPostCard在网格中正确显示 */
+.grid-post-list .card-base {
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+}
