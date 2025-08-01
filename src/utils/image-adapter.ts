@@ -62,9 +62,9 @@ export function adaptImageUrl(strapiImageUrl: string, fallbackUrl?: string): str
       return imageMapping[strapiImageUrl];
     }
 
-    // 如果没有本地映射，使用API代理
-    const filename = strapiImageUrl.replace('/uploads/', '');
-    return `/api/strapi-uploads/${filename}`;
+    // 如果没有本地映射，直接使用Strapi URL（需要配置CORS）
+    const strapiPublicUrl = getStrapiPublicUrl();
+    return `${strapiPublicUrl}${strapiImageUrl}`;
   }
 
   // 其他情况，直接返回
