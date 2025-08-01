@@ -345,13 +345,28 @@ const title = query ? `搜索结果: ${query}` : '搜索';
   async function initializePagefind() {
     try {
       if (typeof window !== 'undefined' && !window.pagefind) {
-        console.log('🔍 初始化Pagefind...');
-        const pagefind = await import('/pagefind/pagefind.js');
-        await pagefind.options({
+        console.log('🔍 尝试初始化Pagefind...');
+
+        // 使用动态导入，避免构建时的路径解析问题
+        const pagefindModule = await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = '/pagefind/pagefind.js';
+          script.onload = () => {
+            if (window.pagefind) {
+              resolve(window.pagefind);
+            } else {
+              reject(new Error('Pagefind未正确加载'));
+            }
+          };
+          script.onerror = () => reject(new Error('Pagefind脚本加载失败'));
+          document.head.appendChild(script);
+        });
+
+        await pagefindModule.options({
           excerptLength: 100,
           highlightParam: 'mark'
         });
-        window.pagefind = pagefind;
+
         console.log('✅ Pagefind初始化成功');
       }
     } catch (error) {
