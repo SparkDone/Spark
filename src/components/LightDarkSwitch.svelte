@@ -37,7 +37,9 @@ onMount(() => {
 
 	// 监听重新初始化事件
 	const handleReinit = () => {
-		console.log('🎨 收到主题切换器重新初始化事件');
+		if (import.meta.env.DEV) {
+			console.log('🎨 收到主题切换器重新初始化事件');
+		}
 		isInitialized = false;
 		setTimeout(() => {
 			initializeThemeSwitch();
@@ -49,18 +51,24 @@ onMount(() => {
 		const themeButton = document.getElementById('scheme-switch');
 		if (themeButton) {
 			themeButton.addEventListener('theme-switch-reinit', handleReinit);
-			console.log('🎨 主题切换器事件监听器已绑定');
+			if (import.meta.env.DEV) {
+				console.log('🎨 主题切换器事件监听器已绑定');
+			}
 		}
 	}, 50); // 延迟绑定，确保DOM元素存在
 
 	// 监听Swup页面切换事件，重新初始化组件
 	const setupSwupListeners = () => {
 		if (window.swup && window.swup.hooks) {
-			console.log('🎨 设置主题切换器Swup事件监听');
+			if (import.meta.env.DEV) {
+				console.log('🎨 设置主题切换器Swup事件监听');
+			}
 
 			// 页面切换后重新初始化
 			window.swup.hooks.on('page:view', () => {
-				console.log('🎨 Swup页面切换完成，重新初始化主题切换器');
+				if (import.meta.env.DEV) {
+					console.log('🎨 Swup页面切换完成，重新初始化主题切换器');
+				}
 				handleReinit();
 			});
 		}
@@ -83,7 +91,9 @@ onMount(() => {
 });
 
 function switchScheme(newMode: LIGHT_DARK_MODE) {
-	console.log('🎨 应用新主题:', newMode);
+	if (import.meta.env.DEV) {
+		console.log('🎨 应用新主题:', newMode);
+	}
 	mode = newMode;
 	setTheme(newMode);
 
@@ -110,7 +120,9 @@ function toggleTheme(event) {
 		}
 	}
 	const newMode = seq[(i + 1) % seq.length];
-	console.log('🎨 直接切换主题:', mode, '->', newMode);
+	if (import.meta.env.DEV) {
+		console.log('🎨 直接切换主题:', mode, '->', newMode);
+	}
 	switchScheme(newMode);
 }
 </script>

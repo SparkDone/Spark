@@ -39,8 +39,9 @@ class ThemePerformanceMonitor {
     }
     
     isDevelopment() {
-        return window.location.hostname === 'localhost' || 
-               window.location.hostname === '127.0.0.1';
+        return window.location.hostname === 'localhost' ||
+               window.location.hostname === '127.0.0.1' ||
+               window.location.hostname.includes('localhost');
     }
     
     observeThemeChanges() {
@@ -86,11 +87,15 @@ class ThemePerformanceMonitor {
     }
     
     onThemeButtonClick() {
-        console.log('🖱️ 主题切换按钮被点击');
+        if (this.isDevelopment()) {
+            console.log('🖱️ 主题切换按钮被点击');
+        }
     }
-    
+
     onThemeSwitchStart() {
-        console.log('🎨 主题切换开始');
+        if (this.isDevelopment()) {
+            console.log('🎨 主题切换开始');
+        }
     }
     
     onThemeSwitchEnd(switchTime) {
@@ -98,14 +103,23 @@ class ThemePerformanceMonitor {
         this.metrics.totalSwitchTime += switchTime;
         this.metrics.averageSwitchTime = this.metrics.totalSwitchTime / this.metrics.switchCount;
         
-        if (switchTime > this.thresholds.slow) {
-            this.metrics.slowSwitches++;
-            console.warn(`⚠️ 慢速主题切换: ${switchTime.toFixed(2)}ms`);
-        } else if (switchTime < this.thresholds.fast) {
-            this.metrics.fastSwitches++;
-            console.log(`⚡ 快速主题切换: ${switchTime.toFixed(2)}ms`);
+        if (this.isDevelopment()) {
+            if (switchTime > this.thresholds.slow) {
+                this.metrics.slowSwitches++;
+                console.warn(`⚠️ 慢速主题切换: ${switchTime.toFixed(2)}ms`);
+            } else if (switchTime < this.thresholds.fast) {
+                this.metrics.fastSwitches++;
+                console.log(`⚡ 快速主题切换: ${switchTime.toFixed(2)}ms`);
+            } else {
+                console.log(`✅ 正常主题切换: ${switchTime.toFixed(2)}ms`);
+            }
         } else {
-            console.log(`✅ 正常主题切换: ${switchTime.toFixed(2)}ms`);
+            // 生产环境只记录慢速切换
+            if (switchTime > this.thresholds.slow) {
+                this.metrics.slowSwitches++;
+            } else if (switchTime < this.thresholds.fast) {
+                this.metrics.fastSwitches++;
+            }
         }
         
         this.updatePerformancePanel();

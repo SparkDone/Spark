@@ -42,7 +42,10 @@ export function initializeTheme(configHue = 260) {
   const hue = localStorage.getItem('hue') || configHue;
   document.documentElement.style.setProperty('--hue', hue);
 
-  console.log(`🎨 主题已初始化: ${theme}, 色调: ${hue}`);
+  // 只在开发环境显示初始化日志
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    console.log(`🎨 主题已初始化: ${theme}, 色调: ${hue}`);
+  }
 }
 
 // 导出主题管理工具
