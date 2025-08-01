@@ -411,6 +411,7 @@ onMount(() => {
                 on:input={() => debouncedSearch(keyword)}
                 on:keydown={handleKeydown}
                 class="w-full h-full pl-10 pr-4 text-sm border-0 outline-0 rounded-xl bg-transparent text-black/90 dark:text-white/90 placeholder:text-black/40 dark:placeholder:text-white/40"
+                style="background: transparent !important; color: var(--text-90) !important;"
             />
         </div>
     </div>
