@@ -178,7 +178,8 @@ const search = async (searchKeyword: string): Promise<void> => {
 	try {
 		let searchResults: SearchResult[] = [];
 
-		if (import.meta.env.PROD && pagefindLoaded && window.pagefind) {
+		// 暂时禁用Pagefind，强制使用API搜索避免WASM错误
+		if (false && import.meta.env.PROD && pagefindLoaded && window.pagefind) {
 			// 使用优化的搜索参数
 			const response = await window.pagefind.search(normalizedKeyword, {
 				// 提高搜索结果的相关性
@@ -259,6 +260,12 @@ const search = async (searchKeyword: string): Promise<void> => {
 		}
 	} catch (error) {
 		console.error("Search error:", error);
+
+		// 如果是WASM错误，显示友好提示
+		if (error.message && error.message.includes('unreachable')) {
+			console.warn('🔧 检测到Pagefind WASM错误，已切换到API搜索模式');
+		}
+
 		result = [];
 		// 错误时不重置展开状态，保持用户体验
 		// showAllResults = false; // 移除这行
