@@ -1,0 +1,200 @@
+---
+/**
+ * 搜索功能深度诊断
+ */
+
+import { getSortedPosts } from "../utils/strapi-content-utils";
+import { searchArticles } from "../lib/strapi";
+
+const posts = await getSortedPosts();
+const testKeywords = ["11", "银翼杀手", "MIT", "技术"];
+
+// 测试每个关键词
+const testResults = [];
+
+for (const keyword of testKeywords) {
+  const result = {
+    keyword,
+    strapiResults: [],
+    localResults: [],
+    strapiError: null,
+    localError: null
+  };
+
+  // 测试Strapi搜索
+  try {
+    const strapiResponse = await searchArticles(keyword);
+    result.strapiResults = strapiResponse.data || [];
+  } catch (error) {
+    result.strapiError = error.message;
+  }
+
+  // 测试本地搜索
+  try {
+    const searchTerm = keyword.toLowerCase();
+    const matchedPosts = posts.filter(post => {
+      const title = post.data.title?.toLowerCase() || '';
+      const description = post.data.description?.toLowerCase() || '';
+      const content = post.body?.toLowerCase() || '';
+      const tags = post.data.tags?.join(' ').toLowerCase() || '';
+      const category = post.data.category?.toLowerCase() || '';
+
+      return title.includes(searchTerm) ||
+             description.includes(searchTerm) ||
+             content.includes(searchTerm) ||
+             tags.includes(searchTerm) ||
+             category.includes(searchTerm);
+    });
+
+    result.localResults = matchedPosts.map(post => ({
+      title: post.data.title,
+      slug: post.slug,
+      contentLength: post.body?.length || 0,
+      hasContent: !!post.body,
+      contentPreview: post.body?.substring(0, 200) || '无内容'
+    }));
+  } catch (error) {
+    result.localError = error.message;
+  }
+
+  testResults.push(result);
+}
+
+// 分析文章内容
+const contentAnalysis = posts.slice(0, 3).map(post => ({
+  title: post.data.title,
+  slug: post.slug,
+  hasBody: !!post.body,
+  bodyLength: post.body?.length || 0,
+  bodyPreview: post.body?.substring(0, 500) || '无内容',
+  contains11: post.body?.toLowerCase().includes('11') || false,
+  containsMIT: post.body?.toLowerCase().includes('mit') || false,
+  containsChinese: /[\u4e00-\u9fa5]/.test(post.body || '') || false
+}));
+---
+
+<html>
+<head>
+    <title>搜索功能深度诊断</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .section { border: 1px solid #ddd; margin: 20px 0; padding: 15px; }
+        .error { background: #ffe6e6; color: #d00; }
+        .success { background: #e6ffe6; color: #060; }
+        .warning { background: #fff3cd; color: #856404; }
+        .code { background: #f5f5f5; padding: 10px; font-family: monospace; white-space: pre-wrap; }
+        .result { margin: 10px 0; padding: 10px; border-left: 3px solid #ccc; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>🔍 搜索功能深度诊断</h1>
+
+    <div class="section">
+        <h2>📊 基础统计</h2>
+        <table>
+            <tr><th>项目</th><th>数值</th></tr>
+            <tr><td>总文章数</td><td>{posts.length}</td></tr>
+            <tr><td>有内容的文章数</td><td>{posts.filter(p => p.body).length}</td></tr>
+            <tr><td>无内容的文章数</td><td>{posts.filter(p => !p.body).length}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>📝 文章内容分析</h2>
+        {contentAnalysis.map(analysis => (
+            <div class="result">
+                <h3>{analysis.title}</h3>
+                <table>
+                    <tr><td>Slug</td><td>{analysis.slug}</td></tr>
+                    <tr><td>有内容</td><td class={analysis.hasBody ? 'success' : 'error'}>{analysis.hasBody ? '✅ 是' : '❌ 否'}</td></tr>
+                    <tr><td>内容长度</td><td>{analysis.bodyLength} 字符</td></tr>
+                    <tr><td>包含"11"</td><td class={analysis.contains11 ? 'success' : 'warning'}>{analysis.contains11 ? '✅ 是' : '❌ 否'}</td></tr>
+                    <tr><td>包含"MIT"</td><td class={analysis.containsMIT ? 'success' : 'warning'}>{analysis.containsMIT ? '✅ 是' : '❌ 否'}</td></tr>
+                    <tr><td>包含中文</td><td class={analysis.containsChinese ? 'success' : 'warning'}>{analysis.containsChinese ? '✅ 是' : '❌ 否'}</td></tr>
+                </table>
+                <div class="code">内容预览: {analysis.bodyPreview}</div>
+            </div>
+        ))}
+    </div>
+
+    <div class="section">
+        <h2>🔍 搜索测试结果</h2>
+        {testResults.map(test => (
+            <div class="result">
+                <h3>搜索关键词: "{test.keyword}"</h3>
+                
+                <h4>Strapi搜索结果</h4>
+                {test.strapiError ? (
+                    <div class="error">❌ Strapi搜索失败: {test.strapiError}</div>
+                ) : (
+                    <div class={test.strapiResults.length > 0 ? 'success' : 'warning'}>
+                        找到 {test.strapiResults.length} 个结果
+                        {test.strapiResults.slice(0, 3).map(result => (
+                            <div>• {result.title}</div>
+                        ))}
+                    </div>
+                )}
+
+                <h4>本地搜索结果</h4>
+                {test.localError ? (
+                    <div class="error">❌ 本地搜索失败: {test.localError}</div>
+                ) : (
+                    <div class={test.localResults.length > 0 ? 'success' : 'warning'}>
+                        找到 {test.localResults.length} 个结果
+                        {test.localResults.slice(0, 3).map(result => (
+                            <div>
+                                • {result.title} (内容长度: {result.contentLength})
+                                <div class="code">{result.contentPreview}</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        ))}
+    </div>
+
+    <div class="section">
+        <h2>🧪 API测试</h2>
+        <div id="api-results">正在测试API...</div>
+    </div>
+
+    <script>
+        async function testAPIs() {
+            const resultsDiv = document.getElementById('api-results');
+            const keywords = ['11', '银翼杀手', 'MIT', '技术'];
+            
+            for (const keyword of keywords) {
+                try {
+                    const response = await fetch(`/api/search/?q=${encodeURIComponent(keyword)}`);
+                    const data = await response.json();
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    resultDiv.innerHTML = `
+                        <h3>API搜索: "${keyword}"</h3>
+                        <p class="${data.success && data.data.length > 0 ? 'success' : 'warning'}">
+                            ${data.success ? `✅ 成功，找到 ${data.data.length} 个结果` : '❌ 失败'}
+                        </p>
+                        ${data.data && data.data.length > 0 ? 
+                            data.data.slice(0, 3).map(item => `<div>• ${item.title}</div>`).join('') : 
+                            '<div>无结果</div>'
+                        }
+                    `;
+                    resultsDiv.appendChild(resultDiv);
+                } catch (error) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'result error';
+                    errorDiv.innerHTML = `<h3>API搜索: "${keyword}"</h3><p>❌ 错误: ${error.message}</p>`;
+                    resultsDiv.appendChild(errorDiv);
+                }
+            }
+        }
+
+        // 页面加载后测试API
+        testAPIs();
+    </script>
+</body>
+</html>
