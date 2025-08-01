@@ -434,7 +434,8 @@ export async function getFeaturedArticles(): Promise<StrapiResponse<StrapiArticl
 
 // 搜索文章
 export async function searchArticles(query: string): Promise<StrapiResponse<StrapiArticle[]>> {
-  return fetchAPI(`/articles?populate=*&filters[$or][0][title][$containsi]=${query}&filters[$or][1][description][$containsi]=${query}&filters[$or][2][content][$containsi]=${query}&filters[draft][$eq]=false&sort=published:desc`);
+  const encodedQuery = encodeURIComponent(query);
+  return fetchAPI(`/articles?populate=*&filters[$or][0][title][$containsi]=${encodedQuery}&filters[$or][1][description][$containsi]=${encodedQuery}&filters[$or][2][content][$containsi]=${encodedQuery}&filters[draft][$eq]=false&sort=published:desc`);
 }
 
 

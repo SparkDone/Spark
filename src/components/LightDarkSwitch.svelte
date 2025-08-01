@@ -148,7 +148,8 @@ function toggleTheme(event) {
 
 <!-- 简化的黑白主题切换按钮 -->
 <button aria-label="Toggle Theme" class="relative btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="scheme-switch"
-        onclick={toggleTheme}
+        on:click={toggleTheme}
+        on:touchend|preventDefault={toggleTheme}
         title="点击切换主题: {mode === LIGHT_MODE ? '切换到暗色' : '切换到亮色'}"
 >
     <div class="absolute" class:opacity-0={mode !== LIGHT_MODE}>

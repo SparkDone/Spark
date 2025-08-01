@@ -356,13 +356,12 @@ onMount(() => {
     <input placeholder="{i18n(I18nKey.search)}" bind:value={keyword}
            on:input={() => debouncedSearch(keyword)}
            on:focus={() => {
-               // 只有在有关键词时才搜索（允许单个字符）
+               // 只有在有关键词时才搜索和显示面板
                if (keyword.trim().length >= 1) {
                    search(keyword);
-               } else {
-                   // 显示面板
                    setPanelVisibility(true);
                }
+               // 如果没有关键词，不显示空面板
            }}
            on:blur={(e) => {
                // 延迟隐藏面板，给用户时间点击搜索结果
@@ -411,7 +410,7 @@ onMount(() => {
                 bind:value={keyword}
                 on:input={() => debouncedSearch(keyword)}
                 on:keydown={handleKeydown}
-                class="w-full h-full pl-10 pr-4 text-sm border-0 outline-0 rounded-xl text-black dark:text-white placeholder:text-black/40 dark:placeholder:text-white/40"
+                class="w-full h-full pl-10 pr-4 text-sm border-0 outline-0 rounded-xl bg-transparent text-black/90 dark:text-white/90 placeholder:text-black/40 dark:placeholder:text-white/40"
             />
         </div>
     </div>
@@ -422,10 +421,10 @@ onMount(() => {
             <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--primary)]"></div>
             <span class="ml-3 text-sm text-black/60 dark:text-white/60">正在搜索...</span>
         </div>
-    {:else if keyword.trim() && keyword.trim().length < 2}
+    {:else if keyword.trim() && keyword.trim().length < 1}
         <div class="flex flex-col items-center justify-center py-6">
             <Icon icon="material-symbols:edit" class="text-3xl text-black/30 dark:text-white/30 mb-3 mx-auto"></Icon>
-            <p class="text-sm text-black/60 dark:text-white/60 mb-1 text-center">请输入至少2个字符</p>
+            <p class="text-sm text-black/60 dark:text-white/60 mb-1 text-center">请输入搜索关键词</p>
             <p class="text-xs text-black/40 dark:text-white/40 text-center">
                 当前输入: "{keyword}"
             </p>
