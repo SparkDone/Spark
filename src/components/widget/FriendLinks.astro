@@ -15,16 +15,49 @@ let friendLinks: any[] = [];
 
 try {
   // 使用配置中的Strapi URL
-  const strapiUrl = import.meta.env.STRAPI_URL || 'http://localhost:1337';
-  const url = `${strapiUrl}/api/friend-links?populate=*&sort=sort_order:asc,createdAt:desc&filters[publishedAt][$notNull]=true`;
-  const response = await fetch(url);
-  const data = await response.json();
+  const strapiUrl = import.meta.env.STRAPI_URL || import.meta.env.STRAPI_PUBLIC_URL || 'https://api.sparkdone.com';
+  const apiToken = import.meta.env.STRAPI_API_TOKEN;
 
-  if (data && data.data && Array.isArray(data.data)) {
-    friendLinks = data.data;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (apiToken) {
+    headers['Authorization'] = `Bearer ${apiToken}`;
+  }
+
+  const url = `${strapiUrl}/api/friend-links?populate=*&sort=sort_order:asc,createdAt:desc&filters[publishedAt][$notNull]=true`;
+  const response = await fetch(url, { headers });
+
+  if (response.ok) {
+    const data = await response.json();
+    if (data && data.data && Array.isArray(data.data)) {
+      friendLinks = data.data;
+    }
+  } else {
+    console.warn('友情链接API响应失败:', response.status, response.statusText);
   }
 } catch (error) {
   console.error('获取友情链接失败:', error);
+  // 添加一些测试数据，确保组件能显示
+  if (import.meta.env.DEV) {
+    friendLinks = [
+      {
+        id: 1,
+        name: "示例友链1",
+        url: "https://example1.com",
+        description: "这是一个示例友情链接",
+        icon: "material-symbols:link"
+      },
+      {
+        id: 2,
+        name: "示例友链2",
+        url: "https://example2.com",
+        description: "这是另一个示例友情链接",
+        icon: "material-symbols:favorite"
+      }
+    ];
+  }
 }
 
 // 如果友情链接数量较多，启用折叠功能

@@ -33,6 +33,9 @@ function initializeThemeSwitch() {
 }
 
 onMount(() => {
+	// 确保在客户端环境中初始化
+	if (typeof window === 'undefined') return;
+
 	initializeThemeSwitch();
 
 	// 监听重新初始化事件
@@ -47,15 +50,30 @@ onMount(() => {
 	};
 
 	// 监听自定义重新初始化事件
-	setTimeout(() => {
+	const setupThemeButton = () => {
 		const themeButton = document.getElementById('scheme-switch');
 		if (themeButton) {
 			themeButton.addEventListener('theme-switch-reinit', handleReinit);
 			if (import.meta.env.DEV) {
 				console.log('🎨 主题切换器事件监听器已绑定');
 			}
+			return themeButton;
 		}
-	}, 50); // 延迟绑定，确保DOM元素存在
+		return null;
+	};
+
+	// 多次尝试绑定，确保在CF环境中也能工作
+	let themeButton = setupThemeButton();
+	if (!themeButton) {
+		setTimeout(() => {
+			themeButton = setupThemeButton();
+		}, 100);
+	}
+	if (!themeButton) {
+		setTimeout(() => {
+			themeButton = setupThemeButton();
+		}, 500);
+	}
 
 	// 监听Swup页面切换事件，重新初始化组件
 	const setupSwupListeners = () => {
@@ -84,6 +102,7 @@ onMount(() => {
 
 	// 清理函数
 	return () => {
+		const themeButton = document.getElementById('scheme-switch');
 		if (themeButton) {
 			themeButton.removeEventListener('theme-switch-reinit', handleReinit);
 		}

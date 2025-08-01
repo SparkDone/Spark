@@ -132,19 +132,80 @@ const jsonLd = {
 
 <!-- 优化：关键脚本优先加载 -->
 <script>
-    // 立即加载关键功能
-    Promise.all([
-        import('../scripts/module-manager.js'),
-        import('../utils/lazy-loader.ts')
-    ]).then(([moduleManager, lazyLoader]) => {
-        // 立即初始化懒加载
-        lazyLoader.setupImageLazyLoading();
-        if (import.meta.env.DEV) {
-            console.log('🚀 关键功能已加载');
+    // 使用更稳定的模块加载方式，避免构建时的路径问题
+    async function loadCriticalModules() {
+        try {
+            // 使用相对路径导入，让Astro处理路径解析
+            const modulePromises = [];
+
+            // 动态导入模块管理器
+            try {
+                const moduleManagerModule = await import('../scripts/module-manager.js');
+                if (moduleManagerModule) {
+                    modulePromises.push(Promise.resolve(moduleManagerModule));
+                }
+            } catch (e) {
+                console.warn('⚠️ 模块管理器加载失败，跳过');
+            }
+
+            // 动态导入懒加载工具
+            try {
+                const lazyLoaderModule = await import('../utils/lazy-loader.ts');
+                if (lazyLoaderModule && lazyLoaderModule.setupImageLazyLoading) {
+                    lazyLoaderModule.setupImageLazyLoading();
+                    if (import.meta.env.DEV) {
+                        console.log('✅ 图片懒加载已初始化');
+                    }
+                }
+            } catch (e) {
+                console.warn('⚠️ 懒加载工具加载失败，使用备用方案');
+                // 备用方案：基本的图片懒加载
+                setupBasicImageLazyLoading();
+            }
+
+            if (import.meta.env.DEV) {
+                console.log('🚀 关键功能加载完成');
+            }
+        } catch (error) {
+            console.error('❌ 关键功能加载失败:', error);
+            // 确保基本功能可用
+            setupBasicImageLazyLoading();
         }
-    }).catch(error => {
-        console.error('❌ 关键功能加载失败:', error);
-    });
+    }
+
+    // 备用的基本图片懒加载
+    function setupBasicImageLazyLoading() {
+        if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            if (images.length > 0) {
+                const imageObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            if (img.dataset.src) {
+                                img.src = img.dataset.src;
+                                img.removeAttribute('data-src');
+                            }
+                            imageObserver.unobserve(img);
+                        }
+                    });
+                });
+
+                images.forEach(img => imageObserver.observe(img));
+
+                if (import.meta.env.DEV) {
+                    console.log('🔄 使用备用图片懒加载方案');
+                }
+            }
+        }
+    }
+
+    // 页面加载完成后执行
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadCriticalModules);
+    } else {
+        loadCriticalModules();
+    }
 </script>
 
 

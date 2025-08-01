@@ -171,7 +171,21 @@
                 case 'script':
                     // 脚本加载失败
                     if (!src.includes('extension')) {
-                        console.warn('📜 脚本加载失败:', src);
+                        // 检查是否是Astro构建的脚本文件缓存问题
+                        if (src.includes('index.astro_astro_type_script') || src.includes('_astro/')) {
+                            console.warn('🔄 Astro脚本文件可能需要刷新缓存:', src);
+                            console.info('💡 建议：按 Ctrl+F5 强制刷新页面清除缓存');
+
+                            // 尝试自动刷新页面（仅在开发环境）
+                            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                                console.log('🔄 开发环境：3秒后自动刷新页面');
+                                setTimeout(() => {
+                                    window.location.reload(true);
+                                }, 3000);
+                            }
+                        } else {
+                            console.warn('📜 脚本加载失败:', src);
+                        }
                     }
                     break;
                     

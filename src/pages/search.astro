@@ -100,8 +100,8 @@ const title = query ? `搜索结果: ${query}` : '搜索';
       return;
     }
 
-    if (query.trim().length < 2) {
-      console.log('⚠️ 搜索关键词太短，需要至少2个字符');
+    if (query.trim().length < 1) {
+      console.log('⚠️ 搜索关键词为空');
       isSearching = false;
       return;
     }
@@ -114,27 +114,75 @@ const title = query ? `搜索结果: ${query}` : '搜索';
       showLoadingState();
     }
 
+    // 尝试使用Pagefind搜索（生产环境优先）
+    let searchResults = [];
+    let searchMethod = 'unknown';
+
     try {
-      const apiUrl = `/api/search/?q=${encodeURIComponent(query)}&limit=50`;
-      console.log('📡 发送搜索请求:', apiUrl);
+      // 方法1：尝试Pagefind搜索
+      if (typeof window !== 'undefined' && window.pagefind && typeof window.pagefind.search === 'function') {
+        console.log('🔍 使用Pagefind搜索:', query);
+        searchMethod = 'pagefind';
 
-      const response = await fetch(apiUrl);
-      console.log('📊 搜索响应状态:', response.status);
+        const pagefindResponse = await window.pagefind.search(query, {
+          excerpt_length: 100,
+          fuzzy: true,
+          partial: true
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (pagefindResponse && pagefindResponse.results && pagefindResponse.results.length > 0) {
+          console.log('✅ Pagefind找到结果:', pagefindResponse.results.length, '个');
+          const pagefindResults = await Promise.all(
+            pagefindResponse.results.slice(0, 50).map(item => item.data())
+          );
+
+          // 转换Pagefind结果格式
+          searchResults = pagefindResults.map(item => ({
+            title: item.meta?.title || '无标题',
+            url: item.url,
+            excerpt: item.excerpt || '',
+            description: item.meta?.description || '',
+            slug: item.url.replace('/posts/', '').replace('/', ''),
+            category: '',
+            tags: [],
+            published: null
+          }));
+        }
       }
 
-      const data = await response.json();
-      console.log('📋 搜索响应数据:', data);
+      // 方法2：如果Pagefind失败或无结果，使用API搜索
+      if (searchResults.length === 0) {
+        console.log('🔍 Pagefind无结果，尝试API搜索:', query);
+        searchMethod = 'api';
 
-      if (data.success && data.data && data.data.length > 0) {
-        console.log('✅ 找到搜索结果:', data.data.length, '个');
-        showResults(data.data, query);
+        const apiUrl = `/api/search/?q=${encodeURIComponent(query)}&limit=50`;
+        console.log('📡 发送搜索请求:', apiUrl);
+
+        const response = await fetch(apiUrl);
+        console.log('📊 搜索响应状态:', response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('📋 搜索响应数据:', data);
+
+          if (data.success && data.data && data.data.length > 0) {
+            console.log('✅ API找到搜索结果:', data.data.length, '个');
+            searchResults = data.data;
+          }
+        } else {
+          console.warn('⚠️ API搜索请求失败:', response.status, response.statusText);
+        }
+      }
+
+      // 显示结果
+      if (searchResults.length > 0) {
+        console.log(`✅ 最终显示 ${searchResults.length} 个搜索结果 (方法: ${searchMethod})`);
+        showResults(searchResults, query);
       } else {
-        console.log('❌ 未找到搜索结果');
+        console.log('❌ 所有搜索方法都未找到结果');
         showNoResults();
       }
+
     } catch (error) {
       console.error('❌ 搜索错误:', error);
       showNoResults();
@@ -293,9 +341,31 @@ const title = query ? `搜索结果: ${query}` : '搜索';
 
 
 
+  // Pagefind初始化
+  async function initializePagefind() {
+    try {
+      if (typeof window !== 'undefined' && !window.pagefind) {
+        console.log('🔍 初始化Pagefind...');
+        const pagefind = await import('/pagefind/pagefind.js');
+        await pagefind.options({
+          excerptLength: 100,
+          highlightParam: 'mark'
+        });
+        window.pagefind = pagefind;
+        console.log('✅ Pagefind初始化成功');
+      }
+    } catch (error) {
+      console.warn('⚠️ Pagefind初始化失败，将使用API搜索:', error);
+      window.pagefind = null;
+    }
+  }
+
   // 页面加载完成后的初始化
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     console.log('📄 搜索页面DOMContentLoaded');
+
+    // 先初始化Pagefind，然后执行搜索
+    await initializePagefind();
     searchFromUrl();
   });
 

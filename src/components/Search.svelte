@@ -109,8 +109,8 @@ const debouncedSearch = (searchKeyword: string, delay: number = 500): void => {
 		return;
 	}
 
-	// 如果关键词太短，显示面板但不搜索
-	if (searchKeyword.trim().length < 2) {
+	// 如果关键词太短，显示面板但不搜索（允许单个字符搜索）
+	if (searchKeyword.trim().length < 1) {
 		result = [];
 		isSearching = false;
 		setPanelVisibility(true);
@@ -356,11 +356,11 @@ onMount(() => {
     <input placeholder="{i18n(I18nKey.search)}" bind:value={keyword}
            on:input={() => debouncedSearch(keyword)}
            on:focus={() => {
-               // 只有在有足够长的关键词时才搜索
-               if (keyword.trim().length >= 2) {
+               // 只有在有关键词时才搜索（允许单个字符）
+               if (keyword.trim().length >= 1) {
                    search(keyword);
-               } else if (keyword.trim().length > 0) {
-                   // 即使关键词不够长，也显示面板（显示提示信息）
+               } else {
+                   // 显示面板
                    setPanelVisibility(true);
                }
            }}

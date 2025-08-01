@@ -19,7 +19,7 @@ if (import.meta.env.DEV && !import.meta.env.PROD) {
         <img
           src={logoConfig.light}
           alt={logoConfig.alt}
-          class="logo-light h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+          class="logo-light h-8 w-auto object-contain logo-image"
           loading="eager"
           decoding="async"
         />
@@ -30,7 +30,7 @@ if (import.meta.env.DEV && !import.meta.env.PROD) {
         <img
           src={logoConfig.dark}
           alt={logoConfig.alt}
-          class="logo-dark h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+          class="logo-dark h-8 w-auto object-contain logo-image"
           loading="eager"
           decoding="async"
         />
@@ -74,8 +74,22 @@ if (import.meta.env.DEV && !import.meta.env.PROD) {
     display: block;
   }
 
-  /* 悬停效果 */
-  .logo-container:hover .logo-image-wrapper img {
-    transform: scale(1.05);
+  /* 图片特效 - 悬停时的3D旋转和缩放效果 */
+  .logo-image {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+    filter: brightness(1) contrast(1);
+  }
+
+  .logo-container:hover .logo-image {
+    transform: scale(1.08) rotateY(5deg) rotateX(2deg);
+    filter: brightness(1.1) contrast(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  /* 添加3D透视效果 */
+  .logo-image-wrapper {
+    perspective: 1000px;
+    transform-style: preserve-3d;
   }
 </style>

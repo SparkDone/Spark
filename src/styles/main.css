@@ -542,14 +542,14 @@
         color: var(--text-50);
     }
 
-    /* PostMeta组件中分类和标签的统一样式 - 使用最高优先级的选择器 */
+    /* PostMeta组件中分类和标签的统一样式 - 与日期时间颜色一致 */
     div.post-meta-container a.category-meta-link,
     div.post-meta-container a.tag-meta-link,
     .post-meta-container a.category-meta-link,
     .post-meta-container a.tag-meta-link,
     a.category-meta-link,
     a.tag-meta-link {
-        color: var(--text-75) !important;
+        color: var(--text-50) !important;
         font-weight: 500 !important;
         text-decoration: none !important;
         -webkit-font-smoothing: antialiased !important;
@@ -606,6 +606,24 @@
 
     .logo-single {
         display: block !important;
+    }
+
+    /* LOGO悬停容器样式 - 去掉背景色，只保留图片特效 */
+    .logo-hover-container {
+        background: transparent !important;
+        transition: none !important;
+    }
+
+    .logo-hover-container:hover {
+        background: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .logo-hover-container:active {
+        background: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
     }
 
     /* Markdown styles */
