@@ -422,14 +422,7 @@ onMount(() => {
             <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--primary)]"></div>
             <span class="ml-3 text-sm text-black/60 dark:text-white/60">正在搜索...</span>
         </div>
-    {:else if keyword.trim() && keyword.trim().length < 1}
-        <div class="flex flex-col items-center justify-center py-6">
-            <Icon icon="material-symbols:edit" class="text-3xl text-black/30 dark:text-white/30 mb-3 mx-auto"></Icon>
-            <p class="text-sm text-black/60 dark:text-white/60 mb-1 text-center">请输入搜索关键词</p>
-            <p class="text-xs text-black/40 dark:text-white/40 text-center">
-                当前输入: "{keyword}"
-            </p>
-        </div>
+
     {:else if result.length === 0 && keyword.trim()}
         <div class="flex flex-col items-center justify-center py-6">
             <Icon icon="material-symbols:search-off" class="text-3xl text-black/30 dark:text-white/30 mb-3 mx-auto"></Icon>
