@@ -1,0 +1,97 @@
+---
+// 简单的图片测试页面
+const testImageUrl = "https://api.sparkdone.com/uploads/519556628d594f0db15a565f1d4598d3_6830c9816e.jpeg";
+---
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片测试页面</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+    .test-image { max-width: 300px; height: auto; margin: 10px 0; }
+    .success { border: 2px solid green; }
+    .error { border: 2px solid red; }
+  </style>
+</head>
+<body>
+  <h1>🖼️ 图片加载测试</h1>
+
+  <div class="test-section">
+    <h2>测试1: 直接img标签</h2>
+    <p><strong>URL:</strong> {testImageUrl}</p>
+    <img 
+      src={testImageUrl} 
+      alt="测试图片" 
+      class="test-image"
+      onload="this.className += ' success'; console.log('✅ 图片加载成功:', this.src);"
+      onerror="this.className += ' error'; console.error('❌ 图片加载失败:', this.src);"
+    />
+  </div>
+
+  <div class="test-section">
+    <h2>测试2: 带crossorigin属性</h2>
+    <img 
+      src={testImageUrl} 
+      alt="测试图片" 
+      class="test-image"
+      crossorigin="anonymous"
+      onload="this.className += ' success'; console.log('✅ 跨域图片加载成功:', this.src);"
+      onerror="this.className += ' error'; console.error('❌ 跨域图片加载失败:', this.src);"
+    />
+  </div>
+
+  <div class="test-section">
+    <h2>测试3: 带referrerpolicy属性</h2>
+    <img 
+      src={testImageUrl} 
+      alt="测试图片" 
+      class="test-image"
+      referrerpolicy="no-referrer"
+      onload="this.className += ' success'; console.log('✅ no-referrer图片加载成功:', this.src);"
+      onerror="this.className += ' error'; console.error('❌ no-referrer图片加载失败:', this.src);"
+    />
+  </div>
+
+  <div class="test-section">
+    <h2>测试4: JavaScript动态加载</h2>
+    <div id="js-test-result">正在测试...</div>
+  </div>
+
+  <script>
+    // JavaScript测试图片加载
+    const testUrl = "https://api.sparkdone.com/uploads/519556628d594f0db15a565f1d4598d3_6830c9816e.jpeg";
+    const resultDiv = document.getElementById('js-test-result');
+    
+    const img = new Image();
+    img.onload = function() {
+      resultDiv.innerHTML = `
+        <p style="color: green;">✅ JavaScript加载成功</p>
+        <p>尺寸: ${this.naturalWidth} x ${this.naturalHeight}</p>
+        <img src="${testUrl}" alt="JS加载的图片" class="test-image success" />
+      `;
+      console.log('✅ JavaScript图片加载成功:', testUrl);
+    };
+    img.onerror = function() {
+      resultDiv.innerHTML = '<p style="color: red;">❌ JavaScript加载失败</p>';
+      console.error('❌ JavaScript图片加载失败:', testUrl);
+    };
+    img.src = testUrl;
+
+    // 测试fetch请求
+    fetch(testUrl, { method: 'HEAD' })
+      .then(response => {
+        console.log('🌐 Fetch测试结果:', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+      })
+      .catch(error => {
+        console.error('🌐 Fetch测试失败:', error);
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,729 @@
+---
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+
+import "../styles/variables.css";
+import "../styles/markdown-extend.css";
+import "../styles/components/layout.css";
+
+import ConfigCarrier from "@components/ConfigCarrier.astro";
+import ResourceHints from "@components/ResourceHints.astro";
+import SecurityHeaders from "@components/SecurityHeaders.astro";
+import FontPreloader from "@components/FontPreloader.astro";
+import { profileConfig, siteConfig } from "@/config";
+import {
+	AUTO_MODE,
+	// BANNER_HEIGHT, // Banner已删除
+	// BANNER_HEIGHT_EXTEND, // Banner已删除
+	// BANNER_HEIGHT_HOME, // Banner已删除
+	DARK_MODE,
+	DEFAULT_THEME,
+	LIGHT_MODE,
+	PAGE_WIDTH,
+} from "../constants/constants";
+import { defaultFavicons } from "../constants/icon";
+import type { Favicon } from "../types/config";
+import { pathsEqual, url } from "../utils/url-utils";
+import "katex/dist/katex.css";
+import { getIndexSettings } from "../lib/strapi";
+import { getSiteConfig } from "../lib/config-integration";
+
+interface Props {
+	title?: string;
+	// banner?: string; // Banner已删除
+	description?: string;
+	lang?: string;
+	setOGTypeArticle?: boolean;
+	author?: string;
+}
+
+let { title, /* banner, */ description, lang, setOGTypeArticle, author } = Astro.props;
+
+// 获取整合后的站点配置（Strapi + config.ts）
+const integratedSiteConfig = await getSiteConfig();
+const strapiSiteTitle = integratedSiteConfig.title;
+const strapiSiteSubtitle = integratedSiteConfig.subtitle;
+const strapiSiteDescription = integratedSiteConfig.description || description;
+
+// 调试信息（仅开发环境且非构建模式）
+if (import.meta.env.DEV && !import.meta.env.PROD) {
+  console.log('🔧 Layout.astro 配置调试:', {
+    integratedSiteConfig,
+    strapiSiteTitle,
+    strapiSiteSubtitle,
+    strapiSiteDescription
+  });
+}
+
+// apply a class to the body element to decide the height of the banner, only used for initial page load
+// Swup can update the body for each page visit, but it's after the page transition, causing a delay for banner height change
+// so use Swup hooks instead to change the height immediately when a link is clicked
+const isHomePage = pathsEqual(Astro.url.pathname, url("/"));
+
+// defines global css variables
+// why doing this in Layout instead of GlobalStyles: https://github.com/withastro/astro/issues/6728#issuecomment-1502203757
+const configHue = siteConfig.themeColor.hue;
+// Banner相关代码已删除
+// if (!banner || typeof banner !== "string" || banner.trim() === "") {
+//	banner = siteConfig.banner.src;
+// }
+// banner = siteConfig.banner.src;
+// const enableBanner = siteConfig.banner.enable;
+
+let pageTitle: string;
+if (title) {
+	// 内容页面：页面标题 - 网站名称
+	pageTitle = `${title} - ${strapiSiteTitle}`;
+} else {
+	// 首页：网站名称 - 网站副标题（如果有副标题的话）
+	if (strapiSiteSubtitle && strapiSiteSubtitle.trim() !== '') {
+		pageTitle = `${strapiSiteTitle} - ${strapiSiteSubtitle}`;
+	} else {
+		pageTitle = strapiSiteTitle;
+	}
+}
+
+const favicons: Favicon[] =
+	siteConfig.favicon.length > 0 ? siteConfig.favicon : defaultFavicons;
+
+// const siteLang = siteConfig.lang.replace('_', '-')
+if (!lang) {
+	lang = `${siteConfig.lang}`;
+}
+const siteLang = lang.replace("_", "-");
+
+// Banner offset相关代码已删除
+// const bannerOffsetByPosition = {
+//	top: `${BANNER_HEIGHT_EXTEND}vh`,
+//	center: `${BANNER_HEIGHT_EXTEND / 2}vh`,
+//	bottom: "0",
+// };
+// const bannerOffset = bannerOffsetByPosition[siteConfig.banner.position || "center"];
+---
+
+<!DOCTYPE html>
+<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
+	  data-overlayscrollbars-initialize
+>
+	<head>
+		<!-- 安全头 - 必须在最前面 -->
+		<SecurityHeaders />
+
+		<!-- 字体预加载 - 关键性能优化 -->
+		<FontPreloader />
+
+		<!-- 环境感知的资源预加载 -->
+		<ResourceHints />
+
+		<title>{pageTitle}</title>
+
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content={strapiSiteDescription || description || pageTitle}>
+		<meta name="author" content={author || profileConfig.name}>
+		<meta name="robots" content="index, follow">
+		<meta name="googlebot" content="index, follow">
+
+		<!-- 语言和地区 -->
+		<meta name="language" content={lang || "zh-CN"}>
+		<meta property="og:locale" content={lang || "zh_CN"}>
+
+		<meta property="og:site_name" content={strapiSiteTitle}>
+		<meta property="og:url" content={Astro.url}>
+		<meta property="og:title" content={pageTitle}>
+		<meta property="og:description" content={strapiSiteDescription || description || pageTitle}>
+		<meta property="og:type" content={setOGTypeArticle ? "article" : "website"}>
+		<!-- Banner OG image已删除 -->
+		<!-- {banner && <meta property="og:image" content={new URL(banner, Astro.site).href}>} -->
+
+		<meta name="twitter:card" content="summary_large_image">
+		<meta property="twitter:url" content={Astro.url}>
+		<meta name="twitter:title" content={pageTitle}>
+		<meta name="twitter:description" content={strapiSiteDescription || description || pageTitle}>
+		<!-- Banner Twitter image已删除 -->
+		<!-- {banner && <meta name="twitter:image" content={new URL(banner, Astro.site).href}>} -->
+
+		<!-- Canonical URL -->
+		<link rel="canonical" href={Astro.url.href}>
+		<meta name="generator" content={Astro.generator} />
+		{favicons.map(favicon => (
+			<link rel="icon"
+				  href={favicon.src.startsWith('/') ? url(favicon.src) : favicon.src}
+				  sizes={favicon.sizes}
+				  media={favicon.theme && `(prefers-color-scheme: ${favicon.theme})`}
+			/>
+		))}
+
+		<!-- 主题初始化 - 必须在页面渲染前执行以避免闪烁 -->
+		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, configHue}}>
+			// 模块化的主题管理逻辑（内联版本，避免闪烁）
+			(function initializeTheme() {
+				// 防止重复初始化
+				if (window.themeInitialized) {
+					return;
+				}
+				window.themeInitialized = true;
+
+				// Load the theme from local storage, 默认为暗黑模式
+				const theme = localStorage.getItem('theme') || DEFAULT_THEME;
+
+				// 如果是首次访问且没有设置主题，设置为暗黑模式
+				if (!localStorage.getItem('theme')) {
+					localStorage.setItem('theme', DARK_MODE);
+				}
+
+				switch (theme) {
+					case LIGHT_MODE:
+						document.documentElement.classList.remove('dark');
+						break;
+					case DARK_MODE:
+						document.documentElement.classList.add('dark');
+						break;
+					case AUTO_MODE:
+						if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+							document.documentElement.classList.add('dark');
+						} else {
+							document.documentElement.classList.remove('dark');
+						}
+						break;
+					default:
+						// 默认情况下使用暗黑模式
+						document.documentElement.classList.add('dark');
+						localStorage.setItem('theme', DARK_MODE);
+				}
+
+				// Load the hue from local storage
+				const hue = localStorage.getItem('hue') || configHue;
+				document.documentElement.style.setProperty('--hue', hue);
+
+				// 预设页面转换优化
+				document.documentElement.style.setProperty('--content-delay', '0ms');
+
+				// 标记页面已准备好，避免Swup重复初始化
+				document.documentElement.setAttribute('data-theme-ready', 'true');
+
+
+			})();
+		</script>
+
+
+		<slot name="head"></slot>
+
+		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
+
+		<!-- 页面工具脚本 -->
+		<script is:inline src="/js/page-utils.js"></script>
+
+		<!-- 分类预热脚本 -->
+		<script is:inline src="/js/category-preheater.js"></script>
+
+		<!-- 初始化管理器 - 必须最先加载 -->
+		<script is:inline src="/js/init-manager.js"></script>
+
+		<!-- WebAssembly兼容性检查 -->
+		<script is:inline src="/js/wasm-compatibility.js"></script>
+
+		<!-- 全局错误处理器 -->
+		<script is:inline src="/js/error-handler.js"></script>
+
+		<!-- 性能监控脚本（仅开发环境） - 暂时禁用以避免界面干扰 -->
+		{false && import.meta.env.DEV && (
+			<>
+				<script is:inline src="/js/performance-monitor.js"></script>
+				<script is:inline src="/js/theme-performance-monitor.js"></script>
+				<script is:inline src="/js/resource-preload-monitor.js"></script>
+				<script is:inline src="/js/preload-validator.js"></script>
+			</>
+		)}
+
+	</head>
+	<body class="transition" class:list={[{"lg:is-home": isHomePage /* , "enable-banner": enableBanner */}]}
+	>
+		<ConfigCarrier></ConfigCarrier>
+		<slot />
+
+		<!-- increase the page height during page transition to prevent the scrolling animation from jumping -->
+		<div id="page-height-extend" class="hidden h-[300vh]"></div>
+
+
+	</body>
+</html>
+
+<!-- Banner CSS样式已删除 -->
+
+<!-- 字体加载和错误处理 - 使用内联版本确保立即执行 -->
+<script is:inline>
+/* 引用外部页面工具脚本 */
+
+
+</script>
+
+<script>
+import 'overlayscrollbars/overlayscrollbars.css';
+import {
+	OverlayScrollbars,
+	// ScrollbarsHidingPlugin,
+	// SizeObserverPlugin,
+	// ClickScrollPlugin
+} from 'overlayscrollbars';
+import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
+import {pathsEqual, url} from "../utils/url-utils";
+// Banner常量导入已删除
+// import {
+//	BANNER_HEIGHT,
+//	BANNER_HEIGHT_HOME,
+//	BANNER_HEIGHT_EXTEND,
+//	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT
+// } from "../constants/constants";
+import { siteConfig } from '../config';
+
+
+
+/* TODO This is a temporary solution for style flicker issue when the transition is activated */
+/* issue link: https://github.com/withastro/astro/issues/8711, the solution get from here too */
+/* update: fixed in Astro 3.2.4 */
+/*
+function disableAnimation() {
+	const css = document.createElement('style')
+	css.appendChild(
+		document.createTextNode(
+			`*{
+              -webkit-transition:none!important;
+              -moz-transition:none!important;
+              -o-transition:none!important;
+              -ms-transition:none!important;
+              transition:none!important
+              }`
+		)
+	)
+	document.head.appendChild(css)
+
+	return () => {
+		// Force restyle
+		;(() => window.getComputedStyle(document.body))()
+
+		// Wait for next tick before removing
+		setTimeout(() => {
+			document.head.removeChild(css)
+		}, 1)
+	}
+}
+*/
+
+// const bannerEnabled = !!document.getElementById('banner-wrapper') // Banner已删除
+
+function setClickOutsideToClose(panel: string, ignores: string[]) {
+	document.addEventListener("click", event => {
+		let panelDom = document.getElementById(panel);
+		let tDom = event.target;
+		if (!(tDom instanceof Node)) return;		// Ensure the event target is an HTML Node
+		for (let ig of ignores) {
+			let ie = document.getElementById(ig)
+			if (ie == tDom || (ie?.contains(tDom))) {
+				return;
+			}
+		}
+		if (panelDom) {
+			panelDom.classList.add("float-panel-closed");
+		}
+	});
+}
+setClickOutsideToClose("display-setting", ["display-setting", "display-settings-switch"])
+setClickOutsideToClose("nav-menu-panel", ["nav-menu-panel", "nav-menu-switch"])
+setClickOutsideToClose("search-panel", ["search-panel", "search-bar", "search-switch"])
+// 移除主题面板的点击外部关闭，因为已经没有面板了
+
+
+function loadTheme() {
+	const theme = getStoredTheme()
+	setTheme(theme)
+}
+
+function loadHue() {
+	setHue(getHue())
+}
+
+function initCustomScrollbar() {
+	// 防止重复初始化
+	if (window.customScrollbarInitialized) {
+		return;
+	}
+
+	const bodyElement = document.querySelector('body');
+	if (!bodyElement) return;
+
+	// 完全延迟OverlayScrollbars初始化，避免阻塞页面渲染
+	// 只在用户交互后才初始化，提升首次加载性能
+	const initScrollbarOnInteraction = () => {
+		try {
+			OverlayScrollbars(
+				{
+					target: bodyElement,
+					cancel: {
+						nativeScrollbarsOverlaid: true,
+					}
+				}, {
+				scrollbars: {
+					theme: 'scrollbar-base scrollbar-auto py-1',
+					autoHide: 'leave',
+					autoHideDelay: 300,
+					autoHideSuspend: false,
+					visibility: 'auto',
+				},
+				overflow: {
+					x: 'hidden',
+					y: 'scroll'
+				}
+			});
+
+			window.customScrollbarInitialized = true;
+		} catch (error) {
+			console.warn('⚠️ 自定义滚动条初始化失败:', error);
+		}
+	};
+
+	// 在用户首次滚动或点击时初始化
+	const initOnce = () => {
+		initScrollbarOnInteraction();
+		// 移除事件监听器
+		window.removeEventListener('scroll', initOnce);
+		window.removeEventListener('click', initOnce);
+		window.removeEventListener('touchstart', initOnce);
+	};
+
+	// 添加事件监听器
+	window.addEventListener('scroll', initOnce, { passive: true, once: true });
+	window.addEventListener('click', initOnce, { passive: true, once: true });
+	window.addEventListener('touchstart', initOnce, { passive: true, once: true });
+
+	// 备用方案：5秒后自动初始化
+	setTimeout(initOnce, 5000);
+
+	const katexElements = document.querySelectorAll('.katex-display') as NodeListOf<HTMLElement>;
+
+	const katexObserverOptions = {
+		root: null,
+		rootMargin: '100px',
+		threshold: 0.1
+	};
+
+	const processKatexElement = (element: HTMLElement) => {
+		if (!element.parentNode) return;
+		if (element.hasAttribute('data-scrollbar-initialized')) return;
+
+		const container = document.createElement('div');
+		container.className = 'katex-display-container';
+		container.setAttribute('aria-label', 'scrollable container for formulas');
+
+		element.parentNode.insertBefore(container, element);
+		container.appendChild(element);
+
+		OverlayScrollbars(container, {
+			scrollbars: {
+				theme: 'scrollbar-base scrollbar-auto',
+				autoHide: 'leave',
+				autoHideDelay: 500,
+				autoHideSuspend: false
+			}
+		});
+
+		element.setAttribute('data-scrollbar-initialized', 'true');
+	};
+
+	const katexObserver = new IntersectionObserver((entries, observer) => {
+		entries.forEach(entry => {
+			if (entry.isIntersecting) {
+			processKatexElement(entry.target as HTMLElement);
+			observer.unobserve(entry.target);
+			}
+		});
+	}, katexObserverOptions);
+
+	katexElements.forEach(element => {
+		katexObserver.observe(element);
+	});
+}
+
+// showBanner函数已删除
+// function showBanner() { ... }
+
+function init() {
+	// 防止重复初始化
+	if (window.layoutInitialized) {
+		return;
+	}
+
+	// 立即执行关键初始化
+	loadTheme();
+	loadHue();
+
+	// 暂时禁用自定义滚动条，测试fixed定位问题
+	// requestAnimationFrame(() => {
+	//	initCustomScrollbar();
+	// });
+
+	window.layoutInitialized = true;
+}
+
+/* Load settings when entering the site */
+// 优化初始化时机，避免阻塞页面渲染
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', () => {
+		// 延迟执行，让页面先完成基本渲染
+		setTimeout(init, 50);
+	});
+} else {
+	// 页面已加载，延迟执行避免阻塞
+	setTimeout(init, 50);
+}
+
+const setup = () => {
+	// 预热Swup，减少首次点击延迟
+	window.swup.hooks.on('enable', () => {
+		// 预先设置一些样式，避免首次点击时的闪烁
+		document.documentElement.style.setProperty('--content-delay', '0ms')
+		// 标记Swup已准备好
+		document.documentElement.setAttribute('data-swup-ready', 'true')
+
+	})
+
+	// 优化首次点击，避免完整页面重新加载
+	window.swup.hooks.on('animation:out:start', () => {
+		// 确保页面转换动画流畅
+		document.documentElement.classList.add('is-animating')
+	})
+	window.swup.hooks.on('link:click', () => {
+		// Remove the delay for the first time page load
+		document.documentElement.style.setProperty('--content-delay', '0ms')
+
+		// 预先准备页面转换，减少首次点击的延迟
+		document.documentElement.classList.add('is-changing')
+	})
+	// 暂时禁用自定义滚动条
+	// window.swup.hooks.on('content:replace', initCustomScrollbar)
+	window.swup.hooks.on('content:replace', () => {
+		// 防止重复初始化
+		if (window.swupInitializing) {
+			return;
+		}
+		window.swupInitializing = true;
+
+		// 重新初始化布局切换器
+		setTimeout(() => {
+			const switcher = document.querySelector('.layout-switcher');
+			if (switcher) {
+				const defaultLayout = switcher.getAttribute('data-default-layout') || 'grid';
+				const targetSelector = switcher.getAttribute('data-target-selector') || '.universal-post-list';
+
+				// 清除旧实例
+				if (window.universalLayoutSwitcherInstance) {
+					window.universalLayoutSwitcherInstance = null;
+				}
+
+				// 重新初始化 - 添加安全检查
+				if (typeof window.initUniversalLayoutSwitcher === 'function') {
+					window.initUniversalLayoutSwitcher({
+						defaultLayout,
+						targetSelector
+					});
+
+
+					// 优化搜索组件重新初始化 - 减少性能开销
+					const searchComponents = document.querySelectorAll('[data-search-component]');
+					if (searchComponents.length > 0) {
+						// 使用微任务队列，避免阻塞主线程
+						Promise.resolve().then(() => {
+							searchComponents.forEach(component => {
+								const event = new CustomEvent('search-reinit');
+								component.dispatchEvent(event);
+							});
+						});
+					}
+				}
+			} else {
+
+				// 延迟重试 - 重新获取配置
+				setTimeout(() => {
+					const retryswitcher = document.querySelector('.layout-switcher');
+					if (retryswitcher && typeof window.initUniversalLayoutSwitcher === 'function') {
+						const retryDefaultLayout = retryswitcher.getAttribute('data-default-layout') || 'grid';
+						const retryTargetSelector = retryswitcher.getAttribute('data-target-selector') || '.universal-post-list';
+
+						window.initUniversalLayoutSwitcher({
+							defaultLayout: retryDefaultLayout,
+							targetSelector: retryTargetSelector
+						});
+
+					}
+				}, 500);
+			}
+
+			// 重置初始化标志
+			setTimeout(() => {
+				window.swupInitializing = false;
+			}, 200);
+		}, 100);
+	})
+	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
+		// Banner height相关代码已删除
+		const bodyElement = document.querySelector('body')
+		if (pathsEqual(visit.to.url, url('/'))) {
+			bodyElement!.classList.add('lg:is-home');
+		} else {
+			bodyElement!.classList.remove('lg:is-home');
+		}
+
+		// increase the page height during page transition to prevent the scrolling animation from jumping
+		const heightExtend = document.getElementById('page-height-extend')
+		if (heightExtend) {
+			heightExtend.classList.remove('hidden')
+		}
+
+
+	});
+	window.swup.hooks.on('page:view', () => {
+		// hide the temp high element when the transition is done
+		const heightExtend = document.getElementById('page-height-extend')
+		if (heightExtend) {
+			heightExtend.classList.add('hidden')
+		}
+
+		// 确保布局切换器正常工作
+		setTimeout(() => {
+			const switcher = document.querySelector('.layout-switcher');
+			const buttons = document.querySelectorAll('.layout-switch-btn');
+
+			if (switcher && buttons.length > 0 && !window.universalLayoutSwitcherInstance) {
+				window.forceReinitLayoutSwitcher();
+			}
+		}, 50);
+
+		// 确保主题切换器正常工作
+		setTimeout(() => {
+			if (typeof window.reinitThemeSwitch === 'function') {
+				window.reinitThemeSwitch();
+			}
+		}, 50); // 减少延迟，更快重新初始化
+	});
+	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
+		setTimeout(() => {
+			const heightExtend = document.getElementById('page-height-extend')
+			if (heightExtend) {
+				heightExtend.classList.add('hidden')
+			}
+
+
+        }, 50)
+	});
+}
+if (window?.swup?.hooks) {
+	setup()
+} else {
+	document.addEventListener('swup:enable', setup)
+}
+
+let backToTopBtn = document.getElementById('back-to-top-btn');
+let navbar = document.getElementById('navbar-wrapper')
+function scrollFunction() {
+	// let bannerHeight = window.innerHeight * (BANNER_HEIGHT / 100) // Banner已删除
+	let scrollThreshold = 200; // 固定滚动阈值
+
+	if (backToTopBtn) {
+		if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+			backToTopBtn.classList.remove('hide')
+		} else {
+			backToTopBtn.classList.add('hide')
+		}
+	}
+
+
+
+	// Banner相关导航栏隐藏逻辑已删除
+}
+window.onscroll = scrollFunction
+
+window.onresize = () => {
+	// Banner height计算已删除
+	// let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
+	// offset = offset - offset % 4;
+	// document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+}
+
+// 移除冲突的全局toggleTheme函数，让Svelte组件处理主题切换
+
+// 全局主题切换器重新初始化函数
+window.reinitThemeSwitch = function() {
+	// 触发Svelte组件重新初始化
+	const themeButton = document.getElementById('scheme-switch');
+	if (themeButton) {
+		// 发送自定义事件通知Svelte组件重新初始化
+		const event = new CustomEvent('theme-switch-reinit');
+		themeButton.dispatchEvent(event);
+		console.log('🎨 已触发主题切换器重新初始化事件');
+	}
+};
+
+</script>
+
+<script>
+import PhotoSwipeLightbox from "photoswipe/lightbox"
+import "photoswipe/style.css"
+
+let lightbox: PhotoSwipeLightbox
+let pswp = import("photoswipe")
+
+function createPhotoSwipe() {
+	lightbox = new PhotoSwipeLightbox({
+		gallery: ".custom-md img, #post-cover img",
+		pswpModule: () => pswp,
+		closeSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>',
+		zoomSVG: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M340-540h-40q-17 0-28.5-11.5T260-580q0-17 11.5-28.5T300-620h40v-40q0-17 11.5-28.5T380-700q17 0 28.5 11.5T420-660v40h40q17 0 28.5 11.5T500-580q0 17-11.5 28.5T460-540h-40v40q0 17-11.5 28.5T380-460q-17 0-28.5-11.5T340-500v-40Zm40 220q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>',
+		padding: { top: 20, bottom: 20, left: 20, right: 20 },
+		wheelToZoom: true,
+		arrowPrev: false,
+		arrowNext: false,
+		imageClickAction: 'close',
+		tapAction: 'close',
+		doubleTapAction: 'zoom',
+	})
+
+	lightbox.addFilter("domItemData", (itemData, element) => {
+		if (element instanceof HTMLImageElement) {
+			itemData.src = element.src
+
+			itemData.w = Number(element.naturalWidth || window.innerWidth)
+			itemData.h = Number(element.naturalHeight || window.innerHeight)
+
+			itemData.msrc = element.src
+		}
+
+		return itemData
+	})
+
+	lightbox.init()
+}
+
+const setup = () => {
+	if (!lightbox) {
+		createPhotoSwipe()
+	}
+	window.swup.hooks.on("page:view", () => {
+		createPhotoSwipe()
+	})
+
+	window.swup.hooks.on(
+		"content:replace",
+		() => {
+			lightbox?.destroy?.()
+		},
+		{ before: true },
+	)
+}
+
+if (window.swup) {
+	setup()
+} else {
+	document.addEventListener("swup:enable", setup)
+}
+</script>

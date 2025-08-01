@@ -28,37 +28,15 @@ import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-cop
 
 // https://astro.build/config
 // 根据环境选择适配器
-// CF Pages环境检测：检查多个可能的环境变量
-const isCloudflare = process.env.CF_PAGES === 'true' ||
-                     process.env.CF_PAGES === '1' ||
-                     process.env.CLOUDFLARE_PAGES === 'true' ||
-                     process.env.CLOUDFLARE_PAGES === '1' ||
-                     !!process.env.CF_PAGES_URL ||
-                     !!process.env.CF_PAGES_BRANCH;
-
-console.log('🌐 环境检测:', {
-  CF_PAGES: process.env.CF_PAGES,
-  CLOUDFLARE_PAGES: process.env.CLOUDFLARE_PAGES,
-  CF_PAGES_URL: process.env.CF_PAGES_URL,
-  CF_PAGES_BRANCH: process.env.CF_PAGES_BRANCH,
-  isCloudflare: isCloudflare
-});
-
-// 暂时强制使用Cloudflare适配器来修复CF Pages问题
-const adapter = cloudflare({
-	mode: "advanced",
-	functionPerRoute: false
-});
-
-// 备用逻辑（暂时注释）
-// const adapter = isCloudflare
-// 	? cloudflare({
-// 		mode: "advanced",
-// 		functionPerRoute: false
-// 	})
-// 	: node({
-// 		mode: "standalone"
-// 	});
+const isCloudflare = process.env.CF_PAGES === 'true';
+const adapter = isCloudflare
+	? cloudflare({
+		mode: "advanced",
+		functionPerRoute: false
+	})
+	: node({
+		mode: "standalone"
+	});
 
 export default defineConfig({
 	site: "https://sparkdone.com/", // 主站域名

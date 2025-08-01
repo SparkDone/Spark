@@ -1,0 +1,112 @@
+---
+import path from "node:path";
+
+interface Props {
+	id?: string;
+	src: string;
+	class?: string;
+	alt?: string;
+	position?: string;
+	basePath?: string;
+}
+
+import { Image } from "astro:assets";
+import { url } from "../../utils/url-utils";
+import { adaptImageUrlSync } from "../../utils/image-adapter";
+
+const { id, src, alt, position = "center", basePath = "/" } = Astro.props;
+const className = Astro.props.class;
+
+// 确保 src 是字符串，如果不是则使用空字符串
+const srcString = typeof src === 'string' ? src : '';
+
+// 检查是否有有效的图片源
+const hasValidSrc = srcString && srcString.trim() !== '';
+
+
+
+const isLocal = !(
+	srcString.startsWith("/") ||
+	srcString.startsWith("http") ||
+	srcString.startsWith("https") ||
+	srcString.startsWith("data:")
+);
+const isPublic = srcString.startsWith("/");
+const isNetwork = srcString.startsWith("http") || srcString.startsWith("https");
+
+
+
+// TODO temporary workaround for images dynamic import
+// https://github.com/withastro/astro/issues/3373
+// biome-ignore lint/suspicious/noImplicitAnyLet: <check later>
+let img;
+if (isLocal) {
+	const files = import.meta.glob<ImageMetadata>("../../**", {
+		import: "default",
+	});
+
+	// 处理不同的路径格式
+	let normalizedPath;
+	if (srcString.startsWith("src/")) {
+		// 如果路径以 src/ 开头，直接使用
+		normalizedPath = path.normalize(path.join("../../", srcString)).replace(/\\/g, "/");
+	} else if (srcString.startsWith("assets/")) {
+		// 如果路径以 assets/ 开头，添加 src/ 前缀
+		normalizedPath = path.normalize(path.join("../../src/", srcString)).replace(/\\/g, "/");
+	} else {
+		// 其他情况，使用 basePath
+		normalizedPath = path.normalize(path.join("../../", basePath, srcString)).replace(/\\/g, "/");
+	}
+
+	// 只在开发模式下打印调试信息
+	if (import.meta.env.DEV) {
+		console.log(`🖼️ 尝试加载图片: ${normalizedPath}`);
+		console.log(`🖼️ basePath: ${basePath}, srcString: ${srcString}`);
+	}
+
+	const file = files[normalizedPath];
+	if (!file) {
+		if (import.meta.env.DEV) {
+			console.error(
+				`\n[ERROR] Image file not found: ${normalizedPath.replace("../../", "src/")}`,
+			);
+			console.log(`🖼️ 可用文件列表:`, Object.keys(files).slice(0, 10));
+		}
+	} else {
+		img = await file();
+	}
+}
+
+const isBanner = id === 'banner';
+const imageClass = isBanner ? "w-full h-full object-cover" : "w-full h-full object-cover";
+const imageStyle = `object-position: ${position}`;
+---
+{hasValidSrc && (
+<div id={id} class:list={[className, 'overflow-hidden relative']}>
+    <!-- 移除Banner的叠加层，保持其他图片的叠加层 -->
+    {!isBanner && <div class="transition absolute inset-0 dark:bg-black/10 bg-opacity-50 pointer-events-none"></div>}
+
+    {isLocal && img && <Image
+        src={img}
+        alt={alt || ""}
+        class={imageClass}
+        style={imageStyle}
+        quality={isBanner ? 95 : 80}
+        format="webp"
+        loading={isBanner ? "eager" : "lazy"}
+        decoding={isBanner ? "sync" : "async"}
+        width={isBanner ? 1920 : undefined}
+        height={isBanner ? 1080 : undefined}
+    />}
+    {!isLocal && <img
+        src={adaptImageUrlSync(srcString)}
+        alt={alt || ""}
+        class={imageClass}
+        style={imageStyle}
+        loading={isBanner ? "eager" : "lazy"}
+        decoding={isBanner ? "sync" : "async"}
+        crossorigin={isNetwork ? "anonymous" : undefined}
+        referrerpolicy={isNetwork ? "no-referrer-when-downgrade" : undefined}
+    />}
+</div>
+)}

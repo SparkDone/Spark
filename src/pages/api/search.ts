@@ -10,7 +10,6 @@ export const GET: APIRoute = async ({ url }) => {
     const limitParam = url.searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam) : 10;
 
-    console.log(`🌐 搜索API调用 - 环境: ${import.meta.env.MODE}, 时间: ${new Date().toISOString()}`);
     console.log(`🔍 搜索API被调用: "${query}", 限制: ${limit}`);
 
     if (!query || query.trim().length === 0) {
@@ -30,95 +29,71 @@ export const GET: APIRoute = async ({ url }) => {
     let allResults = [];
 
     // 方法1：尝试Strapi搜索
-    let strapiResults = [];
     try {
       console.log(`🔍 尝试Strapi搜索: "${query}"`);
       const strapiResponse = await searchArticles(query);
       console.log(`📊 Strapi搜索响应:`, strapiResponse);
 
-      strapiResults = strapiResponse.data || [];
-      console.log(`✅ 从Strapi获取到 ${strapiResults.length} 个搜索结果`);
+      const strapiArticles = strapiResponse.data || [];
+      console.log(`✅ 从Strapi获取到 ${strapiArticles.length} 个搜索结果`);
 
-      if (strapiResults.length > 0) {
-        allResults = strapiResults;
+      if (strapiArticles.length > 0) {
+        allResults = strapiArticles;
         console.log(`🎯 使用Strapi搜索结果`);
       }
     } catch (strapiError) {
       console.warn(`⚠️ Strapi搜索失败:`, strapiError);
     }
 
-    // 方法2：总是尝试本地内容搜索，然后合并结果
-    let localResults = [];
-    try {
+    // 方法2：如果Strapi搜索失败或无结果，使用本地内容搜索
+    if (allResults.length === 0) {
+      try {
         console.log(`🔍 使用本地内容搜索: "${query}"`);
-      const localPosts = await getSortedPosts();
-      console.log(`📊 获取到 ${localPosts.length} 个本地文章`);
+        const localPosts = await getSortedPosts();
+        console.log(`📊 获取到 ${localPosts.length} 个本地文章`);
 
-      // 搜索本地内容
-      const matchedPosts = localPosts.filter(post => {
-        const title = post.data.title?.toLowerCase() || '';
-        const description = post.data.description?.toLowerCase() || '';
-        const content = post.body?.toLowerCase() || '';
-        const tags = post.data.tags?.join(' ').toLowerCase() || '';
-        const category = post.data.category?.toLowerCase() || '';
+        // 搜索本地内容
+        const matchedPosts = localPosts.filter(post => {
+          const title = post.data.title?.toLowerCase() || '';
+          const description = post.data.description?.toLowerCase() || '';
+          const content = post.body?.toLowerCase() || '';
+          const tags = post.data.tags?.join(' ').toLowerCase() || '';
+          const category = post.data.category?.toLowerCase() || '';
 
-        const titleMatch = title.includes(searchTerm);
-        const descMatch = description.includes(searchTerm);
-        const contentMatch = content.includes(searchTerm);
-        const tagsMatch = tags.includes(searchTerm);
-        const categoryMatch = category.includes(searchTerm);
+          const titleMatch = title.includes(searchTerm);
+          const descMatch = description.includes(searchTerm);
+          const contentMatch = content.includes(searchTerm);
+          const tagsMatch = tags.includes(searchTerm);
+          const categoryMatch = category.includes(searchTerm);
 
-        const isMatch = titleMatch || descMatch || contentMatch || tagsMatch || categoryMatch;
+          const isMatch = titleMatch || descMatch || contentMatch || tagsMatch || categoryMatch;
 
-        if (isMatch) {
-          console.log(`🎯 匹配文章: "${post.data.title}" - 标题:${titleMatch}, 描述:${descMatch}, 内容:${contentMatch}, 标签:${tagsMatch}, 分类:${categoryMatch}`);
-        }
+          if (isMatch) {
+            console.log(`🎯 匹配文章: "${post.data.title}" - 标题:${titleMatch}, 描述:${descMatch}, 内容:${contentMatch}, 标签:${tagsMatch}, 分类:${categoryMatch}`);
+          }
 
-        return isMatch;
-      });
+          return isMatch;
+        });
 
-      console.log(`✅ 本地搜索找到 ${matchedPosts.length} 个结果`);
+        console.log(`✅ 本地搜索找到 ${matchedPosts.length} 个结果`);
 
-      // 转换本地文章格式为API格式
-      localResults = matchedPosts.map(post => ({
-        id: post.data.strapiId || post.id,
-        title: post.data.title,
-        slug: post.slug,
-        description: post.data.description || '',
-        content: post.body || '',
-        published: post.data.published,
-        category: { name: post.data.category || '' },
-        tags: (post.data.tags || []).map(tag => ({ name: tag })),
-      }));
+        // 转换本地文章格式为API格式
+        allResults = matchedPosts.map(post => ({
+          id: post.data.strapiId || post.id,
+          title: post.data.title,
+          slug: post.slug,
+          description: post.data.description || '',
+          content: post.body || '',
+          published: post.data.published,
+          category: { name: post.data.category || '' },
+          tags: (post.data.tags || []).map(tag => ({ name: tag })),
+        }));
 
-      console.log(`🎯 本地搜索完成，找到 ${localResults.length} 个结果`);
-    } catch (localError) {
-      console.error(`❌ 本地搜索失败:`, localError);
-    }
-
-    // 合并Strapi和本地搜索结果，去重
-    const combinedResults = [];
-    const seenSlugs = new Set();
-
-    // 优先使用Strapi结果
-    for (const result of allResults) {
-      if (!seenSlugs.has(result.slug)) {
-        combinedResults.push(result);
-        seenSlugs.add(result.slug);
+        console.log(`🎯 使用本地搜索结果`);
+      } catch (localError) {
+        console.error(`❌ 本地搜索也失败:`, localError);
       }
     }
-
-    // 添加本地搜索中Strapi没有的结果
-    for (const result of localResults) {
-      if (!seenSlugs.has(result.slug)) {
-        combinedResults.push(result);
-        seenSlugs.add(result.slug);
-      }
-    }
-
-    allResults = combinedResults;
-    console.log(`🔄 合并后总共 ${allResults.length} 个搜索结果`);
-    console.log(`📊 结果来源 - Strapi: ${strapiResults.length}, 本地: ${localResults.length}, 合并后: ${allResults.length}`);
 
     // 高亮关键词函数
     const highlightKeyword = (text: string, keyword: string): string => {

@@ -1,0 +1,81 @@
+---
+import { getLogoConfig } from "../lib/config-integration";
+
+// 从Strapi获取LOGO配置
+const logoConfig = await getLogoConfig();
+
+// 调试信息（仅开发环境且非构建模式）
+if (import.meta.env.DEV && !import.meta.env.PROD) {
+  console.log('🖼️ StaticLogo 配置调试:', logoConfig);
+}
+---
+
+<div class="logo-container flex items-center space-x-2 group">
+  {/* 如果有LOGO图片，只显示图片 */}
+  {(logoConfig.light || logoConfig.dark) ? (
+    <div class="logo-image-wrapper">
+      {/* 浅色模式LOGO */}
+      {logoConfig.light && (
+        <img
+          src={logoConfig.light}
+          alt={logoConfig.alt}
+          class="logo-light h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+          loading="eager"
+          decoding="async"
+        />
+      )}
+
+      {/* 深色模式LOGO */}
+      {logoConfig.dark && (
+        <img
+          src={logoConfig.dark}
+          alt={logoConfig.alt}
+          class="logo-dark h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+          loading="eager"
+          decoding="async"
+        />
+      )}
+    </div>
+  ) : (
+    /* 只有在没有LOGO图片时才显示文字标题 */
+    <span class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">
+      {logoConfig.fallbackText}
+    </span>
+  )}
+</div>
+
+<style>
+  .logo-container {
+    max-height: 2rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-image-wrapper img {
+    max-height: 2rem;
+    width: auto;
+    object-fit: contain;
+  }
+
+  /* 主题切换样式 */
+  .logo-light {
+    display: block;
+  }
+
+  .dark .logo-light {
+    display: none;
+  }
+
+  .logo-dark {
+    display: none;
+  }
+
+  .dark .logo-dark {
+    display: block;
+  }
+
+  /* 悬停效果 */
+  .logo-container:hover .logo-image-wrapper img {
+    transform: scale(1.05);
+  }
+</style>

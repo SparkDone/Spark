@@ -178,8 +178,7 @@ const search = async (searchKeyword: string): Promise<void> => {
 	try {
 		let searchResults: SearchResult[] = [];
 
-		// 暂时禁用Pagefind，强制使用API搜索避免WASM错误
-		if (false && import.meta.env.PROD && pagefindLoaded && window.pagefind) {
+		if (import.meta.env.PROD && pagefindLoaded && window.pagefind) {
 			// 使用优化的搜索参数
 			const response = await window.pagefind.search(normalizedKeyword, {
 				// 提高搜索结果的相关性
@@ -260,12 +259,6 @@ const search = async (searchKeyword: string): Promise<void> => {
 		}
 	} catch (error) {
 		console.error("Search error:", error);
-
-		// 如果是WASM错误，显示友好提示
-		if (error.message && error.message.includes('unreachable')) {
-			console.warn('🔧 检测到Pagefind WASM错误，已切换到API搜索模式');
-		}
-
 		result = [];
 		// 错误时不重置展开状态，保持用户体验
 		// showAllResults = false; // 移除这行
@@ -429,7 +422,14 @@ onMount(() => {
             <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--primary)]"></div>
             <span class="ml-3 text-sm text-black/60 dark:text-white/60">正在搜索...</span>
         </div>
-
+    {:else if keyword.trim() && keyword.trim().length < 1}
+        <div class="flex flex-col items-center justify-center py-6">
+            <Icon icon="material-symbols:edit" class="text-3xl text-black/30 dark:text-white/30 mb-3 mx-auto"></Icon>
+            <p class="text-sm text-black/60 dark:text-white/60 mb-1 text-center">请输入搜索关键词</p>
+            <p class="text-xs text-black/40 dark:text-white/40 text-center">
+                当前输入: "{keyword}"
+            </p>
+        </div>
     {:else if result.length === 0 && keyword.trim()}
         <div class="flex flex-col items-center justify-center py-6">
             <Icon icon="material-symbols:search-off" class="text-3xl text-black/30 dark:text-white/30 mb-3 mx-auto"></Icon>

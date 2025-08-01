@@ -279,7 +279,7 @@ export async function getPublishedArticles(): Promise<StrapiResponse<StrapiArtic
 
   return apiCache.get(cacheKey, async () => {
     const fetchFunction = async () => {
-      const result = await fetchAPI(`${API_ENDPOINTS.articles}?populate=*&filters[draft][$eq]=false&sort=published:desc`);
+      const result = await fetchAPI(`${API_ENDPOINTS.articles}?populate[0]=image&populate[1]=category&populate[2]=tags&populate[3]=author.avatar&filters[draft][$eq]=false&sort=published:desc`);
 
       // 调试：检查第一篇文章的 SEO 字段
       if (result.data && result.data.length > 0 && config.development.enableDebugLogs) {
@@ -312,7 +312,7 @@ export async function getPublishedArticles(): Promise<StrapiResponse<StrapiArtic
 export async function getArticleBySlug(slug: string): Promise<StrapiResponse<StrapiArticle[]>> {
   // 添加时间戳参数来破坏缓存，确保获取最新数据
   const timestamp = Date.now();
-  return fetchAPI(`/articles?populate=*&filters[slug][$eq]=${slug}&_t=${timestamp}`);
+  return fetchAPI(`/articles?populate[0]=image&populate[1]=category&populate[2]=tags&populate[3]=author.avatar&filters[slug][$eq]=${slug}&_t=${timestamp}`);
 }
 
 // 根据分类获取文章 - 优化查询，只获取必要字段，添加缓存
@@ -435,11 +435,7 @@ export async function getFeaturedArticles(): Promise<StrapiResponse<StrapiArticl
 // 搜索文章
 export async function searchArticles(query: string): Promise<StrapiResponse<StrapiArticle[]>> {
   const encodedQuery = encodeURIComponent(query);
-  // 使用简化的搜索格式，避免复杂的$or查询
-  const searchUrl = `/articles?populate=*&filters[title][$containsi]=${encodedQuery}&filters[draft][$eq]=false&sort=published:desc`;
-
-  console.log(`🔍 Strapi搜索URL: ${searchUrl}`);
-  return fetchAPI(searchUrl);
+  return fetchAPI(`/articles?populate=*&filters[$or][0][title][$containsi]=${encodedQuery}&filters[$or][1][description][$containsi]=${encodedQuery}&filters[$or][2][content][$containsi]=${encodedQuery}&filters[draft][$eq]=false&sort=published:desc`);
 }
 
 
