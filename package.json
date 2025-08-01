@@ -7,9 +7,11 @@
     "start": "astro dev",
     "check": "astro check",
     "download-images": "node scripts/download-strapi-images.js",
+    "optimize-images": "node scripts/optimize-images.js",
     "build": "node scripts/download-strapi-images.js && astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
     "build:local": "dotenv -e .env.local -- node scripts/download-strapi-images.js && astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
     "build:fast": "astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
+    "build:optimized": "node scripts/download-strapi-images.js && node scripts/optimize-images.js && astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
 
     "deploy:cf": "wrangler pages deploy dist/client --project-name=sparkdone-blog",
     "preview": "astro preview",

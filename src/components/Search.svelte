@@ -398,7 +398,7 @@ onMount(() => {
      }}
      class="float-panel float-panel-closed search-panel absolute md:w-[32rem]
      top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-3
-     bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-black/5 dark:border-white/10">
+     bg-white/98 dark:bg-gray-900/98 backdrop-blur-md border border-black/10 dark:border-white/15">
 
     <!-- search bar inside panel for phone/tablet -->
     <div class="lg:hidden mb-3">

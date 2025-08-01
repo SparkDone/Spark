@@ -60,11 +60,19 @@ export const GET: APIRoute = async ({ url }) => {
           const tags = post.data.tags?.join(' ').toLowerCase() || '';
           const category = post.data.category?.toLowerCase() || '';
 
-          return title.includes(searchTerm) ||
-                 description.includes(searchTerm) ||
-                 content.includes(searchTerm) ||
-                 tags.includes(searchTerm) ||
-                 category.includes(searchTerm);
+          const titleMatch = title.includes(searchTerm);
+          const descMatch = description.includes(searchTerm);
+          const contentMatch = content.includes(searchTerm);
+          const tagsMatch = tags.includes(searchTerm);
+          const categoryMatch = category.includes(searchTerm);
+
+          const isMatch = titleMatch || descMatch || contentMatch || tagsMatch || categoryMatch;
+
+          if (isMatch) {
+            console.log(`🎯 匹配文章: "${post.data.title}" - 标题:${titleMatch}, 描述:${descMatch}, 内容:${contentMatch}, 标签:${tagsMatch}, 分类:${categoryMatch}`);
+          }
+
+          return isMatch;
         });
 
         console.log(`✅ 本地搜索找到 ${matchedPosts.length} 个结果`);
