@@ -3,14 +3,16 @@
  * 处理Strapi图片URL的转换，支持本地化和CDN
  */
 
-// 图片映射数据（使用API代理，解决CORS问题）
-const imageMapping: Record<string, string> = {
-  "/uploads/cyberpunk_abstract_3840x2160_21046_b4caae8be5.jpg": "/api/strapi-uploads/cyberpunk_abstract_3840x2160_21046_b4caae8be5.jpg",
-  "/uploads/shanghai_city_5083x3389_16563_686875de57.jpg": "/api/strapi-uploads/shanghai_city_5083x3389_16563_686875de57.jpg",
-  "/uploads/519556628d594f0db15a565f1d4598d3_4b5fec49c7.jpeg": "/api/strapi-uploads/519556628d594f0db15a565f1d4598d3_4b5fec49c7.jpeg",
-  "/uploads/519556628d594f0db15a565f1d4598d3_6830c9816e.jpeg": "/api/strapi-uploads/519556628d594f0db15a565f1d4598d3_6830c9816e.jpeg",
-  "/uploads/logo1_2c27baca01.png": "/api/strapi-uploads/logo1_2c27baca01.png"
-};
+// 动态加载图片映射数据（构建时生成）
+let imageMapping: Record<string, string> = {};
+
+// 尝试加载构建时生成的映射文件
+try {
+  const mappingData = await import('../data/image-mapping.json');
+  imageMapping = mappingData.default || {};
+} catch (error) {
+  console.warn('⚠️ 无法加载图片映射文件，使用API代理模式');
+}
 
 /**
  * 获取环境变量中的Strapi公网URL
