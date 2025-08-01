@@ -128,6 +128,4 @@ MIT License
 
 ---
 
-**SparkDone** - 帮你创意落地 ✨
-
-> 最后更新：2025-08-01
+**SparkDone** - 帮你创意落地 
