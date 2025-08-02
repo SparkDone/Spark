@@ -61,7 +61,7 @@ export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 		// 动画完成后移除过渡类 - 加快速度
 		setTimeout(() => {
 			html.classList.remove('theme-transitioning');
-		}, 80); // 从120ms减少到80ms
+		}, 50); // 从80ms进一步减少到50ms
 	});
 }
 
@@ -81,7 +81,7 @@ export function setTheme(theme: LIGHT_DARK_MODE): void {
 	themeChangeTimeout = window.setTimeout(() => {
 		applyThemeToDocument(theme);
 		themeChangeTimeout = null;
-	}, 20); // 从50ms减少到20ms
+	}, 10); // 从20ms减少到10ms
 }
 
 export function getStoredTheme(): LIGHT_DARK_MODE {

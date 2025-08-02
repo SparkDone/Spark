@@ -10,7 +10,7 @@
   --animation-duration-slow: 0.25s;
   --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
   --animation-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  --theme-transition-duration: 0.08s; /* 从0.12s进一步调整到0.08s */
+  --theme-transition-duration: 0.05s; /* 进一步加快主题切换动画速度 */
 }
 
 /* 淡入动画 */
