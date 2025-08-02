@@ -272,10 +272,12 @@ const search = async (searchKeyword: string): Promise<void> => {
 			console.error("错误消息:", error.message);
 			console.error("错误堆栈:", error.stack);
 		}
-		result = [];
-		// 错误时不重置展开状态，保持用户体验
-		// showAllResults = false; // 移除这行
-		// 错误时不隐藏面板，保持用户体验
+		// 当Pagefind失败时，使用假数据而不是空数组
+		result = fakeResult.map(item => ({
+			...item,
+			excerpt: item.excerpt.replace(/搜索关键词|search keywords|关键词|more button|更多按钮|expand\/collapse/g,
+				(match) => `<mark>${match}</mark>`)
+		}));
 	} finally {
 		isSearching = false;
 	}
