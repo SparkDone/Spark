@@ -179,29 +179,20 @@ const search = async (searchKeyword: string): Promise<void> => {
 		let searchResults: SearchResult[] = [];
 
 		if (import.meta.env.PROD && pagefindLoaded && window.pagefind) {
-			try {
-				// 使用优化的搜索参数
-				const response = await window.pagefind.search(normalizedKeyword, {
-					// 提高搜索结果的相关性
-					excerpt_length: 100,
-					// 支持模糊匹配
-					fuzzy: true,
-					// 支持部分匹配
-					partial: true
-				});
-				searchResults = await Promise.all(
-					response.results.map((item) => item.data()),
-				);
-			} catch (pagefindError) {
-				console.warn('⚠️ Pagefind搜索失败，使用API回退:', pagefindError);
-				// Pagefind失败时，自动切换到API搜索
-				pagefindLoaded = false;
-				throw pagefindError; // 让外层catch处理
-			}
-		}
-		
-		// 如果Pagefind不可用或失败，使用搜索API
-		if (!pagefindLoaded || searchResults.length === 0) {
+			// 使用优化的搜索参数
+			const response = await window.pagefind.search(normalizedKeyword, {
+				// 提高搜索结果的相关性
+				excerpt_length: 100,
+				// 支持模糊匹配
+				fuzzy: true,
+				// 支持部分匹配
+				partial: true
+			});
+			searchResults = await Promise.all(
+				response.results.map((item) => item.data()),
+			);
+		} else {
+			// 开发环境和生产环境降级：使用搜索API
 			try {
 				// 使用混合模式搜索API（支持Strapi和本地内容）
 				const apiUrl = `/api/search/?q=${encodeURIComponent(normalizedKeyword)}&limit=20`;
@@ -248,6 +239,8 @@ const search = async (searchKeyword: string): Promise<void> => {
 			}
 		}
 
+
+
 		result = searchResults;
 		// 不重置显示状态，保持用户的展开选择
 		// showAllResults = false; // 移除这行，避免展开后立即收起
@@ -266,18 +259,10 @@ const search = async (searchKeyword: string): Promise<void> => {
 		}
 	} catch (error) {
 		console.error("Search error:", error);
-		// 改进错误处理，提供更友好的错误信息
-		if (error instanceof Error) {
-			console.error("错误类型:", error.name);
-			console.error("错误消息:", error.message);
-			console.error("错误堆栈:", error.stack);
-		}
-		// 当Pagefind失败时，使用假数据而不是空数组
-		result = fakeResult.map(item => ({
-			...item,
-			excerpt: item.excerpt.replace(/搜索关键词|search keywords|关键词|more button|更多按钮|expand\/collapse/g,
-				(match) => `<mark>${match}</mark>`)
-		}));
+		result = [];
+		// 错误时不重置展开状态，保持用户体验
+		// showAllResults = false; // 移除这行
+		// 错误时不隐藏面板，保持用户体验
 	} finally {
 		isSearching = false;
 	}
