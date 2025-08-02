@@ -46,7 +46,7 @@ export const navBarConfig: NavBarConfig = {
 		},
 		{
 			name: "GitHub",
-			url: "https://github.com", // Internal links should not include the base path, as it is automatically added
+			url: "https://github.com/SparkDone/Spark", // 更新为正确的GitHub仓库
 			external: true, // Show an external link icon and will open in a new tab
 		},
 	],
@@ -72,7 +72,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
-			url: "https://github.com",
+			url: "https://github.com/SparkDone/Spark", // 更新为正确的GitHub仓库
 		},
 	],
 };

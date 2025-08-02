@@ -1,7 +1,19 @@
 {
-  "name": "fuwari",
+  "name": "sparkdone",
   "type": "module",
   "version": "0.0.1",
+  "description": "SparkDone Blog - 基于 Astro + Strapi 构建的现代化博客系统",
+  "keywords": ["astro", "blog", "strapi", "cms", "sparkdone"],
+  "author": "SparkDone",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SparkDone/Spark.git"
+  },
+  "homepage": "https://sparkdone.com",
+  "bugs": {
+    "url": "https://github.com/SparkDone/Spark/issues"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
