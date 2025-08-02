@@ -84,64 +84,18 @@ if (config.features.useStrapi) {
 </div>
 
 <script>
-function switchTheme() {
-    // 导入优化的主题切换函数
-    import('/src/utils/setting-utils.js').then(module => {
-        const { getStoredTheme, setTheme, LIGHT_MODE, DARK_MODE } = module;
-
-        // 获取当前主题
-        const currentTheme = getStoredTheme();
-
-        // 切换主题
-        const newTheme = currentTheme === DARK_MODE ? LIGHT_MODE : DARK_MODE;
-        setTheme(newTheme);
-
-        // 更新按钮图标（如果需要）
-        updateThemeButtonIcon(newTheme);
-    }).catch(error => {
-        console.warn('主题切换模块加载失败，使用备用方法:', error);
-
-        // 备用的简单切换方法
-        const currentTheme = localStorage.theme || 'dark';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-        // 添加过渡动画
-        document.documentElement.classList.add('theme-transitioning');
-
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
-        localStorage.theme = newTheme;
-
-        // 移除过渡类
-        setTimeout(() => {
-            document.documentElement.classList.remove('theme-transitioning');
-        }, 120); // 与CSS动画时间匹配
-    });
-}
-
-function updateThemeButtonIcon(theme) {
-    // 更新主题切换按钮的图标（如果有的话）
-    const themeButton = document.getElementById("scheme-switch");
-    if (themeButton) {
-        // 添加按钮点击动画
-        themeButton.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            themeButton.style.transform = 'scale(1)';
-        }, 100);
-    }
-}
+// 移除冲突的主题切换函数，让Svelte组件完全控制主题切换
+// function switchTheme() { ... }
+// function updateThemeButtonIcon(theme) { ... }
 
 function loadButtonScript() {
-    let switchBtn = document.getElementById("scheme-switch");
-    if (switchBtn) {
-        switchBtn.onclick = function () {
-            switchTheme()
-        };
-    }
+    // 移除主题切换按钮的事件绑定，让Svelte组件处理
+    // let switchBtn = document.getElementById("scheme-switch");
+    // if (switchBtn) {
+    //     switchBtn.onclick = function () {
+    //         switchTheme()
+    //     };
+    // }
 
     let settingBtn = document.getElementById("display-settings-switch");
     if (settingBtn) {

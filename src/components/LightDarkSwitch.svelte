@@ -53,6 +53,8 @@ onMount(() => {
 	const setupThemeButton = () => {
 		const themeButton = document.getElementById('scheme-switch');
 		if (themeButton) {
+			// 移除旧的事件监听器，避免重复绑定
+			themeButton.removeEventListener('theme-switch-reinit', handleReinit);
 			themeButton.addEventListener('theme-switch-reinit', handleReinit);
 			if (import.meta.env.DEV) {
 				console.log('🎨 主题切换器事件监听器已绑定');
@@ -87,7 +89,20 @@ onMount(() => {
 				if (import.meta.env.DEV) {
 					console.log('🎨 Swup页面切换完成，重新初始化主题切换器');
 				}
-				handleReinit();
+				// 延迟重新初始化，确保DOM完全更新
+				setTimeout(() => {
+					handleReinit();
+				}, 50);
+			});
+
+			// 内容替换时也重新初始化
+			window.swup.hooks.on('content:replace', () => {
+				if (import.meta.env.DEV) {
+					console.log('🎨 Swup内容替换，重新初始化主题切换器');
+				}
+				setTimeout(() => {
+					handleReinit();
+				}, 100);
 			});
 		}
 	};
@@ -100,8 +115,26 @@ onMount(() => {
 		document.addEventListener('swup:enable', setupSwupListeners);
 	}
 
+	// 定期检查按钮是否存在，如果消失则重新初始化
+	const checkButtonExistence = () => {
+		const themeButton = document.getElementById('scheme-switch');
+		if (!themeButton && isInitialized) {
+			if (import.meta.env.DEV) {
+				console.log('🎨 检测到主题切换按钮消失，重新初始化');
+			}
+			isInitialized = false;
+			setTimeout(() => {
+				initializeThemeSwitch();
+			}, 100);
+		}
+	};
+
+	// 每5秒检查一次按钮是否存在
+	const existenceCheckInterval = setInterval(checkButtonExistence, 5000);
+
 	// 清理函数
 	return () => {
+		clearInterval(existenceCheckInterval);
 		const themeButton = document.getElementById('scheme-switch');
 		if (themeButton) {
 			themeButton.removeEventListener('theme-switch-reinit', handleReinit);
@@ -130,6 +163,12 @@ function toggleTheme(event) {
 	if (event) {
 		event.preventDefault();
 		event.stopPropagation();
+		event.stopImmediatePropagation();
+	}
+
+	// 确保组件已初始化
+	if (!isInitialized) {
+		initializeThemeSwitch();
 	}
 
 	let i = 0;
@@ -143,6 +182,15 @@ function toggleTheme(event) {
 		console.log('🎨 直接切换主题:', mode, '->', newMode);
 	}
 	switchScheme(newMode);
+
+	// 添加按钮点击反馈
+	const themeButton = document.getElementById('scheme-switch');
+	if (themeButton) {
+		themeButton.style.transform = 'scale(0.95)';
+		setTimeout(() => {
+			themeButton.style.transform = 'scale(1)';
+		}, 100);
+	}
 }
 </script>
 
