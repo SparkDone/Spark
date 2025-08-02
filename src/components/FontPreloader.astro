@@ -44,10 +44,14 @@ const isProd = import.meta.env.PROD;
 
     Promise.all(fontPromises).then(function() {
       // 字体加载完成，但不改变CSS类，保持字体显示一致
-      console.log('✅ Noto Sans SC 字体预加载完成');
+      if (import.meta.env.DEV) {
+        console.log('✅ Noto Sans SC 字体预加载完成');
+      }
     }).catch(function() {
       // 字体加载失败也不影响显示
-      console.log('⚠️ 字体预加载失败，使用回退字体');
+      if (import.meta.env.DEV) {
+        console.log('⚠️ 字体预加载失败，使用回退字体');
+      }
     });
   }
 </script>

@@ -88,7 +88,9 @@ class UniversalLayoutSwitcher {
     // 智能初始化：只在布局不匹配时才切换
     this.initializeLayout();
     this.isInitialized = true;
-    console.log('✅ 布局切换器初始化完成');
+    if (import.meta.env.DEV) {
+      console.log('✅ 布局切换器初始化完成');
+    }
   }
 
   /**

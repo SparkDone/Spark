@@ -131,7 +131,9 @@ const title = query ? `搜索结果: ${query}` : '搜索';
         });
 
         if (pagefindResponse && pagefindResponse.results && pagefindResponse.results.length > 0) {
-          console.log('✅ Pagefind找到结果:', pagefindResponse.results.length, '个');
+          if (import.meta.env.DEV) {
+            console.log('✅ Pagefind找到结果:', pagefindResponse.results.length, '个');
+          }
           const pagefindResults = await Promise.all(
             pagefindResponse.results.slice(0, 50).map(item => item.data())
           );
@@ -176,10 +178,14 @@ const title = query ? `搜索结果: ${query}` : '搜索';
 
       // 显示结果
       if (searchResults.length > 0) {
-        console.log(`✅ 最终显示 ${searchResults.length} 个搜索结果 (方法: ${searchMethod})`);
+        if (import.meta.env.DEV) {
+          console.log(`✅ 最终显示 ${searchResults.length} 个搜索结果 (方法: ${searchMethod})`);
+        }
         showResults(searchResults, query);
       } else {
-        console.log('❌ 所有搜索方法都未找到结果');
+        if (import.meta.env.DEV) {
+          console.log('❌ 所有搜索方法都未找到结果');
+        }
         showNoResults();
       }
 
@@ -195,7 +201,9 @@ const title = query ? `搜索结果: ${query}` : '搜索';
   // 显示状态函数 - 动态获取DOM元素，减少闪烁
   function showInitialState() {
     const { loadingState, noResults, resultsList } = getDOMElements();
-    console.log('📝 显示初始状态');
+    if (import.meta.env.DEV) {
+      console.log('📝 显示初始状态');
+    }
     if (loadingState) loadingState.classList.add('hidden');
     if (noResults) noResults.classList.add('hidden');
     if (resultsList) resultsList.classList.add('hidden');
@@ -203,7 +211,9 @@ const title = query ? `搜索结果: ${query}` : '搜索';
 
   function showLoadingState() {
     const { loadingState, noResults, resultsList } = getDOMElements();
-    console.log('⏳ 显示加载状态');
+    if (import.meta.env.DEV) {
+      console.log('⏳ 显示加载状态');
+    }
     // 添加短暂延迟，避免快速搜索时的闪烁
     setTimeout(() => {
       if (isSearching) { // 只有在仍在搜索时才显示加载状态
@@ -216,14 +226,18 @@ const title = query ? `搜索结果: ${query}` : '搜索';
 
   function showNoResults() {
     const { loadingState, noResults, resultsList } = getDOMElements();
-    console.log('❌ 显示无结果状态');
+    if (import.meta.env.DEV) {
+      console.log('❌ 显示无结果状态');
+    }
     if (loadingState) loadingState.classList.add('hidden');
     if (noResults) noResults.classList.remove('hidden');
     if (resultsList) resultsList.classList.add('hidden');
   }
   
   function showResults(results, query) {
-    console.log('🎨 渲染搜索结果:', results.length, '个');
+    if (import.meta.env.DEV) {
+      console.log('🎨 渲染搜索结果:', results.length, '个');
+    }
 
     const { loadingState, noResults, resultsList } = getDOMElements();
 
@@ -276,11 +290,9 @@ const title = query ? `搜索结果: ${query}` : '搜索';
       `;
 
       resultsList.innerHTML = statsHtml + resultsHtml;
-      console.log('✅ 搜索结果渲染完成');
-
-
-
-      console.log('✅ 搜索结果渲染完成');
+      if (import.meta.env.DEV) {
+        console.log('✅ 搜索结果渲染完成');
+      }
 
     } catch (error) {
       console.error('❌ 渲染搜索结果时出错:', error);
@@ -292,13 +304,15 @@ const title = query ? `搜索结果: ${query}` : '搜索';
   function isDOMReady() {
     const { searchResults, loadingState, noResults, resultsList } = getDOMElements();
     const isReady = !!(searchResults && loadingState && noResults && resultsList);
-    console.log('🔍 DOM准备状态:', {
-      searchResults: !!searchResults,
-      loadingState: !!loadingState,
-      noResults: !!noResults,
-      resultsList: !!resultsList,
-      isReady
-    });
+    if (import.meta.env.DEV) {
+      console.log('🔍 DOM准备状态:', {
+        searchResults: !!searchResults,
+        loadingState: !!loadingState,
+        noResults: !!noResults,
+        resultsList: !!resultsList,
+        isReady
+      });
+    }
     return isReady;
   }
 
@@ -306,35 +320,47 @@ const title = query ? `搜索结果: ${query}` : '搜索';
   function searchFromUrl() {
     try {
       const urlQuery = new URLSearchParams(window.location.search).get('q');
-      console.log('🔍 检查URL参数:', {
-        url: window.location.href,
-        search: window.location.search,
-        query: urlQuery,
-        pathname: window.location.pathname
-      });
+      if (import.meta.env.DEV) {
+        console.log('🔍 检查URL参数:', {
+          url: window.location.href,
+          search: window.location.search,
+          query: urlQuery,
+          pathname: window.location.pathname
+        });
+      }
 
       // 检查DOM是否准备好
       if (!isDOMReady()) {
-        console.log('⏳ DOM未准备好，延迟执行搜索');
+        if (import.meta.env.DEV) {
+          console.log('⏳ DOM未准备好，延迟执行搜索');
+        }
         setTimeout(() => {
           if (isDOMReady()) {
             searchFromUrl();
           } else {
-            console.error('❌ DOM元素仍未准备好');
+            if (import.meta.env.DEV) {
+              console.error('❌ DOM元素仍未准备好');
+            }
           }
         }, 100);
         return;
       }
 
       if (urlQuery) {
-        console.log('🔍 从URL参数执行搜索:', urlQuery);
+        if (import.meta.env.DEV) {
+          console.log('🔍 从URL参数执行搜索:', urlQuery);
+        }
         performSearch(urlQuery);
       } else {
-        console.log('📝 URL中没有搜索参数，显示初始状态');
+        if (import.meta.env.DEV) {
+          console.log('📝 URL中没有搜索参数，显示初始状态');
+        }
         showInitialState();
       }
     } catch (error) {
-      console.warn('获取URL参数失败:', error);
+      if (import.meta.env.DEV) {
+        console.warn('获取URL参数失败:', error);
+      }
       showInitialState();
     }
   }
@@ -345,7 +371,9 @@ const title = query ? `搜索结果: ${query}` : '搜索';
   async function initializePagefind() {
     try {
       if (typeof window !== 'undefined' && !window.pagefind) {
-        console.log('🔍 尝试初始化Pagefind...');
+        if (import.meta.env.DEV) {
+          console.log('🔍 尝试初始化Pagefind...');
+        }
 
         // 使用动态导入，避免构建时的路径解析问题
         const pagefindModule = await new Promise((resolve, reject) => {
@@ -367,17 +395,23 @@ const title = query ? `搜索结果: ${query}` : '搜索';
           highlightParam: 'mark'
         });
 
-        console.log('✅ Pagefind初始化成功');
+        if (import.meta.env.DEV) {
+          console.log('✅ Pagefind初始化成功');
+        }
       }
     } catch (error) {
-      console.warn('⚠️ Pagefind初始化失败，将使用API搜索:', error);
+      if (import.meta.env.DEV) {
+        console.warn('⚠️ Pagefind初始化失败，将使用API搜索:', error);
+      }
       window.pagefind = null;
     }
   }
 
   // 页面加载完成后的初始化
   document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📄 搜索页面DOMContentLoaded');
+    if (import.meta.env.DEV) {
+      console.log('📄 搜索页面DOMContentLoaded');
+    }
 
     // 先初始化Pagefind，然后执行搜索
     await initializePagefind();

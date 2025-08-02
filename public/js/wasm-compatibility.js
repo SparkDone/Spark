@@ -65,9 +65,13 @@
                 const hasWasmUnsafeEval = cspContent.includes('wasm-unsafe-eval');
                 
                 if (hasUnsafeEval || hasWasmUnsafeEval) {
-                    console.log('✅ CSP允许WebAssembly执行');
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        console.log('✅ CSP允许WebAssembly执行');
+                    }
                 } else {
-                    console.warn('⚠️ CSP可能阻止WebAssembly执行');
+                    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                        console.warn('⚠️ CSP可能阻止WebAssembly执行');
+                    }
                 }
             }
         }
