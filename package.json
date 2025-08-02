@@ -1,5 +1,5 @@
 {
-  "name": "sparkdone-blog",
+  "name": "AstroCms",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -13,7 +13,7 @@
     "build:fast": "astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
     "build:optimized": "node scripts/download-strapi-images.js && node scripts/optimize-images.js && astro build && pagefind --site dist/client && node scripts/post-build.js && node scripts/optimize-html.js",
 
-    "deploy:cf": "wrangler pages deploy dist/client --project-name=sparkdone-blog",
+    "deploy:cf": "wrangler pages deploy dist/client --project-name=AstroCms",
     "preview": "astro preview",
     "security-check": "node scripts/security-check.js",
     "pre-deploy": "pnpm security-check && pnpm build",
