@@ -138,22 +138,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 打开侧边栏
     function openSidebar() {
-        if (import.meta.env.DEV) console.log('📂 执行打开侧边栏');
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') console.log('📂 执行打开侧边栏');
         sidebarOverlay.classList.remove('opacity-0', 'pointer-events-none');
         sidebarOverlay.classList.add('opacity-100');
         sidebarMobile.classList.remove('-translate-x-full');
         document.body.style.overflow = 'hidden';
-        if (import.meta.env.DEV) console.log('✅ 侧边栏已打开');
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') console.log('✅ 侧边栏已打开');
     }
 
     // 关闭侧边栏
     function closeSidebar() {
-        if (import.meta.env.DEV) console.log('📁 执行关闭侧边栏');
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') console.log('📁 执行关闭侧边栏');
         sidebarOverlay.classList.add('opacity-0', 'pointer-events-none');
         sidebarOverlay.classList.remove('opacity-100');
         sidebarMobile.classList.add('-translate-x-full');
         document.body.style.overflow = '';
-        if (import.meta.env.DEV) console.log('✅ 侧边栏已关闭');
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') console.log('✅ 侧边栏已关闭');
     }
 
     // 折叠按钮点击事件
@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentWidth = window.innerWidth;
 
         // 只在开发环境或宽度变化较大时输出日志
-        if (import.meta.env.DEV && Math.abs(currentWidth - (window.lastLoggedWidth || 0)) > 100) {
+        if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && Math.abs(currentWidth - (window.lastLoggedWidth || 0)) > 100) {
             console.log(`🔍 窗口宽度: ${currentWidth}px, 当前折叠状态: ${window.isAutoCollapsed}, 智能模式标记: ${window.wasInSmartMode}`);
             window.lastLoggedWidth = currentWidth;
         }
@@ -412,7 +412,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (needsUpdate) {
-            console.log('⚠️ 检测到状态不一致，强制更新');
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('⚠️ 检测到状态不一致，强制更新');
+            }
             updateSidebarDisplay();
         }
     }

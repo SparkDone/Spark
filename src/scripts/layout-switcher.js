@@ -88,7 +88,7 @@ class UniversalLayoutSwitcher {
     // 智能初始化：只在布局不匹配时才切换
     this.initializeLayout();
     this.isInitialized = true;
-    if (import.meta.env.DEV) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       console.log('✅ 布局切换器初始化完成');
     }
   }
@@ -111,7 +111,7 @@ class UniversalLayoutSwitcher {
       if (pageDefaultLayout && pageDefaultLayout !== this.currentLayout) {
         // 页面有明确的布局设置，使用页面设置
         this.currentLayout = pageDefaultLayout;
-        if (import.meta.env.DEV) {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
           console.log(`🔄 使用页面指定的布局: ${pageDefaultLayout}`);
         }
       }
@@ -123,7 +123,7 @@ class UniversalLayoutSwitcher {
       const currentLayout = container.getAttribute('data-layout');
       if (currentLayout !== this.currentLayout) {
         needsUpdate = true;
-        if (import.meta.env.DEV) {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
           console.log(`🔄 容器布局不匹配: ${currentLayout} -> ${this.currentLayout}`);
         }
       }
@@ -135,7 +135,7 @@ class UniversalLayoutSwitcher {
     } else {
       // 即使不需要切换，也要更新按钮状态
       this.updateButtonStates(this.currentLayout);
-      if (import.meta.env.DEV) {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         console.log(`✅ 布局已匹配，无需切换: ${this.currentLayout}`);
       }
     }
@@ -159,7 +159,7 @@ class UniversalLayoutSwitcher {
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    if (import.meta.env.DEV) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       console.log('🖱️ 布局按钮被点击');
     }
 
@@ -178,7 +178,7 @@ class UniversalLayoutSwitcher {
     }
 
     if (layout && layout !== this.currentLayout) {
-      if (import.meta.env.DEV) {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         console.log(`🔄 切换布局: ${this.currentLayout} -> ${layout}`);
       }
       this.switchLayout(layout);
@@ -201,7 +201,7 @@ class UniversalLayoutSwitcher {
     if (!layout) return;
 
     // 只在开发环境显示详细日志
-    if (import.meta.env.DEV) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       console.log(`🔄 执行布局切换: ${layout}`);
     }
     this.currentLayout = layout;
@@ -234,7 +234,7 @@ class UniversalLayoutSwitcher {
       detail: { layout }
     }));
 
-    if (import.meta.env.DEV) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       console.log(`✅ 布局已切换到: ${layout}`);
     }
   }
@@ -258,14 +258,14 @@ class UniversalLayoutSwitcher {
       if (oldLayout !== layout) {
         // 直接切换布局，无动画
         container.setAttribute('data-layout', layout);
-        if (import.meta.env.DEV) {
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
           console.log(`🔄 容器布局: ${oldLayout} -> ${layout}`);
         }
         hasChanges = true;
       }
     });
 
-    if (hasChanges && import.meta.env.DEV) {
+    if (hasChanges && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
       console.log(`✅ 已应用布局 ${layout} 到 ${containers.length} 个容器`);
     }
   }
@@ -274,14 +274,14 @@ class UniversalLayoutSwitcher {
 // 全局初始化函数
 window.initUniversalLayoutSwitcher = function(options = {}) {
   if (window.universalLayoutSwitcherInstance) {
-    if (import.meta.env.DEV) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       console.log('🔄 通用布局切换器已存在，重新初始化');
     }
     // 清理旧实例
     window.universalLayoutSwitcherInstance = null;
   }
 
-  if (import.meta.env.DEV) {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     console.log('🚀 创建新的布局切换器实例');
   }
   window.universalLayoutSwitcherInstance = new UniversalLayoutSwitcher(options);

@@ -39,7 +39,7 @@ class ModuleManager {
     init() {
         // 防止重复初始化
         if (window.moduleManagerInitialized) {
-            if (import.meta.env.DEV && !import.meta.env.PROD) {
+            if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && !window.location.hostname.includes('pages.dev')) {
                 console.log('⚠️ 模块管理器已初始化，跳过重复初始化');
             }
             return;
@@ -47,7 +47,7 @@ class ModuleManager {
 
         window.moduleManagerInitialized = true;
 
-        if (import.meta.env.DEV && !import.meta.env.PROD) {
+        if ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && !window.location.hostname.includes('pages.dev')) {
             console.log('🚀 模块管理器初始化');
         }
         
@@ -72,7 +72,7 @@ class ModuleManager {
      * 加载关键模块
      */
     async loadCriticalModules() {
-        if (import.meta.env.DEV) console.log('⚡ 加载关键模块');
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') console.log('⚡ 加载关键模块');
 
         for (const moduleName of this.moduleConfig.critical) {
             try {
@@ -87,7 +87,7 @@ class ModuleManager {
      * 加载重要模块
      */
     async loadImportantModules() {
-        if (import.meta.env.DEV) console.log('📦 加载重要模块');
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') console.log('📦 加载重要模块');
 
         // 并行加载重要模块
         const loadPromises = this.moduleConfig.important.map(moduleName =>
