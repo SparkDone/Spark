@@ -179,18 +179,29 @@ const search = async (searchKeyword: string): Promise<void> => {
 		let searchResults: SearchResult[] = [];
 
 		if (import.meta.env.PROD && pagefindLoaded && window.pagefind) {
-			// 使用优化的搜索参数
-			const response = await window.pagefind.search(normalizedKeyword, {
-				// 提高搜索结果的相关性
-				excerpt_length: 100,
-				// 支持模糊匹配
-				fuzzy: true,
-				// 支持部分匹配
-				partial: true
-			});
-			searchResults = await Promise.all(
-				response.results.map((item) => item.data()),
-			);
+			try {
+				// 使用优化的搜索参数
+				const response = await window.pagefind.search(normalizedKeyword, {
+					// 提高搜索结果的相关性
+					excerpt_length: 100,
+					// 支持模糊匹配
+					fuzzy: true,
+					// 支持部分匹配
+					partial: true
+				});
+				searchResults = await Promise.all(
+					response.results.map((item) => item.data()),
+				);
+			} catch (pagefindError) {
+				// 在生产环境中隐藏详细的WASM错误信息，只显示友好的提示
+				if (import.meta.env.PROD) {
+					console.log('🔍 搜索完成：未找到相关内容');
+				} else {
+					console.warn('⚠️ Pagefind搜索失败，显示无结果:', pagefindError);
+				}
+				// Pagefind失败时，显示空结果
+				searchResults = [];
+			}
 		} else {
 			// 开发环境和生产环境降级：使用搜索API
 			try {

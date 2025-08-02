@@ -31,8 +31,8 @@ import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-cop
 const isCloudflare = process.env.CF_PAGES === 'true';
 const adapter = isCloudflare
 	? cloudflare({
-		mode: "advanced",
-		functionPerRoute: false
+		mode: "directory",
+		functionPerRoute: true
 	})
 	: node({
 		mode: "standalone"
