@@ -61,7 +61,7 @@ export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 		// 动画完成后移除过渡类 - 加快速度
 		setTimeout(() => {
 			html.classList.remove('theme-transitioning');
-		}, 50); // 从80ms进一步减少到50ms
+		}, 30); // 调整为30ms，与CSS动画时间匹配
 	});
 }
 

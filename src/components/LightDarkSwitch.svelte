@@ -189,7 +189,7 @@ function toggleTheme(event) {
 		themeButton.style.transform = 'scale(0.95)';
 		setTimeout(() => {
 			themeButton.style.transform = 'scale(1)';
-		}, 60); // 从100ms减少到60ms，让反馈更快
+		}, 30); // 调整为30ms，与主题切换动画保持一致
 	}
 }
 </script>
