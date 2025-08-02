@@ -32,9 +32,10 @@ export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 
 	// 检查是否需要切换（避免不必要的动画）
 	const isDarkMode = html.classList.contains("dark");
+	const isLightMode = html.classList.contains("light");
 	const shouldBeDark = theme === DARK_MODE;
 
-	if (isDarkMode === shouldBeDark) {
+	if ((isDarkMode && shouldBeDark) || (isLightMode && !shouldBeDark)) {
 		// 主题没有变化，只更新data-theme属性
 		html.setAttribute("data-theme", expressiveCodeConfig.theme);
 		return;
@@ -48,8 +49,10 @@ export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 		switch (theme) {
 			case LIGHT_MODE:
 				html.classList.remove("dark");
+				html.classList.add("light");
 				break;
 			case DARK_MODE:
+				html.classList.remove("light");
 				html.classList.add("dark");
 				break;
 			// 移除系统模式处理
