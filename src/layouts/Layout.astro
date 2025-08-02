@@ -598,7 +598,16 @@ const setup = () => {
 			const buttons = document.querySelectorAll('.layout-switch-btn');
 
 			if (switcher && buttons.length > 0 && !window.universalLayoutSwitcherInstance) {
-				window.forceReinitLayoutSwitcher();
+				if (typeof window.forceReinitLayoutSwitcher === 'function') {
+					window.forceReinitLayoutSwitcher();
+				} else {
+					// 如果函数不存在，等待一段时间后重试
+					setTimeout(() => {
+						if (typeof window.forceReinitLayoutSwitcher === 'function') {
+							window.forceReinitLayoutSwitcher();
+						}
+					}, 100);
+				}
 			}
 		}, 50);
 
